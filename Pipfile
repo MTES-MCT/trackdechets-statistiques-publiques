@@ -9,6 +9,8 @@ psycopg2-binary = "*"
 django-environ = "*"
 whitenoise = "*"
 pytest-django = "*"
+sentry-sdk = {extras = ["django"], version = "*"}
+
 
 [dev-packages]
 black = "*"
