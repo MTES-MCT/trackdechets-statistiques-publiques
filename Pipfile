@@ -12,7 +12,10 @@ django-environ = "*"
 whitenoise = "*"
 pytest-django = "*"
 sentry-sdk = {extras = ["django"], version = "*"}
-
+polars = "==0.16.9"
+connectorx =  "==0.3.2a2"
+pyarrow = "*"
+plotly = "*"
 
 [dev-packages]
 black = "*"

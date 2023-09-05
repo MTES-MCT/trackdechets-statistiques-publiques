@@ -159,3 +159,4 @@ cython_debug/
 # custom
 public/
 .vscode
+src/temp_data/

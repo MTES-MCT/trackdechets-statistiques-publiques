@@ -1,0 +1,145 @@
+.main-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 1em;
+}
+
+.ta-center {
+  text-align: center;
+}
+
+.callout-number {
+  font-size: 2.5rem;
+  font-family: "Marianne-Bold", sans-serif;
+  text-align: right;
+  margin-top: 3rem;
+  color: var(--text-title-grey);
+  font-weight: bold;
+
+}
+
+.small-number {
+  font-size: 2.3rem;
+}
+
+.number-text {
+  font-size: 1.5rem;
+  margin-top: 1.5rem;
+  font-weight: 500;
+}
+
+.callout-title {
+  color: rgb(0, 0, 145);
+}
+
+.callout-row {
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  row-gap: 1em;
+  column-gap: 1em;
+}
+
+.fr-callout {
+  grid-column: span 3;
+}
+
+.year-nav {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.year-nav li {
+  cursor: pointer;
+}
+
+.processing-explanation-block {
+  grid-column: span 6;
+}
+
+.operation-type-section > div:nth-child(1) {
+  grid-column: span 8;
+}
+
+.operation-type-section > div:nth-child(2) {
+  grid-column: span 4;
+}
+
+/*spinner*/
+.spinner {
+  margin: 100px auto;
+  width: 80px;
+  height: 40px;
+  text-align: center;
+  font-size: 10px;
+  display: none;
+}
+
+.spinner > div {
+  background-color: #333;
+  height: 100%;
+  width: 6px;
+  display: inline-block;
+
+  -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+  animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+
+.spinner .rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+.spinner .rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+
+.spinner .rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+  20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes sk-stretchdelay {
+  0%, 40%, 100% {
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
+  }
+}
+
+.percent {
+  font-size: 18px;
+}
+
+.htmx-request .spinner {
+  display: block;
+}
+
+.htmx-request.spinner {
+  display: block;
+}
+
+
+.accordion-content {
+  display: none;
+  padding: 2rem 0 2rem 0;
+}
+
+.accordion-content.active {
+  display: block;
+}

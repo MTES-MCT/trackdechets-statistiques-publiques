@@ -1,0 +1,27 @@
+{% include "stats/fragments/_user_companies_tabs.html" with tabtype="users" %}
+<div id="tabpanel-3-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-3"
+     tabindex="0">
+    <h4>Nombre de comptes utilisateurs créés par semaine</h4>
+    <div id="user_created_weekly_graph"></div>
+</div>
+<script>
+    {% autoescape off %}
+        function users() {
+            const user_created_weekly = {{ computation.user_created_weekly }};
+
+            const config = [{
+                "data": user_created_weekly,
+                "target": "user_created_weekly_graph"
+            }];
+
+            renderPlots(config);
+
+        }
+
+    {% endautoescape %}
+    onceReady(users);
+
+</script>

@@ -1,0 +1,34 @@
+{% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsff" %}
+{% include "spinner.html" with spinner_id="bsd_spinner" %}
+<div id="tabpanel-3-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-3"
+     tabindex="0">
+    <div id="bsff_counts_weekly_graph"></div>
+    <div id="bsff_quantites_weekly_graph"></div>
+</div>
+<script>
+        {% autoescape off %}
+            function bsff() {
+                const counts_weekly = {{ computation.bsff_counts_weekly }};
+                const quantities_weekly = {{ computation.bsff_quantities_weekly }};
+                const configs = [{
+                    "data": counts_weekly,
+                    "target": "bsff_counts_weekly_graph"
+                },
+                    {
+                        "data": quantities_weekly,
+                        "target": "bsff_quantites_weekly_graph"
+                    }
+
+                ];
+
+
+                renderPlots(configs);
+            }
+
+        {% endautoescape %}
+      onceReady(bsff);
+
+</script>

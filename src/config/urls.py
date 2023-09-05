@@ -8,6 +8,7 @@ from stats.views import Main
 urlpatterns = [
     path(f"{settings.ADMIN_SLUG}/", admin.site.urls),
     path("", Main.as_view(), name="main"),
+    path("stats/", include("stats.urls")),
 ]
 if settings.DEBUG:
     urlpatterns += [

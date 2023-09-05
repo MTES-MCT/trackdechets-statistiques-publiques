@@ -1,0 +1,36 @@
+{% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsda" %}
+{% include "spinner.html" with spinner_id="bsd_spinner" %}
+<div id="tabpanel-2-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-2"
+     tabindex="0">
+    <h4>Nombre de Bordereaux de Suivi de Déchets Amiante par semaine</h4>
+    <div id="bsda_counts_weekly_graph"></div>
+    <div id="bsda_quantites_weekly_graph"></div>
+</div>
+<script>
+    {% autoescape off %}
+
+        function bsda() {
+            const counts_weekly = {{ computation.bsda_counts_weekly }};
+            const quantities_weekly = {{ computation.bsda_quantities_weekly }};
+
+            const configs = [{
+                "data": counts_weekly,
+                "target": "bsda_counts_weekly_graph"
+            },
+                {
+                    "data": quantities_weekly,
+                    "target": "bsda_quantites_weekly_graph"
+                }
+
+            ];
+            renderPlots(configs)
+
+
+        }
+    {% endautoescape %}
+    onceReady(bsda);
+
+</script>

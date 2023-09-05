@@ -1,0 +1,36 @@
+{% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsdd" %}
+{% include "spinner.html" with spinner_id="bsd_spinner" %}
+<div id="tabpanel-1-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-1"
+     tabindex="0">
+    <h4>Nombre de Bordereaux de Suivi de Déchets Dangereux par semaine</h4>
+    <div id="bsdd_counts_weekly_graph"></div>
+    <div id="bsdd_quantites_weekly_graph"></div>
+</div>
+<script>
+        {% autoescape off %}
+            function bsdd() {
+                const counts_weekly = {{ computation.bsdd_counts_weekly }};
+                const quantities_weekly = {{ computation.bsdd_quantities_weekly }};
+                const configs = [{
+                    "data":  counts_weekly,
+                    "target": "bsdd_counts_weekly_graph"
+                },
+                    {
+                        "data": quantities_weekly,
+                        "target": "bsdd_quantites_weekly_graph"
+                    }
+
+                ];
+
+              renderPlots(configs);
+
+
+            }
+        {% endautoescape %}
+
+
+      onceReady(bsdd);
+</script>
