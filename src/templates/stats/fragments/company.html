@@ -1,0 +1,28 @@
+{% include "stats/fragments/_user_companies_tabs.html" with tabtype="companies" %}
+<div id="tabpanel-3-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-3"
+     tabindex="0">
+    <h4>Nombre de comptes d'établissements créés par semaine</h4>
+    <div id="company_created_weekly_graph"></div>
+</div>
+<script>
+    {% autoescape off %}
+        function companies() {
+            const company_created_weekly = {{ computation.company_created_weekly }};
+
+            const config = [{
+                "data": company_created_weekly,
+                "target": "company_created_weekly_graph"
+            }];
+
+            renderPlots(config)
+
+
+        }
+
+    {% endautoescape %}
+    onceReady(companies)
+
+</script>

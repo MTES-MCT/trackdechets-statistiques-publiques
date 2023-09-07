@@ -1,0 +1,35 @@
+{% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsdasri" %}
+{% include "spinner.html" with spinner_id="bsd_spinner" %}
+<div id="tabpanel-4-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-4"
+     tabindex="0">
+    <h4>Nombre de Bordereaux de Suivi de Déchets d'Activités de Soins à Risques Infectieux par semaine</h4>
+    <div id="bsdasri_counts_weekly_graph"></div>
+    <div id="bsdasri_quantity_weekly_graph"></div>
+</div>
+<script>
+    {% autoescape off %}
+        function bsdasri() {
+            const counts_weekly = {{ computation.bsdasri_counts_weekly }};
+            const quantities_weekly = {{ computation.bsdasri_quantities_weekly }};
+            const configs = [{
+                "data": counts_weekly,
+                "target": "bsdasri_counts_weekly_graph"
+            },
+                {
+                    "data": quantities_weekly,
+                    "target": "bsdasri_quantity_weekly_graph"
+                }
+
+            ];
+            renderPlots(configs);
+        }
+
+    {% endautoescape %}
+
+    onceReady(bsdasri);
+
+
+</script>

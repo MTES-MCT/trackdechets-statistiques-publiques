@@ -1,0 +1,169 @@
+{% load stats %}
+<nav class="fr-nav year-nav"
+     role="navigation"
+     aria-label="Menu de sélection de l'année des données à afficher">
+    <ul id="header-nav-elements-container" class="fr-nav__list">
+        <li class="fr-nav__item">
+            <span class="fr-nav__link"
+                  hx-get="{% url 'last_stats' %}"
+                  hx-trigger="click"
+                  hx-target="#yearly_wrapper"
+                  hx-indicator="#yearly_spinner"
+                  {% if current_year != computation.year %}aria-current="page"{% endif %}>Année {{ current_year|add:"-1" }}</span>
+        </li>
+        <li class="fr-nav__item">
+            <span class="fr-nav__link"
+                  hx-get="{% url 'current_stats' %}"
+                  hx-trigger="click"
+                  hx-target="#yearly_wrapper"
+                  hx-indicator="#yearly_spinner"
+                  {% if current_year == computation.year %}aria-current="page"{% endif %}>Année {{ current_year }}</span>
+        </li>
+    </ul>
+</nav>
+{% include "spinner.html" with spinner_id="yearly_spinner" %}
+<h3 class="ta-center">Statistiques pour l'année {{ computation.year }}</h3>
+<div class="callout-row">
+    <div class="fr-callout">
+        <p class="callout-number small-number">{{ computation.quantity_processed_yearly|number }}</p>
+        <div class="number-text">
+            <p>tonnes de déchets dangereux* tracés et traités sur l'année {{ computation.year }}</p>
+        </div>
+    </div>
+    <div class="fr-callout">
+        <p class="callout-number small-number">{{ computation.bs_created_yearly|number }}</p>
+        <div class="number-text">
+            <p>bordereaux créés sur l'année {{ computation.year }}</p>
+        </div>
+    </div>
+    <div class="fr-callout processing-explanation-block">
+        <div class="number-text">
+            <p>
+                Les modes de traitement des déchets dangereux s'inscrivent dans la hiérarchie des traitements de
+                déchets. Ainsi la réutilisation, le recyclage ou la valorisation sont considérés comme
+                "valorisés" dans Trackdéchets, et sont comparés à l'élimination (pas de réutilisation, recyclage
+                ou valorisation possible dans les conditions techniques et économiques du moment).
+            </p>
+        </div>
+    </div>
+</div>
+<div class="fr-callout">
+    <h4>Quantité de déchets dangereux* tracés et traités par semaine</h4>
+    <div id="quantity_processed_weekly_graph"></div>
+</div>
+<div class="callout-row operation-type-section">
+    <div class="fr-callout">
+        <h4>Quantité de déchets dangereux* tracés et traités par opération de traitement</h4>
+        <p>
+            Le cœur du graphique représente la part de déchets valorisés et éliminés, les sections autour
+            permettent d'avoir une idée de la part de déchets par type d'opération de traitement.
+        </p>
+        <div id="quantity_processed_sunburst_graph"></div>
+    </div>
+    <div class="fr-callout">
+        <p>
+            Les codes R (recovery, valorisation) et D (disposal, élimination) définis par la convention de Bâle,
+            et repris aux annexes I et II de la directive cadre déchets n° 2008/98/CE, sont régulièrement
+            exploités dans le contexte de la traçabilité des déchets et de la déclaration annuelle des émissions
+            et des transferts de polluants et des déchets (déclaration GEREP). Ces codes permettent de discerner
+            les différentes opérations de valorisation et d’élimination des déchets. La liste des codes déchets
+            peut être retrouvées en annexe de la notice BSDD.
+        </p>
+    </div>
+</div>
+<div class="fr-callout">
+    <h4>Quels sont les catégories d'entreprises qui produisent le plus de déchets dangereux* ?</h4>
+    <p>
+        La Nomenclature des Activités Françaises permet de catégoriser les différents établissements qui
+        produisent des déchets dangereux* tracés sur Trackdéchets.
+        <br>
+        Les établissements qui traitent les déchets (établissements exutoires ou faisant du Tri, Transit,
+        Regroupement) ont été exclus pour ne conserver que les établissements producteurs.
+        <br>
+        Ces données ne comprennent donc pas les bordereaux émis après rupture de traçabilité ni les déchets
+        issus de l'exploitation des établissements exutoires ou faisant du Tri, Transit, Regroupement. Un clic
+        sur une des catégories permet de visualiser la hiérarchie suivante.
+    </p>
+    <div id="produced_quantity_by_category_graph"></div>
+</div>
+<div>
+    <h3>Détail par types de déchets dangereux</h3>
+    <p>
+        Astuce : vous pouvez cliquer sur les textes de la légende pour faire disparaître ou apparaître les
+        différentes courbes.
+    </p>
+    <div id="bsd_wrapper" class="fr-tabs">
+        <div hx-get="{% url 'bsdd' %}"
+             hx-trigger="load"
+             hx-target="#bsd_wrapper"
+             hx-indicator="#bsd_spinner"></div>
+        {% include "spinner.html" with spinner_id="bsd_spinner" %}
+    </div>
+</div>
+<div>
+    <h4>Établissements et utilisateurs</h4>
+    <div class="callout-row">
+        <div class="fr-callout">
+            <p class="callout-number">{{ computation.company_created_total_life|number }}</p>
+            <div class="number-text ">
+                <p>nouveaux établissements inscrits sur l'année {{ computation.year }}</p>
+            </div>
+        </div>
+        <div class="fr-callout">
+            <p class="callout-number">{{ computation.user_created_total_life|number }}</p>
+            <div class="number-text ">
+                <p>nouveaux utilisateurs inscrits sur l'année {{ computation.year }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <div id="users_companies_wrapper" class="fr-tabs">
+        <div hx-get="{% url 'companies' %}"
+             hx-trigger="load"
+             hx-target="#users_companies_wrapper"
+             hx-indicator="#users_companies_spinner"></div>
+        {% include "spinner.html" with spinner_id="users_companies_spinner" %}
+    </div>
+</div>
+<div class="fr-callout">
+    <h4>Nombre d'entreprises inscrites pour chaque catégorie de code NAF</h4>
+    <p>
+        La Nomenclature des Activités Françaises permet de catégoriser les différents établissements qui
+        s'inscrivent sur Trackdéchets.
+        Un clic sur une des catégories permet de visualiser la hiérarchie suivante.
+    </p>
+    <div id="company_counts_by_category_graph"></div>
+</div>
+<script>
+    {% autoescape off %}
+        function drawFigs() {
+            const quantity_processed_weekly = {{ computation.quantity_processed_weekly }};
+            const company_counts_by_category = {{ computation.company_counts_by_category }};
+            const produced_quantity_by_category = {{ computation.produced_quantity_by_category }};
+            const quantity_processed_sunburst = {{ computation.quantity_processed_sunburst }};
+
+            const plot_configs = [
+                {
+                    "data": quantity_processed_weekly,
+                    "target": "quantity_processed_weekly_graph"
+                }, {
+                    "data": company_counts_by_category,
+                    "target": "company_counts_by_category_graph"
+                }, {
+                    "data": produced_quantity_by_category,
+                    "target": "produced_quantity_by_category_graph"
+                }, {
+                    "data": quantity_processed_sunburst,
+                    "target": "quantity_processed_sunburst_graph"
+                },
+            ];
+            renderPlots(plot_configs)
+
+        }
+    {% endautoescape %}
+
+
+
+    onceReady(drawFigs)
+</script>

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load stats %}
+{% block main %}
+    <div class="main-container">
+        <h2 class="callout-title">Depuis 2020, Trackdéchets c'est...</h2>
+        <p id="update-date" class="fr-badge fr-badge--info">
+            Dernière mise à jour des données
+            le {{ computation.created|date:"d/m/Y" }}
+        </p>
+        <p>Cette page publique présente les données disponibles sur Trackdéchets.</p>
+        <p>
+            Depuis le 1er janvier 2022, l'utilisation de Trackdéchets est obligatoire pour les déchets dangereux et/ou
+            contenant des POP et les déchets d'amiante. Cependant, 2022 est une année de transition qui comprenait une
+            période de tolérance jusqu'au 1er juillet (usage du format papier possible durant cette période). Nous
+            utilisons donc les seules données qui ont fait l'objet d'une dématérialisation via Trackdéchets.
+        </p>
+        <section class="fr-accordion fr-mb-5v">
+            <h3 class="fr-accordion__title">
+                <a class="fr-accordion__btn accordion-toggle"
+                   aria-expanded="false"
+                   href="#accordion-content">En savoir plus</a>
+            </h3>
+            <div class="accordion-content" id="accordion-content">
+                <p>L'application Trackdéchets est utilisée en France pour tracer plusieurs types de déchets:</p>
+                <ul>
+                    <li>déchets dangereux et/ou contenant des Polluants Organiques Persistants (POP);</li>
+                    <li>déchets contenant de l'amiante;</li>
+                    <li>déchets de fluides frigorigènes;</li>
+                    <li>déchets d'activités de soins à risques infectieux (DASRI);</li>
+                    <li>véhicules hors d'usage.</li>
+                </ul>
+                <p>
+                    Les déchets doivent être tracés depuis le producteur/détenteur jusqu'au traitement final. Les
+                    déchets qui vont d'une installation en métropole, à destination de l'étranger (ou l'inverse) ne
+                    sont pas tracés par Trackdéchets. Un bordereau de suivi de déchet (BSD) est créé pour chaque
+                    déchet et chaque mouvement. Les nombreuses informations qu'il contient alimentent ces
+                    statistiques.
+                </p>
+            </div>
+        </section>
+        <h2 id="callout-title">Depuis 2020, Trackdéchets c'est...</h2>
+        <div class="callout-row">
+            <div class="fr-callout">
+                <p class="callout-number small-number">{{ computation.total_quantity_processed|number }}</p>
+                <div class="number-text">
+                    <p>tonnes de déchets dangereux* tracés et traités au total</p>
+                </div>
+            </div>
+            <div class="fr-callout">
+                <p class="callout-number small-number">{{ computation.total_bs_created|number }}</p>
+                <div class="number-text">
+                    <p>bordereaux créés au total</p>
+                </div>
+            </div>
+            <div class="fr-callout">
+                <p class="callout-number small-number">{{ computation.total_companies_created|number }}</p>
+                <div class="number-text">
+                    <p>établissements inscrits au total</p>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div id="yearly_wrapper">
+            <div hx-get="{% url 'current_stats' %}"
+                 hx-trigger="load"
+                 hx-target="#yearly_wrapper"
+                 hx-indicator="#yearly_spinner"></div>
+            {% include "spinner.html" with spinner_id="yearly_spinner" %}
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        function renderPlots(plotConfigs) {
+            for (let config of plotConfigs) {
+                let newConfig = {...config.data.config, locale: 'fr'}
+                Plotly.newPlot(
+                    config.target,
+                    config.data.data,
+                    config.data.layout,
+                    newConfig)
+            }
+        }
+
+        function onceReady(callback) {
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", callback);
+            } else {
+                callback();
+            }
+        }
+
+        function accordion() {
+            document.addEventListener('click', function (event) {
+                    if (!event.target.classList.contains('accordion-toggle')) return;
+                    const content = document.querySelector(event.target.hash);
+                    if (!content) return;
+                    event.preventDefault();
+                    event.target.setAttribute('aria-expanded', !(event.target.getAttribute('aria-expanded') === 'true'));
+                    if (content.classList.contains('active')) {
+                        content.classList.remove('active');
+                        return;
+                    }
+
+                    content.classList.toggle('active');
+                }
+            )
+        }
+
+        onceReady(accordion);
+
+    </script>
+{% endblock %}
