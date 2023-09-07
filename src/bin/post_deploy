@@ -1,0 +1,1 @@
+python /app/src/manage.py migrate --settings=config.settings.production
