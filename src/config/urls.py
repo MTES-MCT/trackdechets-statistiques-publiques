@@ -10,6 +10,7 @@ urlpatterns = [
     path("", Main.as_view(), name="main"),
     path("stats/", include("stats.urls")),
 ]
+
 if settings.DEBUG:
     urlpatterns += [
         path("__debug__/", include("debug_toolbar.urls")),
