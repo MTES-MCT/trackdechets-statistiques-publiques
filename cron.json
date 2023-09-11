@@ -1,7 +1,7 @@
 {
   "jobs": [
     {
-      "command": "0-59/25 * * * * python /app/src/manage.py build_stats --settings=config.settings.production",
+      "command": "13 2 * * * python /app/src/manage.py build_stats --settings=config.settings.production",
       "size": "2XL"
     }
   ]
