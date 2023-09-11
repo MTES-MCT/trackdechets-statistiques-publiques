@@ -1,3 +1,3 @@
 # Trackdechets-statistiques-publiques
 
-Statistiques publiques Trackdéchets
+Statistiques Publiques Trackdéchets
