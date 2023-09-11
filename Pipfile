@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 django = "*"
-pandas = "*"
 sqlalchemy = "~=1.4"
 psycopg2-binary = "*"
 django-environ = "*"

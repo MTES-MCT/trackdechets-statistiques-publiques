@@ -1,9 +1,6 @@
 import json
 import time
-from datetime import datetime
-from typing import Any, Union
 
-import pandas as pd
 import polars as pl
 from django.conf import settings
 from sqlalchemy import create_engine
@@ -139,7 +136,7 @@ def get_departement_geographical_data() -> pl.DataFrame:
     return data
 
 
-def get_waste_nomenclature_data() -> pd.DataFrame:
+def get_waste_nomenclature_data() -> pl.DataFrame:
     """
     Returns waste nomenclature data.
 
@@ -148,7 +145,7 @@ def get_waste_nomenclature_data() -> pd.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pd.read_sql_table(table_name="code_dechets", schema="trusted_zone", con=DB_ENGINE)
+    data = pl.read_sql("SELECT * FROM trusted_zone.code_dechets", connection_uri=settings.WAREHOUSE_URL)
     return data
 
 
