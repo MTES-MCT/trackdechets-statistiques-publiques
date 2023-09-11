@@ -16,6 +16,7 @@ polars = "==0.16.9"
 connectorx =  "==0.3.2a2"
 pyarrow = "*"
 plotly = "*"
+gunicorn = "*"
 
 [dev-packages]
 black = "*"
