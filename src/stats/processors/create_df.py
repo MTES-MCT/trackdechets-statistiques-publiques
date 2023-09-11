@@ -2,18 +2,19 @@ import os
 import shutil
 
 from data.data_extract import get_company_data, get_user_data
-from data.datasets import get_data_pd
+from data.datasets import get_data_df
 
 
 def build_dataframes():
-    root = r"temp_data"
+    # store dataframes as json in temp files
+    root = r"temp_data"  # unversionned dir
     try:
         shutil.rmtree(root)
     except FileNotFoundError:
         pass
     os.mkdir(root)
 
-    bsd_data = get_data_pd()
+    bsd_data = get_data_df()
 
     bsd_data.bsdd_data.write_json("temp_data/bsdd_data.json")
     bsd_data.bsda_data.write_json("temp_data/bsda_data.json")

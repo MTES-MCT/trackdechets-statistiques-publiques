@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 
 import polars as pl
@@ -10,6 +11,8 @@ from data.utils import format_waste_codes
 DB_ENGINE = create_engine(settings.WAREHOUSE_URL)
 SQL_PATH = settings.BASE_DIR / "data" / "sql"
 STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
+
+logger = logging.getLogger(__name__)
 
 
 def get_bs_data(
@@ -59,7 +62,7 @@ def get_bs_data(
     #     pl.col("processing_operation").str.replace(r"([RD])([0-9]{1,2})", value="$1 $2")
     # )
 
-    print(f"get_bs_data duration: {time.time() - started_time} ")
+    logger.info(f"get_bs_data duration: {time.time() - started_time} ({sql_query})")
 
     return bs_data_df
 
@@ -78,7 +81,7 @@ def get_company_data() -> pl.DataFrame:
     sql_query = (SQL_PATH / "get_company_data.sql").read_text()
     company_data_df = pl.read_sql(sql_query, connection_uri=settings.WAREHOUSE_URL)
 
-    print(f"get_company_data duration: {time.time() - started_time} ")
+    logger.info(f"get_company_data duration: {time.time() - started_time}")
 
     return company_data_df
 
@@ -97,7 +100,7 @@ def get_user_data() -> pl.DataFrame:
     sql_query = (SQL_PATH / "get_user_data.sql").read_text()
     user_data_df = pl.read_sql(sql_query, connection_uri=settings.WAREHOUSE_URL)
 
-    print(f"get_user_data duration: {time.time() - started_time} ")
+    logger.info(f"get_user_data duration: {time.time() - started_time} ")
 
     return user_data_df
 

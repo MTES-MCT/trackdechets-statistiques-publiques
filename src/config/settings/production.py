@@ -1,5 +1,3 @@
-import sentry_sdk
-
 from .base import *  # noqa
 from .base import env
 

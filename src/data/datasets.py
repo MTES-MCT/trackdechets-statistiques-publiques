@@ -17,7 +17,7 @@ class Computed:
     bsda_data: pl.DataFrame
 
 
-def get_data_pd():
+def get_data_df():
     BSDD_DATA = get_bs_data(
         "get_bsdd_data.sql",
     )
