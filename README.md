@@ -9,7 +9,7 @@ Transition Écologique.
 
 - Une instance de prosgresql récente
 - Python >= 3.10 avec pipenv
--
+
 
 ## Installation
 
@@ -32,7 +32,7 @@ $ pipenv install -d
 - DATABASE_URL, managée par django, pour les comptes, les données calculées etc.
 - WAREHOUSE_URL, en lecture seule, contenant un dump des données du data warehouse Trackdéchets
 
-Se référer au fichier src/core/settings/env.dist
+Se référer au fichier src/env.dist
 
 ### Setup de la db
 
@@ -50,7 +50,7 @@ Lancer la commande de migration:
 
 ### Générer les graphes
 
-Cette commande génére les stats pour l'année courante et l'année précédente.
+Cette commande génére les statistiques pour l'année courante et l'année précédente.
 
 ```
     $ manage.py build_stats
