@@ -3,7 +3,7 @@ from .base import *  # noqa
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "ts_stats_test",
+        "NAME": "td_stats_test",
         "USER": "postgres",
         "PASSWORD": "admin",
         "HOST": "localhost",

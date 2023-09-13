@@ -126,3 +126,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ADMIN_SLUG = env("ADMIN_SLUG")
 BASE_URL = env.str("BASE_URL", "http://127.0.0.1:8000")
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "sender@test.fr"
+MESSAGE_RECIPIENTS = env.list("MESSAGE_RECIPIENTS", [])
