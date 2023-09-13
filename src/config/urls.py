@@ -14,8 +14,7 @@ urlpatterns = [
     path(f"{settings.ADMIN_SLUG}/", admin.site.urls),
     path("", Main.as_view(), name="main"),
     path("stats/", include("stats.urls")),
-
-    path('sentry-debug/', trigger_error),
+    path("sentry-debug/", trigger_error),
 ]
 
 if settings.DEBUG:

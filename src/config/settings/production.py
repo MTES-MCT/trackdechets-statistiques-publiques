@@ -1,5 +1,4 @@
 import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *  # noqa
 from .base import env
@@ -25,10 +24,5 @@ SENTRY_URL = env("SENTRY_URL")
 
 sentry_sdk.init(
     dsn=SENTRY_URL,
-    integrations=[
-        DjangoIntegration(),
-    ],
-
     traces_sample_rate=1.0,
-
 )
