@@ -1,3 +1,6 @@
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from .base import *  # noqa
 from .base import env
 
@@ -17,3 +20,15 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+
+SENTRY_URL = env("SENTRY_URL")
+
+sentry_sdk.init(
+    dsn=SENTRY_URL,
+    integrations=[
+        DjangoIntegration(),
+    ],
+
+    traces_sample_rate=1.0,
+
+)
