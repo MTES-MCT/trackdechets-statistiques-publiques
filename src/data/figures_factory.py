@@ -4,29 +4,11 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 
 import plotly.graph_objects as go
-import plotly.io as pio
 import polars as pl
 
 from .page_utils import break_long_line, format_number
 
-# pio.templates["gouv"] = go.layout.Template(
-#     layout=dict(
-#         font=dict(family="Marianne"),
-#         title=dict(font=dict(color="black", size=22, family="Marianne-Bold"), x=0.01),
-#         paper_bgcolor="rgb(238, 238, 238)",
-#         colorway=[
-#             "#000091",
-#             "#5E2A2B",
-#             "#66673D",
-#             "#E4794A",
-#             "#60E0EB",
-#         ],  # Taken from DSFR illustrative colors : https://gouvfr.atlassian.net/wiki/spaces/DB/pages/911081484/Palette+de+couleurs+version+1+DSFR+1.1.0#Les-couleurs-illustratives%5BhardBreak%5D
-#         yaxis=dict(
-#             tickformat=",0f",
-#             separatethousands=True,
-#         ),
-#     ),
-# )
+gridcolor = "#ccc"
 
 
 def create_weekly_created_figure(
@@ -103,6 +85,7 @@ def create_weekly_created_figure(
         xaxis_title="Semaine de création",
         showlegend=False,
         paper_bgcolor="#fff",
+        plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(t=20, r=50, l=25),
     )
     fig.update_yaxes(side="right")
@@ -112,8 +95,9 @@ def create_weekly_created_figure(
     fig.update_xaxes(
         range=[min_x - max(delta * 0.05, timedelta(days=2)), max_x + delta * 0.1],
         rangebreaks=[dict(values=breaks)],
+        gridcolor="#ccc",
     )
-
+    fig.update_yaxes(gridcolor="#ccc")
     return fig
 
 
@@ -156,14 +140,8 @@ def create_weekly_scatter_figure(
     Plotly Figure Object
         Figure object ready to be plotted.
     """
-    colors = [
-        "#000091",
-        "#5E2A2B",
-        "#66673D",
-        "#E4794A",
-        "#60E0EB",
-    ]
-    colors.append("#009099")
+    colors = ["#000091", "#5E2A2B", "#66673D", "#E4794A", "#60E0EB", "#009099"]
+
     plot_configs = [
         {"data": bs_created_data, **lines_configs[0], "color": colors[0]},
         {
@@ -270,6 +248,7 @@ def create_weekly_scatter_figure(
 
     fig.update_layout(
         paper_bgcolor="#fff",
+        plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(t=45, r=90, l=5),
         legend=dict(
             orientation="h",
@@ -293,8 +272,9 @@ def create_weekly_scatter_figure(
     fig.update_xaxes(
         range=[min_x - delta * 0.05, max_x + delta * 0.1],
         rangebreaks=[dict(values=breaks)],
+        gridcolor=gridcolor,
     )
-    fig.update_yaxes(side="right", title=y_title)
+    fig.update_yaxes(side="right", title=y_title, gridcolor=gridcolor)
 
     return fig
 
@@ -397,6 +377,7 @@ def create_weekly_quantity_processed_figure(
     max_value = sum([conf["data"]["quantity"].max() or 0 for conf in data_conf])
 
     fig.update_layout(
+        plot_bgcolor="rgba(0,0,0,0)",
         xaxis_title="Semaine de traitement",
         legend=dict(
             orientation="h",
@@ -414,8 +395,6 @@ def create_weekly_quantity_processed_figure(
     )
     fig.update_yaxes(side="right")
 
-    delta = max_x - min_x
-
     # handle ticks to start at first day of the first complete week of the year
     breaks = []
     for i in range(1, min_x.day):
@@ -424,8 +403,9 @@ def create_weekly_quantity_processed_figure(
     fig.update_xaxes(
         range=[min_x - timedelta(days=7), max_x + timedelta(days=7)],
         rangebreaks=[dict(values=breaks)],
+        gridcolor=gridcolor,
     )
-
+    fig.update_yaxes(gridcolor=gridcolor)
     return fig
 
 
@@ -790,6 +770,7 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, use_quantity: b
         margin={"l": 15, "r": 15, "t": 35, "b": 25},
         height=800,
         paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         modebar_bgcolor="rgba(0,0,0,0)",
         modebar_color="rgba(146, 146, 146, 0.7)",
         modebar_activecolor="rgba(146, 146, 146, 0.7)",

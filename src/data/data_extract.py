@@ -62,7 +62,7 @@ def get_bs_data(
     #     pl.col("processing_operation").str.replace(r"([RD])([0-9]{1,2})", value="$1 $2")
     # )
 
-    logger.info(f"get_bs_data duration: {time.time() - started_time} ({sql_query})")
+    logger.info(f"get_bs_data duration: {time.time() - started_time} ({query_filename})")
 
     return bs_data_df
 
