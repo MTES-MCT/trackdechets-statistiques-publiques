@@ -9,6 +9,11 @@ La commande `manage.py build_stats` effectue ces opérations:
 - la commande est lancée chaque nuit dans un container 2XL via un cron.json
 - les calculs sont assez lourds et exigent un container one-off xl ou 2xl, l'application elle-même est peu gourmande
 
+Le calcul s'effectue en deux étapes:
+
+- création des dataframes et stockage dans des fichiers temporaires git-ignorés (dossier temp_data)
+- lecture des fichiers temporaires pour la créations des graphiques plotly
+
 Principes d'affichage:
 
 - L'affichage de la page de statistiques effectue une requête vers les objets des années n et  n-1
