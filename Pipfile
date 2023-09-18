@@ -16,6 +16,7 @@ connectorx =  "==0.3.2a2"
 pyarrow = "*"
 plotly = "*"
 gunicorn = "*"
+factory-boy = "*"
 
 [dev-packages]
 black = "*"
