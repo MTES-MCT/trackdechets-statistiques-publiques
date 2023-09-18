@@ -7,4 +7,4 @@ class ComputationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Computation
 
-    year = 2022
+    year = 2023
