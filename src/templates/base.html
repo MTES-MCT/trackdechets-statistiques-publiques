@@ -20,6 +20,9 @@
     </head>
     <body>
         {% block main %}{% endblock %}
+        {#  including dsfr js because modern css styling needs js nowadays  #}
+        <script type="module" src="{% static "js/dsfr.module.min.js" %}"></script>
+        <script type="text/javascript" nomodule src="{% static "js/dsfr.nomodule.min.js" %}"></script>
         <script src="{% static "js/htmx.min.js" %}"></script>
         <script src="{% static "js/plotly-2.18.1.min.js" %}" charset="utf-8"></script>
         {% block scripts %}{% endblock %}
