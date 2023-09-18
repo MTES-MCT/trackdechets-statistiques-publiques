@@ -1,29 +1,26 @@
-<div class="fr-tabs">
-    <ul class="fr-tabs__list" role="tablist" aria-label=" ">
-        <li role="presentation">
-            <button id="tabpanel-1"
-                    class="fr-tabs__tab fr-tabs__tab--icon-left"
-                    tabindex="0"
-                    role="tab"
-                    aria-selected="{% if tabtype == "companies" %}true{% else %}false{% endif %}"
-                    aria-controls="tabpanel-1-panel"
-                    hx-get="{% url 'companies' %}"
-                    hx-trigger="click"
-                    hx-indicator="#users_companies_spinner"
-                    hx-target="#users_companies_wrapper">Établissements</button>
-        </li>
-        <li role="presentation">
-            <button id="tabpanel-2"
-                    class="fr-tabs__tab fr-tabs__tab--icon-left"
-                    tabindex="-1"
-                    role="tab"
-                    aria-selected="{% if tabtype == "users" %}true{% else %}false{% endif %}"
-                    aria-controls="tabpanel-2-panel"
-                    hx-get="{% url 'users' %}"
-                    hx-trigger="click"
-                    hx-indicator="#users_companies_spinner"
-                    hx-target="#users_companies_wrapper">Utilisateurs</button>
-        </li>
-    </ul>
-</div>
-{% include "spinner.html" with spinner_id="users_companies_spinner" %}
+<ul class="fr-tabs__list" role="tablist" aria-label=" ">
+    <li role="presentation">
+        <button id="tabpanel-1"
+                class="fr-tabs__tab fr-tabs__tab--icon-left"
+                tabindex="0"
+                role="tab"
+                aria-selected="{% if tabtype == "companies" %}true{% else %}false{% endif %}"
+                aria-controls="tabpanel-1-panel"
+                hx-get="{% url 'companies' %}"
+                hx-trigger="click"
+                hx-indicator="#users_companies_spinner"
+                hx-target="#users_companies_wrapper">Établissements</button>
+    </li>
+    <li role="presentation">
+        <button id="tabpanel-2"
+                class="fr-tabs__tab fr-tabs__tab--icon-left"
+                tabindex="-1"
+                role="tab"
+                aria-selected="{% if tabtype == "users" %}true{% else %}false{% endif %}"
+                aria-controls="tabpanel-2-panel"
+                hx-get="{% url 'users' %}"
+                hx-trigger="click"
+                hx-indicator="#users_companies_spinner"
+                hx-target="#users_companies_wrapper">Utilisateurs</button>
+    </li>
+</ul>

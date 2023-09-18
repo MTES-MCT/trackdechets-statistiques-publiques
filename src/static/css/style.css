@@ -143,3 +143,10 @@
 .accordion-content.active {
   display: block;
 }
+.fr-tabs
+{
+  margin-bottom: 2rem;
+}
+.fr-tabs__panel{
+  border: 1px solid #dddddd;
+}
