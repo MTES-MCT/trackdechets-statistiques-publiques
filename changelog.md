@@ -7,4 +7,4 @@ et le projet suit un schéma de versionning inspiré de [Calendar Versioning](ht
 
 ## 19/09/2023
 
-- Implémentation initiale 
+- Implémentation initiale
