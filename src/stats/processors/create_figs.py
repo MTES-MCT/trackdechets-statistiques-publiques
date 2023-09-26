@@ -107,6 +107,15 @@ def build_figs(year, clear_year=False):
     bsff_data_df = pl.read_json("temp_data/bsff_data.json")
     bsdasri_data_df = pl.read_json("temp_data/bsdasri_data.json")
 
+    bsdd_weekly_data_df = pl.read_parquet("temp_data/bsdd_weekly_data.parquet")
+    bsda_weekly_data_df = pl.read_parquet("temp_data/bsda_weekly_data.parquet")
+    bsff_weekly_data_df = pl.read_parquet("temp_data/bsff_weekly_data.parquet")
+    bsdasri_weekly_data_df = pl.read_parquet("temp_data/bsdasri_weekly_data.parquet")
+    accounts_weekly_data_df = pl.read_parquet("temp_data/accounts_weekly_data.parquet")
+    annual_waste_processed_data_df = pl.read_parquet("temp_data/annual_waste_processed_data.parquet")
+    accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
+    waste_processed_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_processed_by_naf_annual_stats.parquet")
+
     total_bs_created = get_total_bs_created(all_bsd_data)
     total_quantity_processed = get_total_quantity_processed(all_bsd_data)
     total_companies_created = company_data.height

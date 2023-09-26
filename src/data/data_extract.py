@@ -7,12 +7,26 @@ from django.conf import settings
 from sqlalchemy import create_engine
 
 from data.utils import format_waste_codes
+from data.queries import bs_weekly_data_sql, accounts_weekly_stats_sql
 
 DB_ENGINE = create_engine(settings.WAREHOUSE_URL)
 SQL_PATH = settings.BASE_DIR / "data" / "sql"
 STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
 
 logger = logging.getLogger(__name__)
+
+
+def extract_dataset(sql_string: str) -> pl.DataFrame:
+    started_time = time.time()
+
+    accounts_data_df = pl.read_sql(sql_string, connection_uri=settings.WAREHOUSE_URL)
+
+    logger.info("Loading stats duration: %s (query : %s)", time.time() - started_time, sql_string)
+
+    return accounts_data_df
+
+
+###########
 
 
 def get_bs_data(
