@@ -161,4 +161,5 @@ staticfiles/
 # custom
 public/
 .vscode
-src/temp_data/
+temp_data/*
+
