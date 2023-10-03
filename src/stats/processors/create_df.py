@@ -1,7 +1,6 @@
 import os
 import shutil
 
-from data.data_extract import get_company_data, get_user_data
 from data.datasets import get_data_df
 
 
