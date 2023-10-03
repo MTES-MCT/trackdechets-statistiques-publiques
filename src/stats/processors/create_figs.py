@@ -1,15 +1,11 @@
 import polars as pl
 
-from data.data_extract import get_naf_nomenclature_data
 from data.data_processing import (
-    get_quantities_by_naf,
     get_recovered_and_eliminated_quantity_processed_by_week_series,
     get_total_bs_created,
     get_total_number_of_accounts_created,
     get_total_quantity_processed,
-    get_waste_quantity_processed_by_processing_code_df,
     get_weekly_preprocessed_dfs,
-    get_weekly_waste_quantity_processed_by_operation_code_df,
 )
 from data.figures_factory import (
     create_quantity_processed_sunburst_figure,

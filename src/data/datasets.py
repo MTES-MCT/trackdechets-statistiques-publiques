@@ -13,7 +13,7 @@ from data.queries import (
     weekly_waste_processed_stats_sql,
 )
 
-from .data_extract import extract_dataset, get_bs_data
+from .data_extract import extract_dataset
 
 
 @dataclass
