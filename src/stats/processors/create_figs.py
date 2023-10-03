@@ -5,9 +5,9 @@ from data.data_processing import (
     get_quantities_by_naf,
     get_recovered_and_eliminated_quantity_processed_by_week_series,
     get_total_bs_created,
+    get_total_number_of_accounts_created,
     get_total_quantity_processed,
     get_waste_quantity_processed_by_processing_code_df,
-    get_weekly_aggregated_series,
     get_weekly_preprocessed_dfs,
     get_weekly_waste_quantity_processed_by_operation_code_df,
 )
@@ -89,128 +89,128 @@ lines_configs_quantities = [
 ]
 
 
-def build_figs(year, clear_year=False):
+def build_figs(year: int, clear_year: bool = False):
     existing_computations = Computation.objects.filter(year=year)
     if clear_year:
         existing_computations.delete()
-    if existing_computations:
-        return
-    NAF_NOMENCLATURE_DATA = get_naf_nomenclature_data()
 
     date_interval = get_data_date_interval_for_year(year)
-    # retrieve data
-    all_bsd_data = pl.read_json("temp_data/all_bsds_data.json")
-    company_data = pl.read_json("temp_data/company_data.json")
-    user_data = pl.read_json("temp_data/user_data.json")
-    bsdd_data_df = pl.read_json("temp_data/bsdd_data.json")
-    bsda_data_df = pl.read_json("temp_data/bsda_data.json")
-    bsff_data_df = pl.read_json("temp_data/bsff_data.json")
-    bsdasri_data_df = pl.read_json("temp_data/bsdasri_data.json")
 
     bsdd_weekly_data_df = pl.read_parquet("temp_data/bsdd_weekly_data.parquet")
     bsda_weekly_data_df = pl.read_parquet("temp_data/bsda_weekly_data.parquet")
     bsff_weekly_data_df = pl.read_parquet("temp_data/bsff_weekly_data.parquet")
     bsdasri_weekly_data_df = pl.read_parquet("temp_data/bsdasri_weekly_data.parquet")
+    bsvhu_weekly_data_df = pl.read_parquet("temp_data/bsvhu_weekly_data.parquet")
     accounts_weekly_data_df = pl.read_parquet("temp_data/accounts_weekly_data.parquet")
-    annual_waste_processed_data_df = pl.read_parquet("temp_data/annual_waste_processed_data.parquet")
+    weekly_waste_processed_data_df = pl.read_parquet("temp_data/weekly_waste_processed_data.parquet")
     accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
     waste_processed_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_processed_by_naf_annual_stats.parquet")
 
-    total_bs_created = get_total_bs_created(all_bsd_data)
-    total_quantity_processed = get_total_quantity_processed(all_bsd_data)
-    total_companies_created = company_data.height
+    total_bs_created = get_total_bs_created(
+        [bsdd_weekly_data_df, bsda_weekly_data_df, bsff_weekly_data_df, bsdasri_weekly_data_df, bsvhu_weekly_data_df]
+    )
+    total_quantity_processed = get_total_quantity_processed(
+        [bsdd_weekly_data_df, bsda_weekly_data_df, bsff_weekly_data_df, bsdasri_weekly_data_df, bsvhu_weekly_data_df]
+    )
+    total_companies_created = get_total_number_of_accounts_created(accounts_weekly_data_df, "comptes_etablissements")
 
     # BSx weekly figures
-    bsdd_weekly_processed_dfs = get_weekly_preprocessed_dfs(bsdd_data_df, date_interval)
-    bsda_weekly_processed_dfs = get_weekly_preprocessed_dfs(bsda_data_df, date_interval)
-    bsff_weekly_processed_dfs = get_weekly_preprocessed_dfs(bsff_data_df, date_interval)
-    bsdasri_weekly_processed_dfs = get_weekly_preprocessed_dfs(bsdasri_data_df, date_interval)
+    bsdd_weekly_filtered_df = get_weekly_preprocessed_dfs(bsdd_weekly_data_df, date_interval)
+    bsda_weekly_filtered_df = get_weekly_preprocessed_dfs(bsda_weekly_data_df, date_interval)
+    bsff_weekly_filtered_df = get_weekly_preprocessed_dfs(bsff_weekly_data_df, date_interval)
+    bsdasri_weekly_filtered_df = get_weekly_preprocessed_dfs(bsdasri_weekly_data_df, date_interval)
 
     bsdd_counts_weekly_fig = create_weekly_scatter_figure(
-        *bsdd_weekly_processed_dfs["counts"],
+        bsdd_weekly_filtered_df,
+        metric_type="counts",
         bs_type="BSDD",
         lines_configs=lines_configs_count,
     )
     bsda_counts_weekly_fig = create_weekly_scatter_figure(
-        *bsda_weekly_processed_dfs["counts"],
+        bsda_weekly_filtered_df,
+        metric_type="counts",
         bs_type="BSDA",
         lines_configs=lines_configs_count,
     )
     bsff_counts_weekly_fig = create_weekly_scatter_figure(
-        *bsff_weekly_processed_dfs["counts"],
+        bsff_weekly_filtered_df,
+        metric_type="counts",
         bs_type="BSFF",
         lines_configs=lines_configs_count,
     )
     bsdasri_counts_weekly_fig = create_weekly_scatter_figure(
-        *bsdasri_weekly_processed_dfs["counts"],
+        bsdasri_weekly_filtered_df,
+        metric_type="counts",
         bs_type="BSDASRI",
         lines_configs=lines_configs_count,
     )
 
     bsdd_quantities_weekly_fig = create_weekly_scatter_figure(
-        *bsdd_weekly_processed_dfs["quantity"],
+        bsdd_weekly_filtered_df,
+        metric_type="quantity",
         bs_type="BSDD",
         lines_configs=lines_configs_quantities,
     )
     bsda_quantities_weekly_fig = create_weekly_scatter_figure(
-        *bsda_weekly_processed_dfs["quantity"],
+        bsda_weekly_filtered_df,
+        metric_type="quantity",
         bs_type="BSDA",
         lines_configs=lines_configs_quantities,
     )
     bsdasri_quantities_weekly_fig = create_weekly_scatter_figure(
-        *bsdasri_weekly_processed_dfs["quantity"],
-        bs_type="BSDASRI",
-        lines_configs=lines_configs_quantities,
-    )
-    bsff_quantities_weekly_fig = create_weekly_scatter_figure(
-        *bsdasri_weekly_processed_dfs["quantity"],
+        bsff_weekly_filtered_df,
+        metric_type="quantity",
         bs_type="BSFF",
         lines_configs=lines_configs_quantities,
     )
-
-    # Waste weight processed weekly
-    quantity_processed_weekly_df = get_weekly_waste_quantity_processed_by_operation_code_df(
-        all_bsd_data, date_interval
+    bsff_quantities_weekly_fig = create_weekly_scatter_figure(
+        bsdasri_weekly_filtered_df,
+        metric_type="quantity",
+        bs_type="BSDASRI",
+        lines_configs=lines_configs_quantities,
     )
-    # Total bordereaux created
 
     # Waste weight processed weekly
 
     (
         recovered_quantity_series,
         eliminated_quantity_series,
-    ) = get_recovered_and_eliminated_quantity_processed_by_week_series(quantity_processed_weekly_df)
+    ) = get_recovered_and_eliminated_quantity_processed_by_week_series(weekly_waste_processed_data_df)
 
     quantity_processed_weekly_fig = create_weekly_quantity_processed_figure(
-        recovered_quantity_series, eliminated_quantity_series
-    )
-    waste_quantity_processed_by_processing_code_df = get_waste_quantity_processed_by_processing_code_df(
-        quantity_processed_weekly_df
+        recovered_quantity_series, eliminated_quantity_series, date_interval
     )
 
     quantity_processed_sunburst_fig = create_quantity_processed_sunburst_figure(
-        waste_quantity_processed_by_processing_code_df
+        weekly_waste_processed_data_df, date_interval
     )
 
-    quantity_processed_yearly = get_total_quantity_processed(all_bsd_data, date_interval)
-    bs_created_yearly = get_total_bs_created(all_bsd_data, date_interval)
-    # Company and user section
-    company_data_df = company_data.filter(pl.col("created_at").is_between(*date_interval, closed="left"))
-    user_data_df = user_data.filter(pl.col("created_at").is_between(*date_interval, closed="left"))
+    quantity_processed_yearly = get_total_quantity_processed(
+        [bsdd_weekly_data_df, bsda_weekly_data_df, bsff_weekly_data_df, bsdasri_weekly_data_df, bsvhu_weekly_data_df],
+        date_interval,
+    )
+    bs_created_yearly = get_total_bs_created(
+        [bsdd_weekly_data_df, bsda_weekly_data_df, bsff_weekly_data_df, bsdasri_weekly_data_df, bsvhu_weekly_data_df],
+        date_interval,
+    )
 
-    company_created_total_life = company_data_df.height
-    user_created_total_life = user_data_df.height
+    company_created_total_life = get_total_number_of_accounts_created(
+        accounts_weekly_data_df, "comptes_etablissements", date_interval=date_interval
+    )
+    user_created_total_life = get_total_number_of_accounts_created(
+        accounts_weekly_data_df, "comptes_utilisateurs", date_interval=date_interval
+    )
 
-    company_created_weekly_df = get_weekly_aggregated_series(company_data_df)
-    user_created_weekly_df = get_weekly_aggregated_series(user_data_df)
+    accounts_created_weekly_df = get_weekly_preprocessed_dfs(accounts_weekly_data_df, date_interval=date_interval)
 
-    company_created_weekly_fig = create_weekly_created_figure(company_created_weekly_df)
-    user_created_weekly_fig = create_weekly_created_figure(user_created_weekly_df)
+    company_created_weekly_fig = create_weekly_created_figure(accounts_created_weekly_df, "comptes_etablissements")
+    user_created_weekly_fig = create_weekly_created_figure(accounts_created_weekly_df, "comptes_utilisateurs")
 
-    treemap_companies_figure = create_treemap_companies_figure(company_data_df)
-    all_bordereaux_with_naf = get_quantities_by_naf(all_bsd_data, NAF_NOMENCLATURE_DATA, date_interval)
+    treemap_companies_figure = create_treemap_companies_figure(accounts_by_naf_data_df, year=year)
 
-    produced_quantity_by_category_fig = create_treemap_companies_figure(all_bordereaux_with_naf, use_quantity=True)
+    produced_quantity_by_category_fig = create_treemap_companies_figure(
+        waste_processed_by_naf_annual_stats_df, use_quantity=True, year=year
+    )
     Computation.objects.create(
         year=year,
         total_bs_created=total_bs_created,
