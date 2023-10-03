@@ -10,87 +10,10 @@ import polars as pl
 from .data_extract import get_processing_operation_codes_data
 
 
-def get_weekly_aggregated_series(
-    data: pl.DataFrame,
-    date_interval: Tuple[datetime, datetime] | None = None,
-    aggregate_column: str = "created_at",
-    agg_config: Dict[str, str] = {
-        "alias": "count",
-        "column_name": "id",
-        "aggfunc": "count",
-    },
-    only_non_final_processing_operation: bool | None = None,
-) -> pl.DataFrame:
-    """
-    Creates a DataFrame with number of BSx, users, company... created by week.
-
-    Parameters
-    ----------
-    bs_data: DataFrame
-        DataFrame containing BSx data.
-    date_interval: tuple of two datetime objects
-        Interval of date used to filter the data as datetime objects.
-        First element is the start interval, the second one is the end of the interval.
-        The interval is left inclusive.
-    aggregate_column: str
-        Date column used to group data.
-    agg_config: dict
-        Dictionary that will be passed to polars `agg` method in order to perform group operation.
-    only_non_final_processing_operation: bool
-        If true and `aggregate_column` is equal to "processed_at",
-        then only non final processing operation code will be kept in dataset.
-        If false and `aggregate_column` is equal to "processed_at",
-        then only non final processing operation will be kept in dataset.
-        If None, no filtering is applied.
-
-    Returns
-    -------
-    DataFrame
-        Polars DataFrame containing data aggregated with the given aggregation config.
-    """
-
-    if date_interval is not None:
-        data = data.filter(pl.col(aggregate_column).is_between(*date_interval, closed="left"))
-
-    non_final_processing_operation_codes = [
-        "D9",
-        "D13",
-        "D14",
-        "D15",
-        "R12",
-        "R13",
-    ]
-    match (aggregate_column, only_non_final_processing_operation):
-        case ("processed_at", False):
-            data = data.filter(pl.col("processing_operation").is_in(non_final_processing_operation_codes).is_not())
-
-        case ("processed_at", True):
-            data = data.filter(pl.col("processing_operation").is_in(non_final_processing_operation_codes))
-
-    if agg_config["aggfunc"] == "count":
-        agg_expression = pl.col(agg_config["column_name"]).count().alias(agg_config["alias"])
-    elif agg_config["aggfunc"] == "sum":
-        agg_expression = pl.col(agg_config["column_name"]).sum().alias(agg_config["alias"])
-    else:
-        raise ValueError("Choose between sum or count aggfunc")
-
-    df = (
-        data.with_columns(pl.col(aggregate_column).dt.truncate("1w"))
-        .sort(aggregate_column)
-        .groupby(aggregate_column, maintain_order=True)
-        .agg(agg_expression)
-        .rename({aggregate_column: "at"})
-        .fill_null(0)
-    )
-
-    return df
-
-
 def get_weekly_preprocessed_dfs(
     bs_data: pl.DataFrame, date_interval: tuple[datetime, datetime] | None
-) -> Dict[str, List[pl.DataFrame]]:
-    """Preprocess raw 'bordereau' data in order to aggregate it at weekly frequency.
-    Useful to make several aggregation to prepare data to weekly aggregated figures.
+) -> pl.DataFrame:
+    """Preprocess raw 'bordereau' data in order to get data for the given date interval.
 
     Parameters
     ----------
@@ -103,44 +26,13 @@ def get_weekly_preprocessed_dfs(
 
     Returns
     -------
-    dict
-        Dict containing two keys : "counts" and "quantity" representing the two metrics computed,
-        Each key is bounded to a list of DataFrames containing the aggregated data for the metric.
-        Each item is aggregated by a particular date column.
+    DataFrame
+
     """
 
-    bs_datasets = defaultdict(list)
-    for aggregate_column, only_non_final_operations in [
-        ("created_at", False),
-        ("sent_at", False),
-        ("received_at", False),
-        ("processed_at", None),
-        ("processed_at", True),
-        ("processed_at", False),
-    ]:
-        bs_datasets["counts"].append(
-            get_weekly_aggregated_series(
-                bs_data,
-                date_interval,
-                aggregate_column,
-                only_non_final_processing_operation=only_non_final_operations,
-            )
-        )
-        bs_datasets["quantity"].append(
-            get_weekly_aggregated_series(
-                bs_data,
-                date_interval,
-                aggregate_column,
-                {
-                    "alias": "quantity",
-                    "column_name": "quantity",
-                    "aggfunc": "sum",
-                },
-                only_non_final_operations,
-            )
-        )
+    bs_data_filtered = bs_data.filter(pl.col("semaine").is_between(*date_interval, closed="left")).sort("semaine")
 
-    return bs_datasets
+    return bs_data_filtered
 
 
 def get_weekly_waste_quantity_processed_by_operation_code_df(
@@ -196,7 +88,7 @@ def get_weekly_waste_quantity_processed_by_operation_code_df(
 
 
 def get_recovered_and_eliminated_quantity_processed_by_week_series(
-    quantity_processed_weekly_df: pl.DataFrame,
+    weekly_waste_processed_data_df: pl.DataFrame,
 ) -> list[pl.Series]:
     """Extract the weekly quantity of recovered waste and eliminated waste in two separate Series.
 
@@ -212,18 +104,14 @@ def get_recovered_and_eliminated_quantity_processed_by_week_series(
         and the second one the weekly quantity of eliminated waste.
     """
 
-    res = []
+    series = weekly_waste_processed_data_df.groupby(["semaine", "type_operation"], maintain_order=True).agg(
+        pl.col("quantite_traitee").sum()
+    )
 
-    for regex in [r"^R.*", r"^D.*"]:
-        series = (
-            quantity_processed_weekly_df.filter(
-                pl.col("processing_operation").is_not_null() & pl.col("processing_operation").str.contains(regex)
-            )
-            .groupby("processed_at", maintain_order=True)
-            .agg(pl.col("quantity").sum())
-        )
-
-        res.append(series)
+    res = [
+        series.filter(pl.col("type_operation") == "Déchet valorisé"),
+        series.filter(pl.col("type_operation") == "Déchet éliminé"),
+    ]
 
     return res
 
@@ -309,7 +197,7 @@ def get_company_counts_by_naf_dfs(
 
 
 def get_total_bs_created(
-    all_bordereaux_data: pl.DataFrame,
+    all_bordereaux_data: list[pl.DataFrame],
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> int:
     """Returns the total number of 'bordereaux' created.
@@ -328,19 +216,19 @@ def get_total_bs_created(
 
     """
     bs_created_total = 0
-
-    if date_interval is not None:
-        bs_created_total = all_bordereaux_data.filter(
-            pl.col("created_at").is_between(*date_interval, closed="left")
-        ).height
-    else:
-        bs_created_total = all_bordereaux_data.height
+    for df in all_bordereaux_data:
+        if date_interval is not None:
+            bs_created_total += (
+                df.filter(pl.col("semaine").is_between(*date_interval, closed="left")).select("creations").sum().item()
+            )
+        else:
+            bs_created_total += df.select("creations").sum().item()
 
     return bs_created_total
 
 
 def get_total_quantity_processed(
-    all_bordereaux_data: pl.DataFrame,
+    all_bordereaux_data: list[pl.DataFrame],
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> int:
     """Returns the total quantity processed (only final processing operation codes).
@@ -359,49 +247,31 @@ def get_total_quantity_processed(
 
     """
     quantity_processed_total = 0
-    if date_interval is not None:
-        quantity_processed_total = (
-            all_bordereaux_data.filter(
-                pl.col("processed_at").is_between(*date_interval, closed="left")
-                & pl.col("processing_operation")
-                .is_in(
-                    [
-                        "D9",
-                        "D13",
-                        "D14",
-                        "D15",
-                        "R12",
-                        "R13",
-                    ]
-                )
-                .is_not()
+    for df in all_bordereaux_data:
+        if date_interval is not None:
+            quantity_processed_total += (
+                df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
+                .select("quantite_traitee_operations_finales")
+                .sum()
+                .item()
             )
-            .select("quantity")
-            .sum()
-            .item()
-        )
-    else:
-        quantity_processed_total = (
-            all_bordereaux_data.filter(
-                pl.col("processing_operation")
-                .is_in(
-                    [
-                        "D9",
-                        "D13",
-                        "D14",
-                        "D15",
-                        "R12",
-                        "R13",
-                    ]
-                )
-                .is_not()
-            )
-            .select("quantity")
-            .sum()
-            .item()
-        )
+        else:
+            quantity_processed_total += df.select("quantite_traitee_operations_finales").sum().item()
 
     return int(quantity_processed_total)
+
+
+def get_total_number_of_accounts_created(
+    accounts_data_df: pl.DataFrame,
+    stats_column: str,
+    date_interval: Tuple[datetime, datetime] | None = None,
+) -> pl.DataFrame:
+    if date_interval is not None:
+        accounts_data_df = accounts_data_df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
+
+    number_of_accounts_created = accounts_data_df.select(stats_column).sum().item()
+
+    return number_of_accounts_created
 
 
 def get_quantities_by_naf(

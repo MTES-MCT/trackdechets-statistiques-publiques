@@ -22,7 +22,7 @@ select
 from
     refined_zone_stats_publiques.weekly_quantity_processed_stats
 where
-    annee >= 2020
+    semaine >= '2020-01-01'
 """
 
 
