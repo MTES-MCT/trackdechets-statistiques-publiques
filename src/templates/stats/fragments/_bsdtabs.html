@@ -6,7 +6,7 @@
                 role="tab"
                 aria-selected="{% if bsdtype == "bsdd" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-1-panel"
-                hx-get="{% url 'bsdd' %}"
+                hx-get="{% url 'bsdd' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
                 hx-target="#bsd_wrapper">Déchets dangereux classiques</button>
@@ -18,7 +18,7 @@
                 role="tab"
                 aria-selected="{% if bsdtype == "bsda" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-2-panel"
-                hx-get="{% url 'bsda' %}"
+                hx-get="{% url 'bsda' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
                 hx-target="#bsd_wrapper">Amiante</button>
@@ -30,7 +30,7 @@
                 role="tab"
                 aria-selected="{% if bsdtype == "bsff" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-3-panel"
-                hx-get="{% url 'bsff' %}"
+                hx-get="{% url 'bsff' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
                 hx-target="#bsd_wrapper">Fluides frigorigènes</button>
@@ -42,7 +42,7 @@
                 role="tab"
                 aria-selected="{% if bsdtype == "bsdasri" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-4-panel"
-                hx-get="{% url 'bsdasri' %}"
+                hx-get="{% url 'bsdasri'  year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
                 hx-target="#bsd_wrapper">Activité de Soins à Risques Infectieux</button>

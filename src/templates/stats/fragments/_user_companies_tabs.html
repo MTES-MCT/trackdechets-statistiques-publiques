@@ -6,7 +6,7 @@
                 role="tab"
                 aria-selected="{% if tabtype == "companies" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-1-panel"
-                hx-get="{% url 'companies' %}"
+                hx-get="{% url 'companies' year=computation.year %}"
                 hx-trigger="click"
                 hx-indicator="#users_companies_spinner"
                 hx-target="#users_companies_wrapper">Établissements</button>
@@ -18,7 +18,7 @@
                 role="tab"
                 aria-selected="{% if tabtype == "users" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-2-panel"
-                hx-get="{% url 'users' %}"
+                hx-get="{% url 'users' year=computation.year %}"
                 hx-trigger="click"
                 hx-indicator="#users_companies_spinner"
                 hx-target="#users_companies_wrapper">Utilisateurs</button>

@@ -5,10 +5,10 @@ from .views import BsdasriView, BsdaView, BsddView, BsffView, CompanyView, Curre
 urlpatterns = [
     path("stats-current", CurrentStats.as_view(), name="current_stats"),
     path("stats-last", LastStats.as_view(), name="last_stats"),
-    path("bsdd", BsddView.as_view(), name="bsdd"),
-    path("bsda", BsdaView.as_view(), name="bsda"),
-    path("bsdasri", BsdasriView.as_view(), name="bsdasri"),
-    path("bsff", BsffView.as_view(), name="bsff"),
-    path("companies", CompanyView.as_view(), name="companies"),
-    path("users", UserView.as_view(), name="users"),
+    path("bsdd/<int:year>", BsddView.as_view(), name="bsdd"),
+    path("bsda/<int:year>", BsdaView.as_view(), name="bsda"),
+    path("bsdasri/<int:year>", BsdasriView.as_view(), name="bsdasri"),
+    path("bsff/<int:year>", BsffView.as_view(), name="bsff"),
+    path("companies/<int:year>", CompanyView.as_view(), name="companies"),
+    path("users/<int:year>", UserView.as_view(), name="users"),
 ]
