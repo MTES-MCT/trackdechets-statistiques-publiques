@@ -37,5 +37,5 @@ waste_processed_by_naf_annual_stats_sql = """
 select
     *
 from
-    refined_zone_stats_publiques.annual_waste_processed_by_naf
+    refined_zone_stats_publiques.annual_waste_produced_by_naf
 """
