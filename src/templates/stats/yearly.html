@@ -93,7 +93,7 @@
         différentes courbes.
     </p>
     <div id="bsd_wrapper" class="fr-tabs">
-        <div hx-get="{% url 'bsdd' %}"
+        <div hx-get="{% url 'bsdd' computation.year %}"
              hx-trigger="load"
              hx-target="#bsd_wrapper"
              hx-indicator="#bsd_spinner"></div>
@@ -119,7 +119,7 @@
 </div>
 <div>
     <div id="users_companies_wrapper" class="fr-tabs">
-        <div hx-get="{% url 'companies' %}"
+        <div hx-get="{% url 'companies' computation.year %}"
              hx-trigger="load"
              hx-target="#users_companies_wrapper"
              hx-indicator="#users_companies_spinner"></div>
