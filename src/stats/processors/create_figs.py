@@ -1,4 +1,5 @@
 import polars as pl
+from data.data_extract import get_processing_operation_codes_data
 
 from data.data_processing import (
     get_recovered_and_eliminated_quantity_processed_by_week_series,
@@ -177,8 +178,9 @@ def build_figs(year: int, clear_year: bool = False):
         recovered_quantity_series, eliminated_quantity_series, date_interval
     )
 
+    waste_codes_data = get_processing_operation_codes_data()
     quantity_processed_sunburst_fig = create_quantity_processed_sunburst_figure(
-        weekly_waste_processed_data_df, date_interval
+        weekly_waste_processed_data_df, waste_codes_data, date_interval
     )
 
     quantity_processed_yearly = get_total_quantity_processed(
