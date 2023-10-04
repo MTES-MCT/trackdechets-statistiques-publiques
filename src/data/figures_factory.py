@@ -216,7 +216,7 @@ def create_weekly_scatter_figure(
         data_without_nulls = data.drop_nulls(column_to_use)
         if len(data_without_nulls) > 0:
             last_value = data_without_nulls[-1, column_to_use]
-        texts = [""] * (len(data) - 1) if len(data) > 1 else []
+        texts = [""] * (len(data_without_nulls) - 1) if len(data_without_nulls) > 1 else []
         texts += [format_number(last_value)]
 
         if metric_type == "counts":
@@ -237,6 +237,7 @@ def create_weekly_scatter_figure(
                 text=texts,
                 textfont_size=15,
                 textfont_color=config["color"],
+                line_color=config["color"],
                 textposition="middle right",
                 hovertext=hover_texts,
                 hoverinfo="text",
@@ -383,6 +384,7 @@ def create_weekly_quantity_processed_figure(
 
     fig.update_layout(
         plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         xaxis_title="Semaine de traitement",
         legend=dict(
             orientation="h",
@@ -397,6 +399,9 @@ def create_weekly_quantity_processed_figure(
         barmode="stack",
         yaxis_title="Quantité (en tonnes)",
         yaxis_range=[0, max_value * 1.1],
+        modebar_bgcolor="rgba(0,0,0,0)",
+        modebar_color="rgba(146, 146, 146, 0.7)",
+        modebar_activecolor="rgba(146, 146, 146, 0.7)",
     )
     fig.update_yaxes(side="right")
 
@@ -415,20 +420,25 @@ def create_weekly_quantity_processed_figure(
 
 
 def create_quantity_processed_sunburst_figure(
-    weekly_waste_processed_data_df: pl.DataFrame, date_interval: tuple[datetime, datetime]
+    weekly_waste_processed_data_df: pl.DataFrame,
+    waste_codes_data: pl.DataFrame,
+    date_interval: tuple[datetime, datetime],
 ) -> go.Figure:
     """Creates the figure showing the weekly waste quantity processed by type of processing operation (destroyed or recovered).
 
     Parameters
     ----------
-    waste_quantity_processed_by_processing_code_df: DataFrame
-        Aggregated DataFrame with quantity of processed waste by processing operation code, along with the description of the processing operation.
+    weekly_waste_processed_data_df: DataFrame
+       DataFrame with weekly quantity of processed waste by processing operation code.
+    waste_codes_data: DataFrame
+        DataFrame containing the description for each processing operation code.
 
     Returns
     -------
     Plotly Figure Object
         Sunburst Figure object ready to be plotted.
     """
+    processing_operation_codes_descriptions = {e["code"]: e["description"] for e in waste_codes_data.to_dicts()}
 
     agg_data = (
         weekly_waste_processed_data_df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
@@ -491,7 +501,7 @@ def create_quantity_processed_sunburst_figure(
         + ["rgb(102, 103, 61, 0.7)", "rgb(94, 42, 43, 0.7)"]
     )
 
-    hover_text_template = "{code}<br><b>{quantity}t</b> traitées"
+    hover_text_template = "{code} : {description}<br><b>{quantity}t</b> traitées"
     hover_texts = (
         [
             f"<b>{format_number(e)}t</b> {index.split(' ')[1]}es"
@@ -500,6 +510,7 @@ def create_quantity_processed_sunburst_figure(
         + [
             hover_text_template.format(
                 code=processing_operation,
+                description=processing_operation_codes_descriptions[processing_operation],
                 quantity=format_number(quantity),
             )
             for processing_operation, quantity in zip(
@@ -523,6 +534,8 @@ def create_quantity_processed_sunburst_figure(
             parents=parents,
             values=values,
             marker_colors=colors,
+            marker_line_color="rgba(238, 238, 238, 1)",
+            marker_line_width=2,
             branchvalues="total",
             texttemplate="%{label} - <b>%{percentRoot}</b>",
             hovertext=hover_texts,
@@ -534,6 +547,10 @@ def create_quantity_processed_sunburst_figure(
     )
     fig.update_layout(
         margin=dict(t=0, l=0, r=0, b=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        modebar_bgcolor="rgba(0,0,0,0)",
+        modebar_color="rgba(146, 146, 146, 0.7)",
+        modebar_activecolor="rgba(146, 146, 146, 0.7)",
     )
 
     return fig
