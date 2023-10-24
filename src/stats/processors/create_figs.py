@@ -157,13 +157,13 @@ def build_figs(year: int, clear_year: bool = False):
     bsff_quantities_weekly_fig = create_weekly_scatter_figure(
         bsff_weekly_filtered_df,
         metric_type="quantity",
-        bs_type="BSDASRI",
+        bs_type="BSFF",
         lines_configs=lines_configs_quantities,
     )
     bsdasri_quantities_weekly_fig = create_weekly_scatter_figure(
         bsdasri_weekly_filtered_df,
         metric_type="quantity",
-        bs_type="BSFF",
+        bs_type="BSDASRI",
         lines_configs=lines_configs_quantities,
     )
 
