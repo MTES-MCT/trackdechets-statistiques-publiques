@@ -15,94 +15,14 @@ STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
 logger = logging.getLogger(__name__)
 
 
-def get_bs_data(
-    query_filename: str,
-    include_drafts: bool = False,
-    include_only_dangerous_waste: bool = True,
-) -> pl.DataFrame:
-    """
-    Queries the configured database for BSx data. The query should select the columns needed to
-    create the figures of the application.
-
-    Parameters
-    ----------
-    query_filename: str
-        Name of the sql query file. Query must select at least a "created_at" column.
-    include_drafts: bool
-        Wether to include drafts BSx in the result.
-    include_only_dangerous_waste: bool
-        If true, only 'bordereaux' for dangerous waste are returned.
-
-    Returns
-    -------
-    DataFrame
-        DataFrame of BSx, with all data included in the sql query.
-    """
-
+def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
-    sql_query = (SQL_PATH / query_filename).read_text()
+    accounts_data_df = pl.read_sql(sql_string, connection_uri=settings.WAREHOUSE_URL)
 
-    bs_data_df = pl.read_sql(sql_query, connection_uri=settings.WAREHOUSE_URL)
+    logger.info("Loading stats duration: %s (query : %s)", time.time() - started_time, sql_string)
 
-    if not include_drafts:
-        bs_data_df = bs_data_df.filter(pl.col("status") != "DRAFT")
-        if "is_draft" in bs_data_df.columns:
-            bs_data_df = bs_data_df.filter(pl.col("is_draft").is_not())
-    if include_only_dangerous_waste:
-        waste_filter = pl.col("waste_code").str.contains(pattern=r".*\*$")
-        if "waste_pop" in bs_data_df.columns:
-            waste_filter = waste_filter | pl.col("waste_pop")
-
-        if "waste_details_is_dangerous" in bs_data_df.columns:
-            waste_filter = waste_filter | pl.col("waste_details_is_dangerous")
-
-    # Depending on the type of 'bordereau', the processing operations codes can contain space or not, so we normalize it :
-    # bs_data_df = bs_data_df.with_columns(
-    #     pl.col("processing_operation").str.replace(r"([RD])([0-9]{1,2})", value="$1 $2")
-    # )
-
-    logger.info(f"get_bs_data duration: {time.time() - started_time} ({query_filename})")
-
-    return bs_data_df
-
-
-def get_company_data() -> pl.DataFrame:
-    """
-    Queries the configured database for company data.
-
-    Returns
-    -------
-    DataFrame
-        DataFrame of companies for a given period of time, with their creation date
-    """
-    started_time = time.time()
-
-    sql_query = (SQL_PATH / "get_company_data.sql").read_text()
-    company_data_df = pl.read_sql(sql_query, connection_uri=settings.WAREHOUSE_URL)
-
-    logger.info(f"get_company_data duration: {time.time() - started_time}")
-
-    return company_data_df
-
-
-def get_user_data() -> pl.DataFrame:
-    """
-    Queries the configured database for user data, focused on creation date.
-
-    Returns
-    --------
-    DataFrame
-        dataframe of users for a given period of time, with their creation date
-    """
-    started_time = time.time()
-
-    sql_query = (SQL_PATH / "get_user_data.sql").read_text()
-    user_data_df = pl.read_sql(sql_query, connection_uri=settings.WAREHOUSE_URL)
-
-    logger.info(f"get_user_data duration: {time.time() - started_time} ")
-
-    return user_data_df
+    return accounts_data_df
 
 
 def get_processing_operation_codes_data() -> pl.DataFrame:
@@ -165,20 +85,3 @@ def get_waste_code_hierarchical_nomenclature() -> list[dict]:
         waste_code_hierarchy = json.load(f)
 
     return format_waste_codes(waste_code_hierarchy, add_top_level=True)
-
-
-def get_naf_nomenclature_data() -> pl.DataFrame:
-    """
-    Returns the NAF nomenclature.
-
-    Returns
-    --------
-    DataFrame
-        DataFrame with NAF nomenclature data.
-    """
-    data = pl.read_sql(
-        "SELECT * FROM trusted_zone_insee.nomenclature_activites_francaises",
-        connection_uri=settings.WAREHOUSE_URL,
-    )
-
-    return data

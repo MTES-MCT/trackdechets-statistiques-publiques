@@ -11,9 +11,7 @@ from .page_utils import break_long_line, format_number
 gridcolor = "#ccc"
 
 
-def create_weekly_created_figure(
-    data: pl.DataFrame,
-) -> go.Figure:
+def create_weekly_created_figure(data: pl.DataFrame, stat_column: str) -> go.Figure:
     """Creates the figure showing number of weekly created companies, users...
 
     Parameters
@@ -26,40 +24,22 @@ def create_weekly_created_figure(
     Plotly Figure Object
         Figure object ready to be plotted.
     """
-    # Filter out data from previous year:
-    current_year = data["at"].max().year
-    data = data.filter(pl.col("at").dt.year() == current_year)
-
+    data = data.sort("semaine")
     data = data.to_dict(as_series=False)
 
     texts = []
-    texts += [""] * (len(data["count"]) - 1) + [format_number(data["count"][-1])]
+    texts += [""] * (len(data[stat_column]) - 1) + [format_number(data[stat_column][-1])]
 
     hovertexts = [
         f"Semaine du {at:%d/%m} au {at + timedelta(days=6):%d/%m}<br><b>{format_number(count)}</b> créations"
-        for at, count in zip(data["at"][:-1], data["count"][:-1])
+        for at, count in zip(data["semaine"], data[stat_column])
     ]
-
-    current_year = max(data["at"]).year
-
-    # Handle case when last data point is last week of the year
-    last_point_date = data["at"][-1]
-    last_point_value = data["count"][-1]
-    if (last_point_date + timedelta(days=6)).year != current_year:
-        last_point = datetime(current_year, 12, 31)
-        hovertexts.append(
-            f"Période du {last_point_date:%d/%m} au {last_point:%d/%m}<br><b>{format_number(last_point_value)}</b> créations"
-        )
-    else:
-        hovertexts.append(
-            f"Semaine du {last_point_date:%d/%m} au {last_point_date + timedelta(days=6):%d/%m}<br><b>{format_number(last_point_value)}</b> créations"
-        )
 
     fig = go.Figure(
         [
             go.Scatter(
-                x=data["at"],
-                y=data["count"],
+                x=data["semaine"],
+                y=data[stat_column],
                 text=texts,
                 mode="lines+markers+text",
                 hovertext=hovertexts,
@@ -74,9 +54,10 @@ def create_weekly_created_figure(
     )
 
     # handle ticks to start at first day of the first complete week of the year
-    min_x = min(data["at"])
-    max_x = max(data["at"])
+    min_x = min(data["semaine"])
+    max_x = max(data["semaine"])
 
+    current_year = max(data["semaine"]).year
     breaks = []
     for i in range(1, min_x.day):
         breaks.append(datetime(current_year, 1, i))
@@ -102,12 +83,8 @@ def create_weekly_created_figure(
 
 
 def create_weekly_scatter_figure(
-    bs_created_data: pl.DataFrame,
-    bs_sent_data: pl.DataFrame,
-    bs_received_data: pl.DataFrame,
-    bs_processed_data: pl.DataFrame,
-    bs_processed_non_final_data: pl.DataFrame,
-    bs_processed_final_data: pl.DataFrame,
+    bs_weekly_data: pl.DataFrame,
+    metric_type: str,
     bs_type: str,
     lines_configs: List[Dict[str, str]],
 ) -> go.Figure:
@@ -143,55 +120,90 @@ def create_weekly_scatter_figure(
     colors = ["#000091", "#5E2A2B", "#66673D", "#E4794A", "#60E0EB", "#009099"]
 
     plot_configs = [
-        {"data": bs_created_data, **lines_configs[0], "color": colors[0]},
+        {"column_counts": "creations", "column_quantity": "quantite_tracee", **lines_configs[0], "color": colors[0]},
         {
-            "data": bs_sent_data,
+            "column_counts": "envois",
+            "column_quantity": "quantite_envoyee",
             **lines_configs[1],
             "color": colors[1],
             "visible": "legendonly",
         },
-        {"data": bs_received_data, **lines_configs[2], "color": colors[2]},
-        {
-            "data": bs_processed_data,
-            **lines_configs[3],
-            "color": colors[3],
-        },
-        {
-            "data": bs_processed_non_final_data,
-            **lines_configs[4],
-            "color": colors[4],
-            "visible": "legendonly",
-        },
-        {
-            "data": bs_processed_final_data,
-            **lines_configs[5],
-            "color": colors[5],
-            "visible": "legendonly",
-        },
+        {"column_counts": "receptions", "column_quantity": "quantite_recue", **lines_configs[2], "color": colors[2]},
     ]
+
+    if bs_type != "BSFF":
+        plot_configs.extend(
+            [
+                {
+                    "column_counts": "traitements",
+                    "column_quantity": "quantite_traitee",
+                    **lines_configs[3],
+                    "color": colors[3],
+                },
+                {
+                    "column_counts": "traitements_operations_non_finales",
+                    "column_quantity": "quantite_traitee_operations_non_finales",
+                    **lines_configs[4],
+                    "color": colors[4],
+                    "visible": "legendonly",
+                },
+                {
+                    "column_counts": "traitements_operations_finales",
+                    "column_quantity": "quantite_traitee_operations_finales",
+                    **lines_configs[5],
+                    "color": colors[5],
+                    "visible": "legendonly",
+                },
+            ]
+        )
+    else:
+        plot_configs.extend(
+            [
+                {
+                    "column_counts": "contenants_traites",
+                    "column_quantity": "quantite_traitee",
+                    **lines_configs[3],
+                    "color": colors[3],
+                },
+                {
+                    "column_counts": "contenants_traites_operations_non_finales",
+                    "column_quantity": "quantite_traitee_operations_non_finales",
+                    **lines_configs[4],
+                    "color": colors[4],
+                    "visible": "legendonly",
+                },
+                {
+                    "column_counts": "contenants_traites_operations_finales",
+                    "column_quantity": "quantite_traitee_operations_finales",
+                    **lines_configs[5],
+                    "color": colors[5],
+                    "visible": "legendonly",
+                },
+            ]
+        )
 
     scatter_list = []
 
-    metric_name = "count" if "count" in bs_created_data.columns else "quantity"
-    y_title = "Quantité (en tonnes)" if metric_name == "quantity" else None
-    legend_title = "Statut :" if metric_name == "quantity" else "Statut du bordereau :"
+    y_title = "Quantité (en tonnes)" if metric_type == "quantity" else None
+    legend_title = "Statut :" if metric_type == "quantity" else "Statut du bordereau :"
     min_x = None
     max_x = None
     for config in plot_configs:
-        data = config["data"]
+        column_to_use = config["column_counts"] if metric_type == "counts" else config["column_quantity"]
+        data = bs_weekly_data
 
         if len(data) == 0:
             continue
 
         # Filter out data from previous year:
-        current_year = data.select("at").max().item().year
-        data = data.filter(pl.col("at").dt.year() == current_year)
+        current_year = data.select("semaine").max().item().year
+        data = data.filter(pl.col("semaine").dt.year() == current_year)
 
-        min_at = data["at"][0]
+        min_at = data["semaine"][0]
         if min_x is None or min_at < min_x:
             min_x = min_at
 
-        max_at = data["at"][-1]
+        max_at = data["semaine"][-1]
         if max_x is None or max_at > max_x:
             max_x = max_at
 
@@ -200,40 +212,32 @@ def create_weekly_scatter_figure(
 
         # Creates a list of text to only show value on last point of the line
         texts = []
-        last_value = data[-1, 1]
-        texts = [""] * (len(data) - 1) if len(data) > 1 else []
+        last_value = None
+        data_without_nulls = data.drop_nulls(column_to_use)
+        if len(data_without_nulls) > 0:
+            last_value = data_without_nulls[-1, column_to_use]
+        texts = [""] * (len(data_without_nulls) - 1) if len(data_without_nulls) > 1 else []
         texts += [format_number(last_value)]
 
-        if metric_name == "count":
-            suffix = f"{bs_type} {suffix}"
+        if metric_type == "counts":
+            to_add_str = bs_type if bs_type != "BSFF" else "contenants"
+            suffix = f"{to_add_str} {suffix}"
 
         hover_texts = [
-            f"Semaine du {e[0]:%d/%m} au {e[0] + timedelta(days=6):%d/%m}<br><b>{format_number(e[1], 2)}</b> {suffix}"
-            for e in data[:-1].iter_rows()
+            f"Semaine du {e['semaine']:%d/%m} au {e['semaine'] + timedelta(days=6):%d/%m}<br><b>{format_number(e[column_to_use], 2)}</b> {suffix}"
+            for e in data.iter_rows(named=True)
         ]
-
-        # Handle case when last data point is last week of the year
-        last_point_date = data[-1]["at"].item()
-        last_point_value = data[-1][metric_name].item()
-        if (last_point_date + timedelta(days=6)).year != current_year:
-            last_point = datetime(current_year, 12, 31)
-            hover_texts.append(
-                f"Période du {last_point_date:%d/%m} au {last_point:%d/%m}<br><b>{format_number(last_point_value, 2)}</b> {suffix}"
-            )
-        else:
-            hover_texts.append(
-                f"Semaine du {last_point_date:%d/%m} au {last_point_date + timedelta(days=6):%d/%m}<br><b>{format_number(last_point_value, 2)}</b> {suffix}"
-            )
 
         scatter_list.append(
             go.Scatter(
-                x=data["at"],
-                y=data[metric_name],
+                x=data["semaine"],
+                y=data[column_to_use],
                 mode="lines+text",
                 name=name,
                 text=texts,
                 textfont_size=15,
                 textfont_color=config["color"],
+                line_color=config["color"],
                 textposition="middle right",
                 hovertext=hover_texts,
                 hoverinfo="text",
@@ -320,20 +324,22 @@ def create_weekly_quantity_processed_figure(
         data = conf["data"]
 
         # Filter out data from previous year:
-        current_year = data.select("processed_at").max().item().year
+        current_year = data.select("semaine").max().item().year
 
-        date_filter = pl.col("processed_at").dt.year() == current_year
+        date_filter = pl.col("semaine").dt.year() == current_year
         if date_interval is not None:
-            date_filter = pl.col("processed_at").is_between(*date_interval, closed="left")
+            date_filter = pl.col("semaine").is_between(*date_interval, closed="left")
+
         data = data.filter(date_filter)
+        data = data.sort("semaine")
 
         data = data.to_dict(as_series=False)
 
-        min_at = data["processed_at"][0]
+        min_at = data["semaine"][0]
         if min_x is None or min_at < min_x:
             min_x = min_at
 
-        max_at = data["processed_at"][-1]
+        max_at = data["semaine"][-1]
         if max_x is None or max_at > max_x:
             max_x = max_at
 
@@ -343,12 +349,12 @@ def create_weekly_quantity_processed_figure(
                 processed_at + timedelta(days=6),
                 format_number(quantity),
             )
-            for processed_at, quantity in zip(data["processed_at"][:-1], data["quantity"][:-1])
+            for processed_at, quantity in zip(data["semaine"][:-1], data["quantite_traitee"][:-1])
         ]
 
         # Handle case when last data point is last week of the year
-        last_point_date = data["processed_at"][-1]
-        last_point_value = data["quantity"][-1]
+        last_point_date = data["semaine"][-1]
+        last_point_value = data["quantite_traitee"][-1]
         if (last_point_date + timedelta(days=6)).year != current_year:
             last_point = datetime(current_year, 12, 31)
             hover_texts.append(
@@ -361,8 +367,8 @@ def create_weekly_quantity_processed_figure(
 
         traces.append(
             go.Bar(
-                x=data["processed_at"],
-                y=data["quantity"],
+                x=data["semaine"],
+                y=data["quantite_traitee"],
                 name=conf["name"],
                 hovertext=hover_texts,
                 hoverinfo="text",
@@ -374,10 +380,11 @@ def create_weekly_quantity_processed_figure(
 
     fig = go.Figure(data=traces)
 
-    max_value = sum([conf["data"]["quantity"].max() or 0 for conf in data_conf])
+    max_value = sum([conf["data"]["quantite_traitee"].max() or 0 for conf in data_conf])
 
     fig.update_layout(
         plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         xaxis_title="Semaine de traitement",
         legend=dict(
             orientation="h",
@@ -388,10 +395,13 @@ def create_weekly_quantity_processed_figure(
             title="Type de traitement :",
             bgcolor="rgba(0,0,0,0)",
         ),
-        margin=dict(t=30, r=70, l=0),
+        margin=dict(t=30, r=70, l=20),
         barmode="stack",
         yaxis_title="Quantité (en tonnes)",
         yaxis_range=[0, max_value * 1.1],
+        modebar_bgcolor="rgba(0,0,0,0)",
+        modebar_color="rgba(146, 146, 146, 0.7)",
+        modebar_activecolor="rgba(146, 146, 146, 0.7)",
     )
     fig.update_yaxes(side="right")
 
@@ -410,46 +420,59 @@ def create_weekly_quantity_processed_figure(
 
 
 def create_quantity_processed_sunburst_figure(
-    waste_quantity_processed_by_processing_code_df: pl.DataFrame,
+    weekly_waste_processed_data_df: pl.DataFrame,
+    waste_codes_data: pl.DataFrame,
+    date_interval: tuple[datetime, datetime],
 ) -> go.Figure:
     """Creates the figure showing the weekly waste quantity processed by type of processing operation (destroyed or recovered).
 
     Parameters
     ----------
-    waste_quantity_processed_by_processing_code_df: DataFrame
-        Aggregated DataFrame with quantity of processed waste by processing operation code, along with the description of the processing operation.
+    weekly_waste_processed_data_df: DataFrame
+       DataFrame with weekly quantity of processed waste by processing operation code.
+    waste_codes_data: DataFrame
+        DataFrame containing the description for each processing operation code.
 
     Returns
     -------
     Plotly Figure Object
         Sunburst Figure object ready to be plotted.
     """
+    processing_operation_codes_descriptions = {e["code"]: e["description"] for e in waste_codes_data.to_dicts()}
 
-    agg_data = waste_quantity_processed_by_processing_code_df
-    total_data = agg_data.groupby("type_operation").agg(pl.col("quantity").sum()).sort("type_operation")
+    agg_data = (
+        weekly_waste_processed_data_df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
+        .groupby(["code_operation"])
+        .agg(pl.col("type_operation").max(), pl.col("quantite_traitee").sum())
+    )
+    total_data = agg_data.groupby("type_operation").agg(pl.col("quantite_traitee").sum()).sort("type_operation")
 
-    agg_data_recycled = agg_data.filter(pl.col("type_operation") == "Déchet valorisé").sort("quantity")
-    agg_data_eliminated = agg_data.filter(pl.col("type_operation") == "Déchet éliminé").sort("quantity")
+    agg_data_recycled = agg_data.filter(pl.col("type_operation") == "Déchet valorisé").sort("quantite_traitee")
+    agg_data_eliminated = agg_data.filter(pl.col("type_operation") == "Déchet éliminé").sort("quantite_traitee")
 
-    agg_data_recycled_other = agg_data_recycled.filter((pl.col("quantity") / pl.col("quantity").sum()) <= 0.12)
-    agg_data_eliminated_other = agg_data_eliminated.filter((pl.col("quantity") / pl.col("quantity").sum()) <= 0.21)
+    agg_data_recycled_other = agg_data_recycled.filter(
+        (pl.col("quantite_traitee") / pl.col("quantite_traitee").sum()) <= 0.12
+    )
+    agg_data_eliminated_other = agg_data_eliminated.filter(
+        (pl.col("quantite_traitee") / pl.col("quantite_traitee").sum()) <= 0.21
+    )
 
-    agg_data_recycled_other_quantity = agg_data_recycled_other["quantity"].sum()
-    agg_data_eliminated_other_quantity = agg_data_eliminated_other["quantity"].sum()
+    agg_data_recycled_other_quantity = agg_data_recycled_other["quantite_traitee"].sum()
+    agg_data_eliminated_other_quantity = agg_data_eliminated_other["quantite_traitee"].sum()
 
     other_processing_operations_codes = (
         pl.concat(
             [
-                agg_data_recycled_other.select("processing_operation"),
-                agg_data_eliminated_other.select("processing_operation"),
+                agg_data_recycled_other.select("code_operation"),
+                agg_data_eliminated_other.select("code_operation"),
             ]
         )
         .unique()
         .to_series()
     )
     agg_data_without_other = agg_data.filter(
-        pl.col("processing_operation").is_in(other_processing_operations_codes).is_not()
-    ).sort("quantity", descending=True)
+        pl.col("code_operation").is_in(other_processing_operations_codes).is_not()
+    ).sort("quantite_traitee", descending=True)
 
     agg_data_without_other = agg_data_without_other.with_columns(
         pl.col("type_operation")
@@ -461,15 +484,15 @@ def create_quantity_processed_sunburst_figure(
     agg_data_without_other = agg_data_without_other.to_dict(as_series=False)
     ids = (
         total_data["type_operation"]
-        + agg_data_without_other["processing_operation"]
+        + agg_data_without_other["code_operation"]
         + ["Autres opérations de valorisation", "Autres opérations d'élimination'"]
     )
 
-    labels = total_data["type_operation"] + agg_data_without_other["processing_operation"] + ["Autre"] * 2
+    labels = total_data["type_operation"] + agg_data_without_other["code_operation"] + ["Autre"] * 2
     parents = ["", ""] + agg_data_without_other["type_operation"] + ["Déchet valorisé", "Déchet éliminé"]
     values = (
-        total_data["quantity"]
-        + agg_data_without_other["quantity"]
+        total_data["quantite_traitee"]
+        + agg_data_without_other["quantite_traitee"]
         + [agg_data_recycled_other_quantity, agg_data_eliminated_other_quantity]
     )
     colors = (
@@ -482,18 +505,17 @@ def create_quantity_processed_sunburst_figure(
     hover_texts = (
         [
             f"<b>{format_number(e)}t</b> {index.split(' ')[1]}es"
-            for index, e in zip(total_data["type_operation"], total_data["quantity"])
+            for index, e in zip(total_data["type_operation"], total_data["quantite_traitee"])
         ]
         + [
             hover_text_template.format(
                 code=processing_operation,
-                description=processing_operation_description,
+                description=processing_operation_codes_descriptions[processing_operation],
                 quantity=format_number(quantity),
             )
-            for processing_operation, processing_operation_description, quantity in zip(
-                agg_data_without_other["processing_operation"],
-                agg_data_without_other["processing_operation_description"],
-                agg_data_without_other["quantity"],
+            for processing_operation, quantity in zip(
+                agg_data_without_other["code_operation"],
+                agg_data_without_other["quantite_traitee"],
             )
         ]
         + [
@@ -512,6 +534,8 @@ def create_quantity_processed_sunburst_figure(
             parents=parents,
             values=values,
             marker_colors=colors,
+            marker_line_color="rgba(238, 238, 238, 1)",
+            marker_line_width=2,
             branchvalues="total",
             texttemplate="%{label} - <b>%{percentRoot}</b>",
             hovertext=hover_texts,
@@ -523,12 +547,16 @@ def create_quantity_processed_sunburst_figure(
     )
     fig.update_layout(
         margin=dict(t=0, l=0, r=0, b=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        modebar_bgcolor="rgba(0,0,0,0)",
+        modebar_color="rgba(146, 146, 146, 0.7)",
+        modebar_activecolor="rgba(146, 146, 146, 0.7)",
     )
 
     return fig
 
 
-def create_treemap_companies_figure(data_with_naf: pl.DataFrame, use_quantity: bool = False) -> go.Figure:
+def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_quantity: bool = False) -> go.Figure:
     """Creates the figure showing the number of companies by NAF category.
 
     Parameters
@@ -638,33 +666,32 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, use_quantity: b
         schema=["libelle_section", "color"],
     )
 
-    df = data_with_naf
+    df = data_with_naf.filter(pl.col("annee") == year)
 
-    df = df.with_columns(
-        [
-            pl.col("code_section").fill_null("NAF inconnu"),
-            pl.col("libelle_section").fill_null("NAF inconnu"),
-        ]
-    )
+    df = df.fill_null("NAF inconnu")
 
     # Init values
-    total = df.height
-    value_expr = pl.col("id").count().alias("value")
+
+    stat_col = "nombre_etablissements"
+    value_expr = pl.col("nombre_etablissements").sum().alias("value")
     value_suffix = pl.lit("</b>")
     hover_expr_str = "</b> établissements inscrits dans la {label} NAF "
     hover_expr_lit_nulls = pl.lit("</b> établissements inscrits ayant un code NAF inconnu ")
     hover_expr_lit_end = pl.lit("%</b> du total des établissements inscrits.<extra></extra>")
-    labels = [f"Tous les établissements - <b>{total / 1000:.2f}k</b>"]
-    hover_texts = [f"Tous les établissements - <b>{total / 1000:.2f}k</b><extra></extra>"]
+    unit = ""
     if use_quantity:
-        total = df.select(pl.col("quantity").sum()).item()
-        value_expr = pl.col("quantity").sum().alias("value")
+        stat_col = "quantite_traitee"
+        value_expr = pl.col("quantite_traitee").sum().alias("value")
         value_suffix = pl.lit("t</b>")
         hover_expr_str = " tonnes</b> produites par des établissements inscrits dans la {label} NAF "
         hover_expr_lit_nulls = pl.lit(" tonnes</b> produites par des établissements ayant un code NAF inconnu ")
         hover_expr_lit_end = pl.lit("%</b> de la quantité totale produite.<extra></extra>")
-        labels = [f"Tous les établissements - <b>{total / 1000:.2f}kt</b>"]
-        hover_texts = [f"Tous les établissements - <b>{total / 1000:.2f}kt</b><extra></extra>"]
+        unit = "t"
+
+    total = df.select(stat_col).sum().item()
+
+    labels = [f"Tous les établissements - <b>{total / 1000:.2f}k{unit}</b>"]
+    hover_texts = [f"Tous les établissements - <b>{total / 1000:.2f}k{unit}</b><extra></extra>"]
 
     categories = ["sous_classe", "classe", "groupe", "division", "section"]
 

@@ -6,6 +6,8 @@ import re
 
 def format_number(input_number: float, precision: int = 0) -> str:
     """Format a float to a string with thousands separated by space and rounding it at the given precision."""
+    if input_number is None:
+        return ""
     input_number = round(input_number, precision)
     return re.sub(r"\.0+", "", "{:,}".format(input_number).replace(",", " "))
 

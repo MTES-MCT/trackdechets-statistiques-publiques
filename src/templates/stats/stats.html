@@ -84,7 +84,7 @@
     <script>
         function renderPlots(plotConfigs) {
             for (let config of plotConfigs) {
-                let newConfig = {...config.data.config, locale: 'fr'}
+                let newConfig = {...config.data.config, locale: 'fr',displaylogo: false}
                 Plotly.newPlot(
                     config.target,
                     config.data.data,
