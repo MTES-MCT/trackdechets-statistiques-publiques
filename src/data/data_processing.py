@@ -118,6 +118,7 @@ def get_total_quantity_processed(
                 df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
                 .select("quantite_traitee_operations_finales")
                 .sum()
+                .fill_null(0)
                 .item()
             )
         else:
