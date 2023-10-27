@@ -6,6 +6,8 @@ from typing import Dict, List
 import plotly.graph_objects as go
 import polars as pl
 
+from data.plot_configs import WEEKLY_BS_STATS_PLOT_CONFIGS, WEEKLY_BSFF_STATS_PLOT_CONFIGS
+
 from .page_utils import break_long_line, format_number
 
 gridcolor = "#ccc"
@@ -86,7 +88,6 @@ def create_weekly_scatter_figure(
     bs_weekly_data: pl.DataFrame,
     metric_type: str,
     bs_type: str,
-    lines_configs: List[Dict[str, str]],
 ) -> go.Figure:
     """Creates a scatter figure showing the weekly number of 'bordereaux' by status (created, sent..)
 
@@ -117,71 +118,8 @@ def create_weekly_scatter_figure(
     Plotly Figure Object
         Figure object ready to be plotted.
     """
-    colors = ["#000091", "#5E2A2B", "#66673D", "#E4794A", "#60E0EB", "#009099"]
 
-    plot_configs = [
-        {"column_counts": "creations", "column_quantity": "quantite_tracee", **lines_configs[0], "color": colors[0]},
-        {
-            "column_counts": "envois",
-            "column_quantity": "quantite_envoyee",
-            **lines_configs[1],
-            "color": colors[1],
-            "visible": "legendonly",
-        },
-        {"column_counts": "receptions", "column_quantity": "quantite_recue", **lines_configs[2], "color": colors[2]},
-    ]
-
-    if bs_type != "BSFF":
-        plot_configs.extend(
-            [
-                {
-                    "column_counts": "traitements",
-                    "column_quantity": "quantite_traitee",
-                    **lines_configs[3],
-                    "color": colors[3],
-                },
-                {
-                    "column_counts": "traitements_operations_non_finales",
-                    "column_quantity": "quantite_traitee_operations_non_finales",
-                    **lines_configs[4],
-                    "color": colors[4],
-                    "visible": "legendonly",
-                },
-                {
-                    "column_counts": "traitements_operations_finales",
-                    "column_quantity": "quantite_traitee_operations_finales",
-                    **lines_configs[5],
-                    "color": colors[5],
-                    "visible": "legendonly",
-                },
-            ]
-        )
-    else:
-        plot_configs.extend(
-            [
-                {
-                    "column_counts": "contenants_traites",
-                    "column_quantity": "quantite_traitee",
-                    **lines_configs[3],
-                    "color": colors[3],
-                },
-                {
-                    "column_counts": "contenants_traites_operations_non_finales",
-                    "column_quantity": "quantite_traitee_operations_non_finales",
-                    **lines_configs[4],
-                    "color": colors[4],
-                    "visible": "legendonly",
-                },
-                {
-                    "column_counts": "contenants_traites_operations_finales",
-                    "column_quantity": "quantite_traitee_operations_finales",
-                    **lines_configs[5],
-                    "color": colors[5],
-                    "visible": "legendonly",
-                },
-            ]
-        )
-
+    plot_configs = WEEKLY_BS_STATS_PLOT_CONFIGS if bs_type != "BSFF" else WEEKLY_BSFF_STATS_PLOT_CONFIGS
     scatter_list = []
 
     y_title = "Quantité (en tonnes)" if metric_type == "quantity" else None
@@ -207,8 +145,8 @@ def create_weekly_scatter_figure(
         if max_x is None or max_at > max_x:
             max_x = max_at
 
-        name = config["name"]
-        suffix = config["suffix"]
+        name = config[f"{metric_type}_line_config"]["name"]
+        suffix = config[f"{metric_type}_line_config"]["suffix"]
 
         # Creates a list of text to only show value on last point of the line
         texts = []
