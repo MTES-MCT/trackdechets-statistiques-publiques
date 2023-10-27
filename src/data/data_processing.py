@@ -62,7 +62,7 @@ def get_recovered_and_eliminated_quantity_processed_by_week_series(
 
 
 def get_total_bs_created(
-    all_bordereaux_data: list[pl.DataFrame],
+    all_bordereaux_data: dict[str, pl.DataFrame],
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> int:
     """Returns the total number of 'bordereaux' created.
@@ -81,19 +81,22 @@ def get_total_bs_created(
 
     """
     bs_created_total = 0
-    for df in all_bordereaux_data:
+    for bs_type, df in all_bordereaux_data.items():
+        stat_column = "creations"
+        if bs_type == "BSFF":
+            stat_column = "creations_bordereaux"
         if date_interval is not None:
             bs_created_total += (
-                df.filter(pl.col("semaine").is_between(*date_interval, closed="left")).select("creations").sum().item()
+                df.filter(pl.col("semaine").is_between(*date_interval, closed="left")).select(stat_column).sum().item()
             )
         else:
-            bs_created_total += df.select("creations").sum().item()
+            bs_created_total += df.select(stat_column).sum().item()
 
     return bs_created_total
 
 
 def get_total_quantity_processed(
-    all_bordereaux_data: list[pl.DataFrame],
+    all_bordereaux_data: dict[str, pl.DataFrame],
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> int:
     """Returns the total quantity processed (only final processing operation codes).
@@ -112,7 +115,7 @@ def get_total_quantity_processed(
 
     """
     quantity_processed_total = 0
-    for df in all_bordereaux_data:
+    for bs_type, df in all_bordereaux_data.items():
         if date_interval is not None:
             quantity_processed_total += (
                 df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
