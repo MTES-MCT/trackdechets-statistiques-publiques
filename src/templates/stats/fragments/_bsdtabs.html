@@ -1,4 +1,6 @@
-<ul class="fr-tabs__list" role="tablist" aria-label="">
+<ul class="fr-tabs__list"
+    role="tablist"
+    aria-label="Statistiques hebdomadaires par type de bordereau">
     <li role="presentation">
         <button id="tabpanel-1"
                 class="fr-tabs__tab   fr-tabs__tab--icon-left"
@@ -46,5 +48,17 @@
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
                 hx-target="#bsd_wrapper">Activité de Soins à Risques Infectieux</button>
+    </li>
+    <li role="presentation">
+        <button id="tabpanel-5"
+                class="fr-tabs__tab  fr-tabs__tab--icon-left"
+                tabindex="-1"
+                role="tab"
+                aria-selected="{% if bsdtype == "bsvhu" %}true{% else %}false{% endif %}"
+                aria-controls="tabpanel-5-panel"
+                hx-get="{% url 'bsvhu'  year %}"
+                hx-trigger="click"
+                hx-indicator="#bsd_spinner"
+                hx-target="#bsd_wrapper">Véhicules Hors d'Usage</button>
     </li>
 </ul>

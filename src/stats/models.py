@@ -25,10 +25,14 @@ class Computation(models.Model):
     bsda_counts_weekly = models.JSONField(default=dict)
     bsff_counts_weekly = models.JSONField(default=dict)
     bsdasri_counts_weekly = models.JSONField(default=dict)
+    bsvhu_counts_weekly = models.JSONField(default=dict)
+
     bsdd_quantities_weekly = models.JSONField(default=dict)
     bsda_quantities_weekly = models.JSONField(default=dict)
     bsff_quantities_weekly = models.JSONField(default=dict)
     bsdasri_quantities_weekly = models.JSONField(default=dict)
+    bsvhu_quantities_weekly = models.JSONField(default=dict)
+
     produced_quantity_by_category = models.JSONField(default=dict)
 
     company_created_total_life = models.JSONField(default=dict)

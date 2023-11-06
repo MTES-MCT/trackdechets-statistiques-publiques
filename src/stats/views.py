@@ -80,6 +80,10 @@ class BsffView(BaseBsdView):
     template_name = "stats/fragments/bsff.html"
 
 
+class BsvhuView(BaseBsdView):
+    template_name = "stats/fragments/bsvhu.html"
+
+
 class CompanyView(BaseBsdView):
     template_name = "stats/fragments/company.html"
 

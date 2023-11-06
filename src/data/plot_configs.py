@@ -98,7 +98,7 @@ WEEKLY_BS_STATS_PLOT_CONFIGS = [
 
 WEEKLY_BSFF_STATS_PLOT_CONFIGS = [
     {
-        "column_counts": "creations_bordereaux",
+        "column_counts": "creations_contenants",
         "column_quantity": "quantite_tracee",
         "counts_line_config": {
             "name": "État initial",
@@ -113,7 +113,7 @@ WEEKLY_BSFF_STATS_PLOT_CONFIGS = [
         "color": COLORS[0],
     },
     {
-        "column_counts": "envois_bordereaux",
+        "column_counts": "envois_contenants",
         "column_quantity": "quantite_envoyee",
         "counts_line_config": {
             "name": "Pris en charge par le transporteur",
@@ -129,7 +129,7 @@ WEEKLY_BSFF_STATS_PLOT_CONFIGS = [
         "visible": "legendonly",
     },
     {
-        "column_counts": "receptions_bordereaux",
+        "column_counts": "receptions_contenants",
         "column_quantity": "quantite_recue",
         "counts_line_config": {
             "name": "Reçu par le destinataire",
