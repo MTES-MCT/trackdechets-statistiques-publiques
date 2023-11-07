@@ -122,8 +122,12 @@ def create_weekly_scatter_figure(
     plot_configs = WEEKLY_BS_STATS_PLOT_CONFIGS if bs_type != "BSFF" else WEEKLY_BSFF_STATS_PLOT_CONFIGS
     scatter_list = []
 
-    y_title = "Quantité (en tonnes)" if metric_type == "quantity" else None
-    legend_title = "Statut :" if metric_type == "quantity" else "Statut du bordereau :"
+    y_title = None
+    legend_title = "Statut du bordereau :" if bs_type != "BSFF" else "Statut du contenant :"
+    if metric_type == "quantity":
+        legend_title = "Statut :"
+        y_title = "Quantité (en tonnes)"
+
     min_x = None
     max_x = None
     for config in plot_configs:
