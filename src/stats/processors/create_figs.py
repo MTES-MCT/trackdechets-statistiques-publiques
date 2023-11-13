@@ -71,6 +71,11 @@ def build_figs(year: int, clear_year: bool = False):
         metric_type="counts",
         bs_type="BSFF",
     )
+    bsff_packagings_counts_weekly_fig = create_weekly_scatter_figure(
+        bsff_weekly_filtered_df,
+        metric_type="counts",
+        bs_type="BSFF PACKAGINGS",
+    )
     bsdasri_counts_weekly_fig = create_weekly_scatter_figure(
         bsdasri_weekly_filtered_df,
         metric_type="counts",
@@ -161,6 +166,7 @@ def build_figs(year: int, clear_year: bool = False):
         bsdd_counts_weekly=bsdd_counts_weekly_fig.to_json(),
         bsda_counts_weekly=bsda_counts_weekly_fig.to_json(),
         bsff_counts_weekly=bsff_counts_weekly_fig.to_json(),
+        bsff_packagings_counts_weekly=bsff_packagings_counts_weekly_fig.to_json(),
         bsdasri_counts_weekly=bsdasri_counts_weekly_fig.to_json(),
         bsvhu_counts_weekly=bsvhu_counts_weekly_fig.to_json(),
         bsdd_quantities_weekly=bsdd_quantities_weekly_fig.to_json(),

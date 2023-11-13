@@ -24,6 +24,7 @@ class Computation(models.Model):
     bsdd_counts_weekly = models.JSONField(default=dict)
     bsda_counts_weekly = models.JSONField(default=dict)
     bsff_counts_weekly = models.JSONField(default=dict)
+    bsff_packagings_counts_weekly = models.JSONField(default=dict)
     bsdasri_counts_weekly = models.JSONField(default=dict)
     bsvhu_counts_weekly = models.JSONField(default=dict)
 
