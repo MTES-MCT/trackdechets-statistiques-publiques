@@ -54,6 +54,7 @@ def build_figs(year: int, clear_year: bool = False):
     bsda_weekly_filtered_df = get_weekly_preprocessed_dfs(bsda_weekly_data_df, date_interval)
     bsff_weekly_filtered_df = get_weekly_preprocessed_dfs(bsff_weekly_data_df, date_interval)
     bsdasri_weekly_filtered_df = get_weekly_preprocessed_dfs(bsdasri_weekly_data_df, date_interval)
+    bsvhu_weekly_filtered_df = get_weekly_preprocessed_dfs(bsvhu_weekly_data_df, date_interval)
 
     bsdd_counts_weekly_fig = create_weekly_scatter_figure(
         bsdd_weekly_filtered_df,
@@ -70,10 +71,20 @@ def build_figs(year: int, clear_year: bool = False):
         metric_type="counts",
         bs_type="BSFF",
     )
+    bsff_packagings_counts_weekly_fig = create_weekly_scatter_figure(
+        bsff_weekly_filtered_df,
+        metric_type="counts",
+        bs_type="BSFF PACKAGINGS",
+    )
     bsdasri_counts_weekly_fig = create_weekly_scatter_figure(
         bsdasri_weekly_filtered_df,
         metric_type="counts",
         bs_type="BSDASRI",
+    )
+    bsvhu_counts_weekly_fig = create_weekly_scatter_figure(
+        bsvhu_weekly_filtered_df,
+        metric_type="counts",
+        bs_type="BSVHU",
     )
 
     bsdd_quantities_weekly_fig = create_weekly_scatter_figure(
@@ -96,9 +107,13 @@ def build_figs(year: int, clear_year: bool = False):
         metric_type="quantity",
         bs_type="BSDASRI",
     )
+    bsvhu_quantities_weekly_fig = create_weekly_scatter_figure(
+        bsvhu_weekly_filtered_df,
+        metric_type="quantity",
+        bs_type="BSDASRI",
+    )
 
     # Waste weight processed weekly
-
     (
         recovered_quantity_series,
         eliminated_quantity_series,
@@ -151,11 +166,14 @@ def build_figs(year: int, clear_year: bool = False):
         bsdd_counts_weekly=bsdd_counts_weekly_fig.to_json(),
         bsda_counts_weekly=bsda_counts_weekly_fig.to_json(),
         bsff_counts_weekly=bsff_counts_weekly_fig.to_json(),
+        bsff_packagings_counts_weekly=bsff_packagings_counts_weekly_fig.to_json(),
         bsdasri_counts_weekly=bsdasri_counts_weekly_fig.to_json(),
+        bsvhu_counts_weekly=bsvhu_counts_weekly_fig.to_json(),
         bsdd_quantities_weekly=bsdd_quantities_weekly_fig.to_json(),
         bsda_quantities_weekly=bsda_quantities_weekly_fig.to_json(),
         bsff_quantities_weekly=bsff_quantities_weekly_fig.to_json(),
         bsdasri_quantities_weekly=bsdasri_quantities_weekly_fig.to_json(),
+        bsvhu_quantities_weekly=bsvhu_quantities_weekly_fig.to_json(),
         produced_quantity_by_category=produced_quantity_by_category_fig.to_json(),
         company_created_total_life=company_created_total_life,
         user_created_total_life=user_created_total_life,

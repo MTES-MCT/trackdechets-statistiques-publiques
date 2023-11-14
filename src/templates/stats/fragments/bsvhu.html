@@ -1,0 +1,36 @@
+{% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsvhu" year=computation.year %}
+{% include "spinner.html" with spinner_id="bsd_spinner" %}
+<div id="tabpanel-5-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-5"
+     tabindex="0">
+    <h4>Nombre de Bordereaux de Suivi de Véhicules Hors d'Usage par semaine</h4>
+    <div id="bsvhu_counts_weekly_graph"></div>
+    <h4>Quantités de Véhicules Hors d'Usage par semaine</h4>
+    <div id="bsvhu_quantity_weekly_graph"></div>
+</div>
+<script>
+    {% autoescape off %}
+        function bsvhu() {
+            const counts_weekly = {{ computation.bsvhu_counts_weekly }};
+            const quantities_weekly = {{ computation.bsvhu_quantities_weekly }};
+            const configs = [{
+                "data": counts_weekly,
+                "target": "bsvhu_counts_weekly_graph"
+            },
+                {
+                    "data": quantities_weekly,
+                    "target": "bsvhu_quantity_weekly_graph"
+                }
+
+            ];
+            renderPlots(configs);
+        }
+
+    {% endautoescape %}
+
+    onceReady(bsvhu);
+
+
+</script>

@@ -5,26 +5,36 @@
      role="tabpanel"
      aria-labelledby="tabpanel-3"
      tabindex="0">
+    <p>
+        Pour les BSFF, la trçabilité est effectuée au niveau contenant. Chaque bordereau peut permettre la traçabilité de plusieurs contenants.
+        Les opérations réalisées sont prises en compte et différenciée au niveau de chaque contenant.
+    </p>
+    <h4>Nombre de Bordereaux de Suivi de Fluides Frigorigènes par semaine</h4>
     <div id="bsff_counts_weekly_graph"></div>
+    <h4>Nombre de contenants de Fluides Frigorigènes par semaine</h4>
+    <div id="bsff_packagings_counts_weekly_graph"></div>
+    <h4>Quantités de Déchets de Fluides Frigorigènes par semaine</h4>
     <div id="bsff_quantites_weekly_graph"></div>
 </div>
 <script>
         {% autoescape off %}
             function bsff() {
                 const counts_weekly = {{ computation.bsff_counts_weekly }};
+                const packagings_counts_weekly = {{ computation.bsff_packagings_counts_weekly }};
                 const quantities_weekly = {{ computation.bsff_quantities_weekly }};
                 const configs = [{
                     "data": counts_weekly,
                     "target": "bsff_counts_weekly_graph"
                 },
-                    {
-                        "data": quantities_weekly,
-                        "target": "bsff_quantites_weekly_graph"
-                    }
-
+                {
+                    "data": packagings_counts_weekly,
+                    "target": "bsff_packagings_counts_weekly_graph"
+                },
+                {
+                    "data": quantities_weekly,
+                    "target": "bsff_quantites_weekly_graph"
+                }
                 ];
-
-
                 renderPlots(configs);
             }
 

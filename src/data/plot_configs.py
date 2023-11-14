@@ -144,7 +144,7 @@ WEEKLY_BSFF_STATS_PLOT_CONFIGS = [
         "color": COLORS[2],
     },
     {
-        "column_counts": "traitements_contenants",
+        "column_counts": "traitements_bordereaux",
         "column_quantity": "quantite_traitee",
         "counts_line_config": {
             "name": "Traité",
@@ -159,16 +159,70 @@ WEEKLY_BSFF_STATS_PLOT_CONFIGS = [
         "color": COLORS[3],
     },
     {
-        "column_counts": "traitements_contenants_operations_non_finales",
         "column_quantity": "quantite_traitee_operations_non_finales",
-        "counts_line_config": {
-            "name": "Traité (traitement intermédiaire)",
-            "suffix": "en traitement intermédiaire",
-            "text_position": "bottom center",
-        },
+        "color": COLORS[4],
         "quantity_line_config": {
             "name": "Traitée (traitement intermédiaire)",
             "suffix": "tonnes traitées en traitement intermédiaire",
+            "text_position": "bottom center",
+        },
+        "visible": "legendonly",
+    },
+    {
+        "column_quantity": "quantite_traitee_operations_finales",
+        "color": COLORS[5],
+        "quantity_line_config": {
+            "name": "Traitée (traitement final)",
+            "suffix": "tonnes traitées en traitement final",
+            "text_position": "bottom center",
+        },
+        "visible": "legendonly",
+    },
+]
+
+WEEKLY_BSFF_PACKAGINGS_STATS_PLOT_CONFIGS = [
+    {
+        "column_counts": "creations_contenants",
+        "counts_line_config": {
+            "name": "État initial",
+            "suffix": "traçés",
+            "text_position": "top center",
+        },
+        "color": COLORS[0],
+    },
+    {
+        "column_counts": "envois_contenants",
+        "counts_line_config": {
+            "name": "Pris en charge par le transporteur",
+            "suffix": "pris en charge par le transporteur",
+            "text_position": "middle top",
+        },
+        "color": COLORS[1],
+        "visible": "legendonly",
+    },
+    {
+        "column_counts": "receptions_contenants",
+        "counts_line_config": {
+            "name": "Reçu par le destinataire",
+            "suffix": "reçus par le destinataire",
+            "text_position": "middle bottom",
+        },
+        "color": COLORS[2],
+    },
+    {
+        "column_counts": "traitements_contenants",
+        "counts_line_config": {
+            "name": "Traité (contenants)",
+            "suffix": "marqués comme traités",
+            "text_position": "bottom center",
+        },
+        "color": COLORS[3],
+    },
+    {
+        "column_counts": "traitements_contenants_operations_non_finales",
+        "counts_line_config": {
+            "name": "Traité (contenants, traitement intermédiaire)",
+            "suffix": "en traitement intermédiaire",
             "text_position": "bottom center",
         },
         "color": COLORS[4],
@@ -176,15 +230,9 @@ WEEKLY_BSFF_STATS_PLOT_CONFIGS = [
     },
     {
         "column_counts": "traitements_contenants_operations_finales",
-        "column_quantity": "quantite_traitee_operations_finales",
         "counts_line_config": {
-            "name": "Traité (traitement final)",
+            "name": "Traité (contenants, traitement final)",
             "suffix": "en traitement final",
-            "text_position": "bottom center",
-        },
-        "quantity_line_config": {
-            "name": "Traitée (traitement final)",
-            "suffix": "tonnes traitées en traitement final",
             "text_position": "bottom center",
         },
         "color": COLORS[5],

@@ -6,7 +6,11 @@ from typing import Dict, List
 import plotly.graph_objects as go
 import polars as pl
 
-from data.plot_configs import WEEKLY_BS_STATS_PLOT_CONFIGS, WEEKLY_BSFF_STATS_PLOT_CONFIGS
+from data.plot_configs import (
+    WEEKLY_BS_STATS_PLOT_CONFIGS,
+    WEEKLY_BSFF_PACKAGINGS_STATS_PLOT_CONFIGS,
+    WEEKLY_BSFF_STATS_PLOT_CONFIGS,
+)
 
 from .page_utils import break_long_line, format_number
 
@@ -93,40 +97,44 @@ def create_weekly_scatter_figure(
 
     Parameters
     ----------
-    bs_created_data: DataFrame
-        DataFrame containing the count of 'bordereaux' created. Must have 'at' and metric corresponding columns.
-    bs_sent_data: DataFrame
-        DataFrame containing the count of 'bordereaux' sent. Must have 'at' and metric corresponding columns.
-    bs_received_data: DataFrame
-        DataFrame containing the count of 'bordereaux' received. Must have 'at' and metric corresponding columns.
-    bs_processed_data: DataFrame
-        DataFrame containing the count of 'bordereaux' processed.
-        Must have 'at' and metric corresponding columns.
-    bs_processed_non_final_data: DataFrame
-        DataFrame containing the count of 'bordereaux' processed with non final processing operation code.
-        Must have 'at' and metric corresponding columns.
-    bs_processed_final_data: DataFrame
-        DataFrame containing the count of 'bordereaux' processed with final processing operation code.
-        Must have 'at' and metric corresponding columns.
+    bs_weekly_data: DataFrame
+        DataFrame containing the count and quantities for a particular
+        type of 'bordereau'.
     bs_type: str
         Type of 'bordereau'. Eg : BSDD, BSDA...
     lines_configs: list of dicts
-        Configuration for the different traces. Must match the number of DataFrames (one config per DataFrame).
-
+        Configuration for the different traces. One config per line in the resulting figure.
     Returns
     -------
     Plotly Figure Object
         Figure object ready to be plotted.
     """
 
-    plot_configs = WEEKLY_BS_STATS_PLOT_CONFIGS if bs_type != "BSFF" else WEEKLY_BSFF_STATS_PLOT_CONFIGS
+    match bs_type:
+        case "BSFF":
+            plot_configs = WEEKLY_BSFF_STATS_PLOT_CONFIGS
+        case "BSFF PACKAGINGS":
+            plot_configs = WEEKLY_BSFF_PACKAGINGS_STATS_PLOT_CONFIGS
+        case _:
+            plot_configs = WEEKLY_BS_STATS_PLOT_CONFIGS
+
     scatter_list = []
 
-    y_title = "Quantité (en tonnes)" if metric_type == "quantity" else None
-    legend_title = "Statut :" if metric_type == "quantity" else "Statut du bordereau :"
+    y_title = None
+    legend_title = "Statut du bordereau :" if bs_type != "BSFF PACKAGINGS" else "Statut du contenant:"
+    if metric_type == "quantity":
+        legend_title = "Statut :"
+        y_title = "Quantité (en tonnes)"
+
     min_x = None
     max_x = None
     for config in plot_configs:
+        if metric_type == "counts" and "column_counts" not in config:
+            continue
+
+        if metric_type == "quantity" and "column_quantity" not in config:
+            continue
+
         column_to_use = config["column_counts"] if metric_type == "counts" else config["column_quantity"]
         data = bs_weekly_data
 
@@ -158,7 +166,11 @@ def create_weekly_scatter_figure(
         texts += [format_number(last_value)]
 
         if metric_type == "counts":
-            to_add_str = bs_type if bs_type != "BSFF" else "contenants"
+            to_add_str = bs_type
+
+            if bs_type == "BSFF PACKAGINGS":  # Handle the case of BSFF that shows packagings for the processing counts
+                to_add_str = "contenants"
+
             suffix = f"{to_add_str} {suffix}"
 
         hover_texts = [
