@@ -657,22 +657,34 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
 
         id_sep = "#"
 
-        id_exprs = [pl.lit("Tous les établissements")]
+        col_names_to_agg = []
         if i < (len(categories) - 1):
             for tmp_cat in reversed(categories[i + 1 :]):
-                id_exprs.append(pl.col(f"libelle_{tmp_cat}").max())
-        id_exprs.append(pl.col(f"libelle_{cat}").max())
-        agg_exprs.append(pl.concat_str(id_exprs, sep=id_sep).alias("ids"))
-
-        temp_colors = colors
-        if cat != "section":
-            agg_exprs.append(pl.col("libelle_section").max())
+                tmp_col_name = f"libelle_{tmp_cat}"
+                agg_exprs.append(pl.col(tmp_col_name).max())
+                col_names_to_agg.append(tmp_col_name)
+        col_names_to_agg.append(f"libelle_{cat}")
+        # agg_exprs.extend(id_exprs)
+        # pl.concat_str(id_exprs, separator=id_sep).alias("ids")
 
         temp_df = temp_df.groupby(f"code_{cat}", maintain_order=True).agg(agg_exprs)
+
+        id_expr = pl.concat_str(
+            [pl.lit("Tous les établissements")] + [pl.col(e) for e in col_names_to_agg], separator=id_sep
+        )
+        temp_df = temp_df.with_columns(ids=id_expr)
+
+        temp_colors = colors
         temp_df = temp_df.join(temp_colors, on="libelle_section", how="left")
 
         parent_exp = (
-            pl.col("ids").str.split(id_sep).arr.reverse().arr.slice(1).arr.reverse().arr.join(id_sep).alias("parents")
+            pl.col("ids")
+            .str.split(id_sep)
+            .list.reverse()
+            .list.slice(1)
+            .list.reverse()
+            .list.join(id_sep)
+            .alias("parents")
         )
 
         labels_expr = pl.concat_str(
@@ -706,7 +718,18 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
             ]
         ).alias("hover_texts")
 
-        dfs.append(temp_df.with_columns([labels_expr, hover_expr, parent_exp]))
+        dfs.append(
+            temp_df.with_columns([labels_expr, hover_expr, parent_exp]).select(
+                [
+                    pl.col("ids"),
+                    pl.col("labels"),
+                    pl.col("parents"),
+                    pl.col("value"),
+                    pl.col("hover_texts"),
+                    pl.col("color"),
+                ]
+            )
+        )
 
     # Build plotly necessaries lists
     ids = ["Tous les établissements"]

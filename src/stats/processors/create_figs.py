@@ -36,6 +36,7 @@ def build_figs(year: int, clear_year: bool = False):
     weekly_waste_processed_data_df = pl.read_parquet("temp_data/weekly_waste_processed_data.parquet")
     accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
     waste_processed_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_processed_by_naf_annual_stats.parquet")
+    icpe_list = pl.read_parquet("temp_data/icpe_list.parquet")
 
     bs_weekly_datasets = {
         "BSDD": bsdd_weekly_data_df,
@@ -154,6 +155,7 @@ def build_figs(year: int, clear_year: bool = False):
     produced_quantity_by_category_fig = create_treemap_companies_figure(
         waste_processed_by_naf_annual_stats_df, use_quantity=True, year=year
     )
+
     Computation.objects.create(
         year=year,
         total_bs_created=total_bs_created,
@@ -180,4 +182,5 @@ def build_figs(year: int, clear_year: bool = False):
         company_created_weekly=company_created_weekly_fig.to_json(),
         user_created_weekly=user_created_weekly_fig.to_json(),
         company_counts_by_category=treemap_companies_figure.to_json(),
+        icpe_list=icpe_list.write_json(row_oriented=True),
     )

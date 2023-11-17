@@ -11,6 +11,7 @@ from data.queries import (
     bs_weekly_data_sql,
     waste_processed_by_naf_annual_stats_sql,
     weekly_waste_processed_stats_sql,
+    icpe_list_sql,
 )
 
 from .data_extract import extract_dataset
@@ -30,6 +31,8 @@ class Computed:
 
     accounts_by_naf_data: pl.DataFrame
     waste_processed_by_naf_annual_stats: pl.DataFrame
+
+    icpe_list: pl.DataFrame
 
 
 def get_data_df():
@@ -56,6 +59,8 @@ def get_data_df():
     accounts_by_naf_data = extract_dataset(accounts_by_naf_annual_stats_sql)
     waste_processed_by_naf_annual_stats = extract_dataset(waste_processed_by_naf_annual_stats_sql)
 
+    icpe_list = extract_dataset(icpe_list_sql)
+
     data = Computed(
         bsdd_weekly_data=bsdd_weekly_data,
         bsda_weekly_data=bsda_weekly_data,
@@ -66,5 +71,6 @@ def get_data_df():
         weekly_waste_processed_data=weekly_waste_processed_data,
         accounts_by_naf_data=accounts_by_naf_data,
         waste_processed_by_naf_annual_stats=waste_processed_by_naf_annual_stats,
+        icpe_list=icpe_list,
     )
     return data

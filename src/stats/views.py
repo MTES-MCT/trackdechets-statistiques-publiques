@@ -1,8 +1,10 @@
 import datetime as dt
+import json
 
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.views import View
 from django.views.generic import TemplateView
 
 from stats.models import Computation
@@ -90,3 +92,19 @@ class CompanyView(BaseBsdView):
 
 class UserView(BaseBsdView):
     template_name = "stats/fragments/user.html"
+
+
+class IcpeView(BaseRender):
+    template_name = "stats/icpe.html"
+
+
+class ICPEListView(View):
+    def get(self, request, *args, **kwargs):
+        year = kwargs.get("year", 2023)  # No difference for the moment
+        try:
+            computation = Computation.objects.get(year=year)
+            icpe_list = json.loads(computation.icpe_list)
+            return JsonResponse(icpe_list, safe=False)
+        except Computation.DoesNotExist:
+            # Handle the case when no computation for the specified year is found
+            return JsonResponse({"error": "Computation not found for the specified year"}, status=404)

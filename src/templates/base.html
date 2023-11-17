@@ -17,6 +17,8 @@
         <link rel="manifest" href="{% static "site.webmanifest" %}">
         <link rel="mask-icon" href="{% static "img/safari-pinned-tab.svg" %}" color="#fff">
         <meta name="theme-color" content="#ffffff">
+        {% block leaflet %}
+        {% endblock leaflet %}
     </head>
     <body>
         {% block main %}{% endblock %}

@@ -1,6 +1,18 @@
 from django.urls import path
 
-from .views import BsdasriView, BsdaView, BsddView, BsffView, BsvhuView, CompanyView, CurrentStats, LastStats, UserView
+from .views import (
+    BsdasriView,
+    BsdaView,
+    BsddView,
+    BsffView,
+    BsvhuView,
+    CompanyView,
+    CurrentStats,
+    ICPEListView,
+    LastStats,
+    UserView,
+    IcpeView,
+)
 
 urlpatterns = [
     path("stats-current", CurrentStats.as_view(), name="current_stats"),
@@ -12,4 +24,6 @@ urlpatterns = [
     path("bsvhu/<int:year>", BsvhuView.as_view(), name="bsvhu"),
     path("companies/<int:year>", CompanyView.as_view(), name="companies"),
     path("users/<int:year>", UserView.as_view(), name="users"),
+    path("icpe", IcpeView.as_view(), name="icpe"),
+    path("icpe-list/<int:year>", ICPEListView.as_view(), name="icpe_list"),
 ]

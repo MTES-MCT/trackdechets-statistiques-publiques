@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load stats %}
+{% load static %}
+{% block leaflet %}
+    <link rel="stylesheet" href="{% static "css/leaflet.css" %}" />
+    <script src="{% static "js/leaflet.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/MarkerCluster.css" %}" />
+    <link rel="stylesheet" href="{% static "css/MarkerCluster.Default.css" %}" />
+    <script src="{% static "js/leaflet.markercluster.js" %}"></script>
+{% endblock leaflet %}
+{% block main %}
+    <div class="main-container">
+        <h1>Données ICPE</h1>
+        <div id="map"></div>
+        <div id="installation-infos">
+            <h1 id="installation-name"></h1>
+            <div id="installation-rubriques-table"
+                 class="fr-table"
+                 style="display: None">
+                <table>
+                    <caption>Rubriques ICPE associées à l'Établissement</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Rubrique</th>
+                            <th scope="col">Nature</th>
+                            <th scope="col">Quantité autorisée</th>
+                            <th scope="col">Unité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock main %}
+{% block scripts %}
+    <script>
+    function populateRubriquesTable(installationRubriques) {
+        
+        tBodyElement = document.querySelector("#installation-rubriques-table tbody")
+        installationRubriques.forEach((element) => {
+            trElement = document.createElement("tr");
+            
+            ["rubrique","nature","quantite_autorisee","unite"].forEach((e) => {
+                console.log("Here");
+                console.log(e);
+                let tdElement = document.createElement("td");
+                tdElement.innerText= element[e];;
+                trElement.appendChild(tdElement)
+            });
+            
+
+            tBodyElement.appendChild(trElement);
+        });
+
+        tTableElement = document.querySelector("#installation-rubriques-table")
+        tTableElement.style.display = "unset"
+    }
+
+    function onMarkerClick(e, installationData) {
+        console.log(e)
+        console.log(installationData)
+        installationNameDiv = document.getElementById("installation-name")
+        installationNameDiv.innerHTML = installationData.raison_sociale;
+
+        populateRubriquesTable(JSON.parse(installationData.rubriques_json))
+    }
+
+    var map = L.map('map').setView([48.2226778, 3.7493862], 4);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    fetch('icpe-list/2023').then(response => {
+        // Check if the response status is OK (200)
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        
+        var data = data
+        console.log(data);
+        var markers = L.markerClusterGroup();
+
+        
+        data.forEach((element) => {
+            markers.addLayer(
+                L.marker(
+                    [element.latitude, element.longitude],
+                    {title: element.raison_sociale},
+                ).bindPopup(`${element.raison_sociale}`).on('click', e=> {
+                    onMarkerClick(e,element)
+                })
+            );
+        });
+        map.addLayer(markers);
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+    
+    </script>
+{% endblock %}

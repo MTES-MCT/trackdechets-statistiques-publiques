@@ -44,6 +44,8 @@ class Computation(models.Model):
 
     company_counts_by_category = models.JSONField(default=dict)
 
+    icpe_list = models.JSONField(default=dict)
+
     class Meta:
         verbose_name = _("Computation")
         verbose_name_plural = _("Computations")

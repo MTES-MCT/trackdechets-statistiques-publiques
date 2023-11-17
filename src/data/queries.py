@@ -39,3 +39,9 @@ select
 from
     refined_zone_stats_publiques.annual_waste_produced_by_naf
 """
+
+icpe_list_sql = """
+SELECT
+    *
+FROM "refined_zone_stats_publiques"."icpe_list"
+"""
