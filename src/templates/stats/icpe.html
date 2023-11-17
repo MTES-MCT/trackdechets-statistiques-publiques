@@ -27,8 +27,6 @@
                             <th scope="col">Unité</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
                 </table>
             </div>
         </div>
@@ -37,14 +35,14 @@
 {% block scripts %}
     <script>
     function populateRubriquesTable(installationRubriques) {
-        
-        tBodyElement = document.querySelector("#installation-rubriques-table tbody")
+        tTableElement = document.querySelector("#installation-rubriques-table table");
+        tTableElement.removeChild(tTableElement.lastChild)
+
+        tBodyElement = document.createElement("tbody");
         installationRubriques.forEach((element) => {
             trElement = document.createElement("tr");
             
             ["rubrique","nature","quantite_autorisee","unite"].forEach((e) => {
-                console.log("Here");
-                console.log(e);
                 let tdElement = document.createElement("td");
                 tdElement.innerText= element[e];;
                 trElement.appendChild(tdElement)
@@ -54,13 +52,16 @@
             tBodyElement.appendChild(trElement);
         });
 
-        tTableElement = document.querySelector("#installation-rubriques-table")
-        tTableElement.style.display = "unset"
+        
+        
+        tTableElement.appendChild(tBodyElement);
+
+        tDivTableElement = document.querySelector("#installation-rubriques-table");
+        tDivTableElement.style.display = "unset";
     }
 
     function onMarkerClick(e, installationData) {
-        console.log(e)
-        console.log(installationData)
+
         installationNameDiv = document.getElementById("installation-name")
         installationNameDiv.innerHTML = installationData.raison_sociale;
 
@@ -84,7 +85,6 @@
     .then(data => {
         
         var data = data
-        console.log(data);
         var markers = L.markerClusterGroup();
 
         
