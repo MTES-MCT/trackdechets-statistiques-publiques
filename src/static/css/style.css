@@ -157,9 +157,3 @@
 .fr-tabs__panel {
   border: 1px solid #dddddd;
 }
-
-#map {
-  height: 70vh;
-  width: 100%;
-  position: relative;
-}

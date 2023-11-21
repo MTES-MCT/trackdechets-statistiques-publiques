@@ -1,0 +1,9 @@
+#map {
+    height: 70vh;
+    width: 100%;
+    position: relative;
+}
+
+#installation-infos {
+    margin-top: 5%;
+}
