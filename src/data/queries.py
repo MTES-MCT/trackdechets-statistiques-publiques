@@ -20,7 +20,7 @@ weekly_waste_processed_stats_sql = """
 select
     *
 from
-    refined_zone_stats_publiques.weekly_quantity_processed_stats
+    refined_zone_stats_publiques.weekly_waste_processed_stats
 where
     semaine >= '2020-01-01'
 """
