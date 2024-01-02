@@ -11,9 +11,6 @@ from stats.models import Computation
 class BaseRender(TemplateView):
     template_name = "stats/yearly.html"
 
-    def handle_missing_computation(self, year):
-        pass
-
     def get_current_year(self):
         """Today's year"""
         return dt.date.today().year

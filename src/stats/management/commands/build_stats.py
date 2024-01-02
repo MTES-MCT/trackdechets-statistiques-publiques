@@ -1,5 +1,3 @@
-import datetime as dt
-
 from django.core.management.base import BaseCommand
 
 from ...processors.clear import clear_figs
