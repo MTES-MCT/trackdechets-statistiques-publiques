@@ -5,19 +5,19 @@
     <ul id="header-nav-elements-container" class="fr-nav__list">
         <li class="fr-nav__item">
             <span class="fr-nav__link"
-                  hx-get="{% url 'last_stats' %}"
+                  hx-get="{% url 'yearly_stats' year=2022 %}"
                   hx-trigger="click"
                   hx-target="#yearly_wrapper"
                   hx-indicator="#yearly_spinner"
-                  {% if current_year != computation.year %}aria-current="page"{% endif %}>Année {{ current_year|add:"-1" }}</span>
+                  {% if computation.year == 2022 %}aria-current="page"{% endif %}>Année 2022</span>
         </li>
         <li class="fr-nav__item">
             <span class="fr-nav__link"
-                  hx-get="{% url 'current_stats' %}"
+                  hx-get="{% url 'yearly_stats' year=2023 %}"
                   hx-trigger="click"
                   hx-target="#yearly_wrapper"
                   hx-indicator="#yearly_spinner"
-                  {% if current_year == computation.year %}aria-current="page"{% endif %}>Année {{ current_year }}</span>
+                  {% if computation.year == 2023 %}aria-current="page"{% endif %}>Année 2023</span>
         </li>
     </ul>
 </nav>

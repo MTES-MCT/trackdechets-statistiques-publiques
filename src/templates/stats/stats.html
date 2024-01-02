@@ -64,7 +64,7 @@
             </div>
             <hr>
             <div id="yearly_wrapper">
-                <div hx-get="{% url 'current_stats' %}"
+                <div hx-get="{% url 'yearly_stats' year=2023 %}"
                      hx-trigger="load"
                      hx-target="#yearly_wrapper"
                      hx-indicator="#yearly_spinner"></div>
