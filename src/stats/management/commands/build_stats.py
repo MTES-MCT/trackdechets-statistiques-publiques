@@ -1,5 +1,3 @@
-import datetime as dt
-
 from django.core.management.base import BaseCommand
 
 from ...processors.clear import clear_figs
@@ -13,8 +11,8 @@ class Command(BaseCommand):
 
         clear_figs()
 
-        year = dt.date.today().year
+        # year = dt.date.today().year
         # build y-1 data if they don't exist
-        build_figs(year - 1, clear_year=True)
+        build_figs(2022, clear_year=True)
         # build current year data
-        build_figs(year, clear_year=True)
+        build_figs(2023, clear_year=True)
