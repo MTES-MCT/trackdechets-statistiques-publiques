@@ -1,6 +1,6 @@
 import polars as pl
-from data.data_extract import get_processing_operation_codes_data
 
+from data.data_extract import get_processing_operation_codes_data
 from data.data_processing import (
     get_recovered_and_eliminated_quantity_processed_by_week_series,
     get_total_bs_created,

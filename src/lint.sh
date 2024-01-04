@@ -1,4 +1,4 @@
 isort .
-black .
 ruff .
+ruff format .
 djlint --reformat templates
