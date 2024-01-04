@@ -20,8 +20,10 @@ class BaseRender(TemplateView):
 
         year = self.kwargs.get("year")
         if year is None:
-            year = Computation.objects.order_by("year").last().year
-
+            last_computation = Computation.objects.order_by("year").last()
+            if not last_computation:
+                return None
+            return last_computation.year
         return year
 
     def handle_missing_computation(self, year):
@@ -36,8 +38,11 @@ class BaseRender(TemplateView):
 
     def get_context_data(self, **kwargs):
         year = self.get_year()
+
         ctx = super().get_context_data(**kwargs)
-        computation = Computation.objects.filter(year=year).first()
+        computation = None
+        if year:
+            computation = Computation.objects.filter(year=year).first()
         if not computation:
             self.handle_missing_computation(year)
         ctx["computation"] = computation
