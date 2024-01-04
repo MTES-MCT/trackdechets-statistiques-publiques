@@ -19,7 +19,6 @@ gunicorn = "*"
 factory-boy = "*"
 
 [dev-packages]
-black = "*"
 isort = "*"
 djlint = "*"
 django-debug-toolbar = "*"
