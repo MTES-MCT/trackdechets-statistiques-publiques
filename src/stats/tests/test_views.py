@@ -7,6 +7,7 @@ pytestmark = pytest.mark.django_db
 
 
 def test_home_no_content(anon_client):
+    """plop"""
     url = reverse("main")
     res = anon_client.get(url)
     assert res.status_code == 200
