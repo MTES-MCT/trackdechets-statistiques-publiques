@@ -19,13 +19,12 @@ gunicorn = "*"
 factory-boy = "*"
 
 [dev-packages]
-black = "*"
 isort = "*"
 djlint = "*"
 django-debug-toolbar = "*"
 django-extensions = "*"
 ipykernel = "*"
-flake8 = "*"
+ruff = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"
