@@ -1,7 +1,6 @@
 """This modules contains all the functions to create the Plotly figure needed or the App.
 """
 from datetime import datetime, timedelta
-from typing import Dict, List
 
 import plotly.graph_objects as go
 import polars as pl

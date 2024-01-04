@@ -46,7 +46,7 @@ jobs:
           pipenv install --deploy --dev
 
       - name: Lint
-        run: pipenv run flake8
+        run: pipenv run ruff --check .
 
       - name: Black
         run: pipenv run black --check .
