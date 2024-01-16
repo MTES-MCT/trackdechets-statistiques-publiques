@@ -73,9 +73,7 @@ def get_waste_nomenclature_data() -> pl.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pl.read_sql(
-        "SELECT * FROM trusted_zone.code_dechets", connection_uri=settings.WAREHOUSE_URL
-    )
+    data = pl.read_sql("SELECT * FROM trusted_zone.code_dechets", connection_uri=settings.WAREHOUSE_URL)
     return data
 
 
