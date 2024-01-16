@@ -33,7 +33,9 @@ def create_weekly_created_figure(data: pl.DataFrame, stat_column: str) -> go.Fig
     data = data.to_dict(as_series=False)
 
     texts = []
-    texts += [""] * (len(data[stat_column]) - 1) + [format_number(data[stat_column][-1])]
+    texts += [""] * (len(data[stat_column]) - 1) + [
+        format_number(data[stat_column][-1])
+    ]
 
     hovertexts = [
         f"Semaine du {at:%d/%m} au {at + timedelta(days=6):%d/%m}<br><b>{format_number(count)}</b> créations"
@@ -120,7 +122,11 @@ def create_weekly_scatter_figure(
     scatter_list = []
 
     y_title = None
-    legend_title = "Statut du bordereau :" if bs_type != "BSFF PACKAGINGS" else "Statut du contenant:"
+    legend_title = (
+        "Statut du bordereau :"
+        if bs_type != "BSFF PACKAGINGS"
+        else "Statut du contenant:"
+    )
     if metric_type == "quantity":
         legend_title = "Statut :"
         y_title = "Quantité (en tonnes)"
@@ -134,7 +140,11 @@ def create_weekly_scatter_figure(
         if metric_type == "quantity" and "column_quantity" not in config:
             continue
 
-        column_to_use = config["column_counts"] if metric_type == "counts" else config["column_quantity"]
+        column_to_use = (
+            config["column_counts"]
+            if metric_type == "counts"
+            else config["column_quantity"]
+        )
         data = bs_weekly_data
 
         if len(data) == 0:
@@ -161,13 +171,17 @@ def create_weekly_scatter_figure(
         data_without_nulls = data.drop_nulls(column_to_use)
         if len(data_without_nulls) > 0:
             last_value = data_without_nulls[-1, column_to_use]
-        texts = [""] * (len(data_without_nulls) - 1) if len(data_without_nulls) > 1 else []
+        texts = (
+            [""] * (len(data_without_nulls) - 1) if len(data_without_nulls) > 1 else []
+        )
         texts += [format_number(last_value)]
 
         if metric_type == "counts":
             to_add_str = bs_type
 
-            if bs_type == "BSFF PACKAGINGS":  # Handle the case of BSFF that shows packagings for the processing counts
+            if (
+                bs_type == "BSFF PACKAGINGS"
+            ):  # Handle the case of BSFF that shows packagings for the processing counts
                 to_add_str = "contenants"
 
             suffix = f"{to_add_str} {suffix}"
@@ -298,7 +312,9 @@ def create_weekly_quantity_processed_figure(
                 processed_at + timedelta(days=6),
                 format_number(quantity),
             )
-            for processed_at, quantity in zip(data["semaine"][:-1], data["quantite_traitee"][:-1])
+            for processed_at, quantity in zip(
+                data["semaine"][:-1], data["quantite_traitee"][:-1]
+            )
         ]
 
         # Handle case when last data point is last week of the year
@@ -387,17 +403,30 @@ def create_quantity_processed_sunburst_figure(
     Plotly Figure Object
         Sunburst Figure object ready to be plotted.
     """
-    processing_operation_codes_descriptions = {e["code"]: e["description"] for e in waste_codes_data.to_dicts()}
+    processing_operation_codes_descriptions = {
+        e["code"]: e["description"] for e in waste_codes_data.to_dicts()
+    }
 
     agg_data = (
-        weekly_waste_processed_data_df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
+        weekly_waste_processed_data_df.filter(
+            pl.col("semaine").is_between(*date_interval, closed="left")
+            & (pl.col("code_operation") != "")
+        )
         .groupby(["code_operation"])
         .agg(pl.col("type_operation").max(), pl.col("quantite_traitee").sum())
     )
-    total_data = agg_data.groupby("type_operation").agg(pl.col("quantite_traitee").sum()).sort("type_operation")
+    total_data = (
+        agg_data.groupby("type_operation")
+        .agg(pl.col("quantite_traitee").sum())
+        .sort("type_operation")
+    )
 
-    agg_data_recycled = agg_data.filter(pl.col("type_operation") == "Déchet valorisé").sort("quantite_traitee")
-    agg_data_eliminated = agg_data.filter(pl.col("type_operation") == "Déchet éliminé").sort("quantite_traitee")
+    agg_data_recycled = agg_data.filter(
+        pl.col("type_operation") == "Déchet valorisé"
+    ).sort("quantite_traitee")
+    agg_data_eliminated = agg_data.filter(
+        pl.col("type_operation") == "Déchet éliminé"
+    ).sort("quantite_traitee")
 
     agg_data_recycled_other = agg_data_recycled.filter(
         (pl.col("quantite_traitee") / pl.col("quantite_traitee").sum()) <= 0.12
@@ -407,7 +436,9 @@ def create_quantity_processed_sunburst_figure(
     )
 
     agg_data_recycled_other_quantity = agg_data_recycled_other["quantite_traitee"].sum()
-    agg_data_eliminated_other_quantity = agg_data_eliminated_other["quantite_traitee"].sum()
+    agg_data_eliminated_other_quantity = agg_data_eliminated_other[
+        "quantite_traitee"
+    ].sum()
 
     other_processing_operations_codes = (
         pl.concat(
@@ -425,7 +456,11 @@ def create_quantity_processed_sunburst_figure(
 
     agg_data_without_other = agg_data_without_other.with_columns(
         pl.col("type_operation")
-        .apply(lambda x: "rgb(102, 103, 61, 0.7)" if x == "Déchet valorisé" else "rgb(94, 42, 43, 0.7)")
+        .apply(
+            lambda x: "rgb(102, 103, 61, 0.7)"
+            if x == "Déchet valorisé"
+            else "rgb(94, 42, 43, 0.7)"
+        )
         .alias("colors")
     )
 
@@ -437,8 +472,16 @@ def create_quantity_processed_sunburst_figure(
         + ["Autres opérations de valorisation", "Autres opérations d'élimination'"]
     )
 
-    labels = total_data["type_operation"] + agg_data_without_other["code_operation"] + ["Autre"] * 2
-    parents = ["", ""] + agg_data_without_other["type_operation"] + ["Déchet valorisé", "Déchet éliminé"]
+    labels = (
+        total_data["type_operation"]
+        + agg_data_without_other["code_operation"]
+        + ["Autre"] * 2
+    )
+    parents = (
+        ["", ""]
+        + agg_data_without_other["type_operation"]
+        + ["Déchet valorisé", "Déchet éliminé"]
+    )
     values = (
         total_data["quantite_traitee"]
         + agg_data_without_other["quantite_traitee"]
@@ -454,12 +497,18 @@ def create_quantity_processed_sunburst_figure(
     hover_texts = (
         [
             f"<b>{format_number(e)}t</b> {index.split(' ')[1]}es"
-            for index, e in zip(total_data["type_operation"], total_data["quantite_traitee"])
+            if index != "Autre"
+            else f"<b>{format_number(e)}t</b>"
+            for index, e in zip(
+                total_data["type_operation"], total_data["quantite_traitee"]
+            )
         ]
         + [
             hover_text_template.format(
                 code=processing_operation,
-                description=processing_operation_codes_descriptions[processing_operation],
+                description=processing_operation_codes_descriptions.get(
+                    processing_operation, "Autre opération de traitement"
+                ),
                 quantity=format_number(quantity),
             )
             for processing_operation, quantity in zip(
@@ -505,7 +554,9 @@ def create_quantity_processed_sunburst_figure(
     return fig
 
 
-def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_quantity: bool = False) -> go.Figure:
+def create_treemap_companies_figure(
+    data_with_naf: pl.DataFrame, year: int, use_quantity: bool = False
+) -> go.Figure:
     """Creates the figure showing the number of companies by NAF category.
 
     Parameters
@@ -625,22 +676,34 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
     value_expr = pl.col("nombre_etablissements").sum().alias("value")
     value_suffix = pl.lit("</b>")
     hover_expr_str = "</b> établissements inscrits dans la {label} NAF "
-    hover_expr_lit_nulls = pl.lit("</b> établissements inscrits ayant un code NAF inconnu ")
-    hover_expr_lit_end = pl.lit("%</b> du total des établissements inscrits.<extra></extra>")
+    hover_expr_lit_nulls = pl.lit(
+        "</b> établissements inscrits ayant un code NAF inconnu "
+    )
+    hover_expr_lit_end = pl.lit(
+        "%</b> du total des établissements inscrits.<extra></extra>"
+    )
     unit = ""
     if use_quantity:
         stat_col = "quantite_traitee"
         value_expr = pl.col("quantite_traitee").sum().alias("value")
         value_suffix = pl.lit("t</b>")
-        hover_expr_str = " tonnes</b> produites par des établissements inscrits dans la {label} NAF "
-        hover_expr_lit_nulls = pl.lit(" tonnes</b> produites par des établissements ayant un code NAF inconnu ")
-        hover_expr_lit_end = pl.lit("%</b> de la quantité totale produite.<extra></extra>")
+        hover_expr_str = (
+            " tonnes</b> produites par des établissements inscrits dans la {label} NAF "
+        )
+        hover_expr_lit_nulls = pl.lit(
+            " tonnes</b> produites par des établissements ayant un code NAF inconnu "
+        )
+        hover_expr_lit_end = pl.lit(
+            "%</b> de la quantité totale produite.<extra></extra>"
+        )
         unit = "t"
 
     total = df.select(stat_col).sum().item()
 
     labels = [f"Tous les établissements - <b>{total / 1000:.2f}k{unit}</b>"]
-    hover_texts = [f"Tous les établissements - <b>{total / 1000:.2f}k{unit}</b><extra></extra>"]
+    hover_texts = [
+        f"Tous les établissements - <b>{total / 1000:.2f}k{unit}</b><extra></extra>"
+    ]
 
     categories = ["sous_classe", "classe", "groupe", "division", "section"]
 
@@ -671,14 +734,22 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
         temp_df = temp_df.join(temp_colors, on="libelle_section", how="left")
 
         parent_exp = (
-            pl.col("ids").str.split(id_sep).arr.reverse().arr.slice(1).arr.reverse().arr.join(id_sep).alias("parents")
+            pl.col("ids")
+            .str.split(id_sep)
+            .arr.reverse()
+            .arr.slice(1)
+            .arr.reverse()
+            .arr.join(id_sep)
+            .alias("parents")
         )
 
         labels_expr = pl.concat_str(
             [
                 pl.col(f"libelle_{cat}").apply(lambda x: break_long_line(x, 14)),
                 pl.lit(" - <b>"),
-                pl.col("value").apply(lambda x: f"{x / 1000:.0f}k" if x > 1000 else format_number(x, 1)),
+                pl.col("value").apply(
+                    lambda x: f"{x / 1000:.0f}k" if x > 1000 else format_number(x, 1)
+                ),
                 value_suffix,
             ]
         ).alias("labels")
@@ -688,7 +759,9 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
         hover_expr_label = pl.format(" - <i>{}</i>", pl.col(f"libelle_{cat}"))
         if cat == "section":
             when_expr = pl.when(pl.col("code_section") == "NAF inconnu")
-            hover_expr_prefix = when_expr.then(hover_expr_lit_nulls).otherwise(hover_expr_prefix)
+            hover_expr_prefix = when_expr.then(hover_expr_lit_nulls).otherwise(
+                hover_expr_prefix
+            )
             hover_expr_code = when_expr.then(pl.lit("")).otherwise(hover_expr_code)
             hover_expr_label = when_expr.then(pl.lit("")).otherwise(hover_expr_label)
 
