@@ -18,11 +18,16 @@ logger = logging.getLogger(__name__)
 def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
-    accounts_data_df = pl.read_sql(sql_string, connection_uri=settings.WAREHOUSE_URL)
+    data_df = pl.read_sql(sql_string, connection_uri=settings.WAREHOUSE_URL)
+    if "semaine" in data_df.columns:
+        data_df = data_df.with_columns(pl.col("semaine").dt.replace_time_zone(None))
+    logger.info(
+        "Loading stats duration: %s (query : %s)",
+        time.time() - started_time,
+        sql_string,
+    )
 
-    logger.info("Loading stats duration: %s (query : %s)", time.time() - started_time, sql_string)
-
-    return accounts_data_df
+    return data_df
 
 
 def get_processing_operation_codes_data() -> pl.DataFrame:

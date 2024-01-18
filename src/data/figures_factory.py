@@ -390,7 +390,9 @@ def create_quantity_processed_sunburst_figure(
     processing_operation_codes_descriptions = {e["code"]: e["description"] for e in waste_codes_data.to_dicts()}
 
     agg_data = (
-        weekly_waste_processed_data_df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
+        weekly_waste_processed_data_df.filter(
+            pl.col("semaine").is_between(*date_interval, closed="left") & (pl.col("code_operation") != "")
+        )
         .groupby(["code_operation"])
         .agg(pl.col("type_operation").max(), pl.col("quantite_traitee").sum())
     )
@@ -454,12 +456,16 @@ def create_quantity_processed_sunburst_figure(
     hover_texts = (
         [
             f"<b>{format_number(e)}t</b> {index.split(' ')[1]}es"
+            if index != "Autre"
+            else f"<b>{format_number(e)}t</b>"
             for index, e in zip(total_data["type_operation"], total_data["quantite_traitee"])
         ]
         + [
             hover_text_template.format(
                 code=processing_operation,
-                description=processing_operation_codes_descriptions[processing_operation],
+                description=processing_operation_codes_descriptions.get(
+                    processing_operation, "Autre opération de traitement"
+                ),
                 quantity=format_number(quantity),
             )
             for processing_operation, quantity in zip(
