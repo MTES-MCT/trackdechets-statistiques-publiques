@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import BaseRender, BsdasriView, BsdaView, BsddView, BsffView, BsvhuView, CompanyView, UserView
+from .views import BaseRender, BsdasriView, BsdaView, BsddView, BsffView, BsvhuView, CompanyView, UserView, digest_view
 
 urlpatterns = [
     path("stats/", BaseRender.as_view(), name="last_stats"),
@@ -12,4 +12,5 @@ urlpatterns = [
     path("bsvhu/<int:year>", BsvhuView.as_view(), name="bsvhu"),
     path("companies/<int:year>", CompanyView.as_view(), name="companies"),
     path("users/<int:year>", UserView.as_view(), name="users"),
+    path("digest/", digest_view, name="stats_digest"),
 ]

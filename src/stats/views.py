@@ -2,7 +2,7 @@ import datetime as dt
 
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.views.generic import TemplateView
 
 from stats.models import Computation
@@ -88,3 +88,16 @@ class CompanyView(BaseBsdView):
 
 class UserView(BaseBsdView):
     template_name = "stats/fragments/user.html"
+
+
+def digest_view(request):
+    """Minimal api to retrieve main numbers for td home page."""
+    last_computation = Computation.objects.order_by("year").last()
+    digest = {}
+    if last_computation:
+        digest = {
+            "total_bsdd_created": last_computation.total_bs_created,
+            "total_quantity_processed": last_computation.total_quantity_processed,
+            "total_companies": last_computation.total_companies_created,
+        }
+    return JsonResponse(digest)
