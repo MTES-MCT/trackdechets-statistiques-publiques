@@ -1,6 +1,9 @@
+import json
 import polars as pl
-from data.data_extract import get_processing_operation_codes_data
+from data.data_extract import get_geojson_as_geodataframe, get_processing_operation_codes_data
 from data.data_processing import (
+    create_installations_geojson,
+    create_regional_geojson,
     get_recovered_and_eliminated_quantity_processed_by_week_series,
     get_total_bs_created,
     get_total_number_of_accounts_created,
@@ -35,6 +38,8 @@ def build_figs(year: int, clear_year: bool = False):
     weekly_waste_processed_data_df = pl.read_parquet("temp_data/weekly_waste_processed_data.parquet")
     accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
     waste_processed_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_processed_by_naf_annual_stats.parquet")
+    installations_icpe_data = pl.read_parquet("temp_data/installations_icpe_data.parquet")
+    waste_processed_icpe_data = pl.read_parquet("temp_data/waste_processed_icpe_data.parquet")
 
     bs_weekly_datasets = {
         "BSDD": bsdd_weekly_data_df,
@@ -153,6 +158,41 @@ def build_figs(year: int, clear_year: bool = False):
     produced_quantity_by_category_fig = create_treemap_companies_figure(
         waste_processed_by_naf_annual_stats_df, use_quantity=True, year=year
     )
+
+    icpe_data = {
+        k: {
+            "installations": json.loads(
+                create_installations_geojson(
+                    installations_icpe_data,
+                    waste_processed_icpe_data,
+                    k,
+                    date_interval,
+                )
+            ),
+            "regions": json.loads(
+                create_regional_geojson(
+                    installations_icpe_data,
+                    waste_processed_icpe_data,
+                    get_geojson_as_geodataframe("regions-avec-outre-mer.geojson"),
+                    k,
+                    "code_region_insee",
+                    date_interval,
+                )
+            ),
+            "departements": json.loads(
+                create_regional_geojson(
+                    installations_icpe_data,
+                    waste_processed_icpe_data,
+                    get_geojson_as_geodataframe("departements-avec-outre-mer.geojson"),
+                    k,
+                    "code_departement_insee",
+                    date_interval,
+                )
+            ),
+        }
+        for k in ["2790", "2760-1"]
+    }
+
     Computation.objects.create(
         year=year,
         total_bs_created=total_bs_created,
@@ -179,4 +219,5 @@ def build_figs(year: int, clear_year: bool = False):
         company_created_weekly=company_created_weekly_fig.to_json(),
         user_created_weekly=user_created_weekly_fig.to_json(),
         company_counts_by_category=treemap_companies_figure.to_json(),
+        icpe_data=json.dumps(icpe_data),
     )

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import plotly.graph_objects as go
 import polars as pl
+import pandas as pd
 
 from data.plot_configs import (
     WEEKLY_BS_STATS_PLOT_CONFIGS,
@@ -662,22 +663,34 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
 
         id_sep = "#"
 
-        id_exprs = [pl.lit("Tous les établissements")]
+        col_names_to_agg = []
         if i < (len(categories) - 1):
             for tmp_cat in reversed(categories[i + 1 :]):
-                id_exprs.append(pl.col(f"libelle_{tmp_cat}").max())
-        id_exprs.append(pl.col(f"libelle_{cat}").max())
-        agg_exprs.append(pl.concat_str(id_exprs, sep=id_sep).alias("ids"))
-
-        temp_colors = colors
-        if cat != "section":
-            agg_exprs.append(pl.col("libelle_section").max())
+                tmp_col_name = f"libelle_{tmp_cat}"
+                agg_exprs.append(pl.col(tmp_col_name).max())
+                col_names_to_agg.append(tmp_col_name)
+        col_names_to_agg.append(f"libelle_{cat}")
+        # agg_exprs.extend(id_exprs)
+        # pl.concat_str(id_exprs, separator=id_sep).alias("ids")
 
         temp_df = temp_df.groupby(f"code_{cat}", maintain_order=True).agg(agg_exprs)
+
+        id_expr = pl.concat_str(
+            [pl.lit("Tous les établissements")] + [pl.col(e) for e in col_names_to_agg], separator=id_sep
+        )
+        temp_df = temp_df.with_columns(ids=id_expr)
+
+        temp_colors = colors
         temp_df = temp_df.join(temp_colors, on="libelle_section", how="left")
 
         parent_exp = (
-            pl.col("ids").str.split(id_sep).arr.reverse().arr.slice(1).arr.reverse().arr.join(id_sep).alias("parents")
+            pl.col("ids")
+            .str.split(id_sep)
+            .list.reverse()
+            .list.slice(1)
+            .list.reverse()
+            .list.join(id_sep)
+            .alias("parents")
         )
 
         labels_expr = pl.concat_str(
@@ -711,7 +724,18 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
             ]
         ).alias("hover_texts")
 
-        dfs.append(temp_df.with_columns([labels_expr, hover_expr, parent_exp]))
+        dfs.append(
+            temp_df.with_columns([labels_expr, hover_expr, parent_exp]).select(
+                [
+                    pl.col("ids"),
+                    pl.col("labels"),
+                    pl.col("parents"),
+                    pl.col("value"),
+                    pl.col("hover_texts"),
+                    pl.col("color"),
+                ]
+            )
+        )
 
     # Build plotly necessaries lists
     ids = ["Tous les établissements"]
@@ -758,3 +782,96 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
         modebar_activecolor="rgba(146, 146, 146, 0.7)",
     )
     return fig
+
+
+def create_icpe_graph(df: pl.DataFrame, key_column: str):
+    siret = df.select(pl.col(key_column).max()).item()
+    authorized_quantity = df.select(pl.col("quantite_autorisee").max()).item()
+
+    df_grouped = df.group_by(pl.col("day_of_processing").dt.truncate("1mo")).agg(pl.col("quantite_traitee").sum())
+    df_grouped = df_grouped.sort(pl.col("day_of_processing")).with_columns(
+        pl.col("quantite_traitee").cum_sum().alias("quantite_traitee_cummulee")
+    )
+
+    data = df_grouped.to_dict(as_series=False)
+
+    trace = go.Bar(
+        x=data["day_of_processing"],
+        y=data["quantite_traitee"],
+        hovertemplate="En %{x|%B} : <b>%{y:.2f}t</b> traitées sur l'année<extra></extra>",
+        name="Quantitée traitée mensuellement",
+        marker_color="#8D533E",
+    )
+    trace_cum = go.Scatter(
+        x=data["day_of_processing"],
+        y=data["quantite_traitee_cummulee"],
+        texttemplate="%{y:.2s}t",
+        textposition="top center",
+        hovertemplate="En %{x|%B} : <b>%{y:.2f}t</b> traitées en cummulé sur l'année<extra></extra>",
+        line_width=2,
+        name="Quantité traitée cummulée",
+        line_color="#272747",
+        mode="lines+text+markers",
+    )
+
+    fig = go.Figure([trace, trace_cum])
+
+    fig.update_layout(
+        margin={"t": 30, "l": 35, "r": 80},
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            bgcolor="rgba(0,0,0,0)",
+            x=1,
+        ),
+        paper_bgcolor="#fff",
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+
+    max_y = df_grouped.select(pl.col("quantite_traitee_cummulee").max()).item()
+    if not pd.isna(authorized_quantity):
+        fig.add_hline(
+            y=authorized_quantity,
+            line_dash="dot",
+            line_color="red",
+            line_width=3,
+        )
+        fig.add_annotation(
+            xref="x domain",
+            yref="y",
+            x=1,
+            y=authorized_quantity,
+            text=f"Quantité maximale <br>autorisée : <b>{authorized_quantity:.0f}</b> t/an",
+            font_color="red",
+            xanchor="left",
+            showarrow=False,
+            textangle=-90,
+            font_size=13,
+        )
+
+        if authorized_quantity > max_y:
+            max_y = authorized_quantity
+
+    fig.update_yaxes(
+        range=[0, max_y * 1.3],
+        gridcolor="#ccc",
+        title="tonnes",
+    )
+
+    fig.update_xaxes(
+        range=[
+            min(data["day_of_processing"]) - timedelta(days=30),
+            max(data["day_of_processing"]) + timedelta(days=30),
+        ],
+        tickformat="%b %y",
+        tick0=min(data["day_of_processing"]),
+        dtick="M1",
+        gridcolor="#ccc",
+        zeroline=True,
+        linewidth=1,
+        linecolor="black",
+    )
+
+    return pl.DataFrame([[siret], [fig.to_json()]], [key_column, "graph"])

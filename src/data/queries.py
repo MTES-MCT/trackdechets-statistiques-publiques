@@ -39,3 +39,22 @@ select
 from
     refined_zone_stats_publiques.annual_waste_produced_by_naf
 """
+
+installations_icpe_sql = """
+select 
+    * 
+from 
+    refined_zone_stats_publiques.installations_icpe
+"""
+
+waste_processed_icpe_sql = """
+select
+    siret,
+    rubrique,
+    raison_sociale,
+    quantite_autorisee,
+    day_of_processing,
+    quantite_traitee
+from
+    refined_zone_icpe.installations_daily_processed_wastes
+"""

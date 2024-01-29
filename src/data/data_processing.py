@@ -5,6 +5,10 @@ from datetime import datetime
 from typing import Tuple
 
 import polars as pl
+import geopandas as gpd
+from shapely.geometry import Point
+
+from .figures_factory import create_icpe_graph
 
 
 def get_weekly_preprocessed_dfs(
@@ -141,3 +145,105 @@ def get_total_number_of_accounts_created(
     number_of_accounts_created = accounts_data_df.select(stats_column).sum().item()
 
     return number_of_accounts_created
+
+
+def create_installations_geojson(
+    df_installations: pl.DataFrame,
+    df_waste_processed: pl.DataFrame,
+    rubrique: str,
+    date_interval: Tuple[datetime, datetime] | None = None,
+) -> str:
+    df_installations_filtered = df_installations.filter(pl.col("rubrique") == rubrique)
+
+    df_waste_processed = df_waste_processed.with_columns(pl.col("quantite_traitee").cast(pl.Float64))
+    df_waste_processed_filtered = df_waste_processed.filter(
+        (pl.col("rubrique") == rubrique) & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
+    )
+
+    df_stats = df_waste_processed_filtered.group_by("siret").agg(pl.col("quantite_traitee").cast(pl.Float32).sum())
+
+    df_graphs = df_waste_processed_filtered.group_by("siret").map_groups(lambda x: create_icpe_graph(x, "siret"))
+
+    df_installations_final = df_installations_filtered.join(df_stats, on="siret", how="left", validate="m:1").join(
+        df_graphs, on="siret", how="left", validate="m:1"
+    )
+
+    gdf_installations = gpd.GeoDataFrame(df_installations_final.to_pandas())
+    gdf_installations = gdf_installations.set_geometry(
+        gdf_installations.apply(lambda x: Point(x["longitude"], x["latitude"]), axis=1)
+    )
+
+    return gdf_installations.to_json()
+
+
+def create_regional_geojson(
+    df_installations: pl.DataFrame,
+    df_waste_processed: pl.DataFrame,
+    regional_geodataframe: gpd.GeoDataFrame,
+    rubrique: str,
+    regional_key_column: str,
+    date_interval: Tuple[datetime, datetime] | None = None,
+) -> str:
+    gdf = regional_geodataframe
+
+    df_installations_filtered = df_installations.filter(pl.col("rubrique") == rubrique).with_columns(
+        pl.col(regional_key_column).cast(pl.String)
+    )
+
+    df_waste_processed = df_waste_processed.with_columns(pl.col("quantite_traitee").cast(pl.Float64))
+
+    df_waste_processed_filtered = df_waste_processed.filter(
+        (pl.col("rubrique") == rubrique) & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
+    )
+
+    # Prepares daily waste processed for plotly graph creation by grouping by departement/region and day
+    df_waste_processed = (
+        df_installations_filtered.join(df_waste_processed_filtered, on="siret", how="inner")
+        .group_by([regional_key_column, "day_of_processing"])
+        .agg(pl.col("quantite_traitee").sum())
+    )
+
+    # Add annual processed waste by departement/region
+    annual_processed_waste = df_waste_processed.group_by(regional_key_column).agg(pl.col("quantite_traitee").sum())
+    gdf = gdf.merge(
+        annual_processed_waste.to_pandas(),
+        left_on="code",
+        right_on=regional_key_column,
+        how="left",
+        validate="1:1",
+    )
+
+    # Add authorized quantity by departement/region
+    authorized_quantity = df_installations_filtered.group_by(regional_key_column).agg(
+        pl.col("quantite_autorisee").sum()
+    )
+
+    gdf = gdf.merge(
+        authorized_quantity.to_pandas(),
+        left_on="code",
+        right_on=regional_key_column,
+        how="left",
+        validate="1:1",
+    )
+
+    # Create plotly graphs adding to daily waste processed the authorized quantity for each departement/region
+    df_graphs = (
+        df_waste_processed.join(
+            pl.DataFrame(gdf[["code", "quantite_autorisee"]]),
+            left_on=regional_key_column,
+            right_on="code",
+            how="left",
+        )
+        .group_by(regional_key_column)
+        .map_groups(lambda x: create_icpe_graph(x, key_column=regional_key_column))
+    )
+
+    gdf = gdf.merge(
+        df_graphs.to_pandas(),
+        left_on="code",
+        right_on=regional_key_column,
+        how="left",
+        validate="one_to_one",
+    )
+
+    return gdf.to_json()

@@ -43,6 +43,7 @@ class Computation(models.Model):
     user_created_weekly = models.JSONField(default=dict)
 
     company_counts_by_category = models.JSONField(default=dict)
+    icpe_data = models.JSONField(default=dict)
 
     class Meta:
         verbose_name = _("Computation")

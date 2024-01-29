@@ -11,12 +11,14 @@ django-environ = "*"
 whitenoise = "*"
 pytest-django = "*"
 sentry-sdk = {extras = ["django"], version = "*"}
-polars = "==0.16.9"
+polars = "*"
 connectorx =  "==0.3.2a2"
 pyarrow = "*"
 plotly = "*"
 gunicorn = "*"
 factory-boy = "*"
+geopandas = "*"
+pandas = "*"
 
 [dev-packages]
 isort = "*"

@@ -1,4 +1,5 @@
 import datetime as dt
+import json
 
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -101,3 +102,10 @@ def digest_view(request):
             "total_companies": last_computation.total_companies_created,
         }
     return JsonResponse(digest)
+
+
+def icpe_view(request, year):
+    computation = Computation.objects.filter(year=year).first()
+    # Supposons que 'donnees_json' est le champ que vous voulez servir
+    icpe_data = json.loads(computation.icpe_data)
+    return JsonResponse(icpe_data)

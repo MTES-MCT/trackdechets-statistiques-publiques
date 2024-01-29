@@ -20,11 +20,11 @@ def get_data_date_interval_for_year(year: int = 2022) -> tuple[datetime, datetim
         A tuple of two datetime objects.
 
     """
-    now = datetime.now(tz=ZoneInfo("Europe/Paris"))
+    now = datetime.now()
 
     date_interval = (
-        datetime(year, 1, 1, tzinfo=ZoneInfo("Europe/Paris")),
-        datetime(year + 1, 1, 1, tzinfo=ZoneInfo("Europe/Paris")),
+        datetime(year, 1, 1),
+        datetime(year + 1, 1, 1),
     )
     date_start, date_end = date_interval
 
