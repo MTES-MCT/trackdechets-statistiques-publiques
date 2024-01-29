@@ -48,10 +48,7 @@
 }
 
 #region-info {
-    display: none;
-    top: 30%;
-    left: 7%;
-    z-index: 1000;
+    min-width: 20%;
     padding: 20px;
     background: white;
     border: 1px solid #ddd;

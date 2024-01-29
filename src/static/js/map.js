@@ -127,6 +127,12 @@ function setInstallations() {
 
 // Crée et configure les couches GeoJSON en fonction des données sélectionnées
 function initMapForRubrique(icpe_data, rubrique) {
+
+    // Si les couches existent déjà sur la carte, il faut les retirer
+    if (geojsonRegions) map.removeLayer(geojsonRegions);
+    if (geojsonDepartements) map.removeLayer(geojsonDepartements);
+    if (geojsonInstallations) map.removeLayer(geojsonInstallations);
+
     selectedData = icpe_data[rubrique]
 
     geojsonRegions = L.geoJSON(selectedData["regions"],
@@ -158,7 +164,6 @@ document.getElementById('layer-select').addEventListener('change', function (e) 
 
 // Gestionnaire d'événements pour le sélecteur de rubrique
 document.getElementById('rubrique-select').addEventListener('change', function (e) {
-    map.removeLayer(geojsonInstallations);
     selectedRubrique = e.target.value;
     initMapForRubrique(icpeData, e.target.value);
     setInstallations()
