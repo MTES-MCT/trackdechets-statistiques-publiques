@@ -38,8 +38,17 @@ function showRegionInfo(e) {
     document.getElementById('region-quantite-autorisee').textContent = "Quantité Autorisée : " + f(properties.quantite_autorisee) + "t";
     document.getElementById('region-quantite-traitee').textContent = "Quantité Traitée : " + f(properties.quantite_traitee) + "t";
     document.getElementById('region-ratio-traitement').textContent = "Quantité consommée : " + f(properties.quantite_traitee * 100 / properties.quantite_autorisee) + "%";
-    // Afficher la div
-    document.getElementById('region-info').style.display = 'block';
+
+    Plotly.purge('region-graphs');
+
+    if (properties.graph) {
+        var plotData = JSON.parse(properties.graph)
+        Plotly.newPlot(
+            'region-graphs',
+            plotData.data,
+            plotData.layout);
+    }
+
 }
 
 

@@ -13,6 +13,7 @@
                 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
                 crossorigin=""></script>
         <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+        <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
         <link rel="stylesheet" href="{% static "css/map.css" %}" />
         <link rel="stylesheet" href="{% static "css/dsfr.main.min.css" %}" />
         <link rel="stylesheet" href="{% static "css/style.css" %}" />
@@ -62,13 +63,13 @@
             </div>
             <div id="main-container">
                 <div id="map"></div>
-                <div id="graphs"></div>
                 <div id="region-info">
                     <h3 id="region-name">France</h3>
                     <div id="region-nombre-installations"></div>
                     <div id="region-quantite-autorisee"></div>
                     <div id="region-quantite-traitee"></div>
                     <div id="region-ratio-traitement"></div>
+                    <div id="region-graphs"></div>
                 </div>
             </div>
         </div>
