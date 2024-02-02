@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
         clear_figs()
 
-        # year = dt.date.today().year
-        # build y-1 data if they don't exist
         build_figs(2022, clear_year=True)
-        # build current year data
+
         build_figs(2023, clear_year=True)
+
+        build_figs(2024, clear_year=True)
