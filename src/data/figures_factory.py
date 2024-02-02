@@ -784,37 +784,59 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
     return fig
 
 
-def create_icpe_graph(df: pl.DataFrame, key_column: str):
-    siret = df.select(pl.col(key_column).max()).item()
+def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.DataFrame:
+    pivot_value = df.select(pl.col(key_column).max()).item()
+
     authorized_quantity = df.select(pl.col("quantite_autorisee").max()).item()
 
-    df_grouped = df.group_by(pl.col("day_of_processing").dt.truncate("1mo")).agg(pl.col("quantite_traitee").sum())
-    df_grouped = df_grouped.sort(pl.col("day_of_processing")).with_columns(
-        pl.col("quantite_traitee").cum_sum().alias("quantite_traitee_cummulee")
-    )
+    df_waste = df
 
-    data = df_grouped.to_dict(as_series=False)
+    trace_hover_template = "Le %{x|%d-%m-%Y} : <b>%{y:.2f}t</b> traitées<extra></extra>"
+    trace_name = "Quantité journalière traitée"
+    trace_x_axis_margin = 7
+    trace_xaxis_tickformat = None
+    trace_dtick = None
+    if rubrique == "2760-1":
+        group_by_expr = pl.col("day_of_processing").dt.truncate("1mo")
+        df_waste = df.group_by(group_by_expr).agg(pl.col("quantite_traitee").sum())
+        df_waste = df_waste.sort(pl.col("day_of_processing")).with_columns(
+            pl.col("quantite_traitee").cum_sum().alias("quantite_traitee_cummulee")
+        )
 
-    trace = go.Bar(
-        x=data["day_of_processing"],
-        y=data["quantite_traitee"],
-        hovertemplate="En %{x|%B} : <b>%{y:.2f}t</b> traitées sur l'année<extra></extra>",
-        name="Quantitée traitée mensuellement",
-        marker_color="#8D533E",
-    )
-    trace_cum = go.Scatter(
-        x=data["day_of_processing"],
-        y=data["quantite_traitee_cummulee"],
-        texttemplate="%{y:.2s}t",
-        textposition="top center",
-        hovertemplate="En %{x|%B} : <b>%{y:.2f}t</b> traitées en cummulé sur l'année<extra></extra>",
-        line_width=2,
-        name="Quantité traitée cummulée",
-        line_color="#272747",
-        mode="lines+text+markers",
-    )
+        trace_hover_template = "En %{x|%B} : <b>%{y:.2f}t</b> traitées<extra></extra>"
+        trace_name = "Quantité mensuelle traitée"
+        trace_x_axis_margin = 30
+        trace_xaxis_tickformat = "%b %y"
+        trace_dtick = "M1"
 
-    fig = go.Figure([trace, trace_cum])
+    data = df_waste.to_dict(as_series=False)
+
+    traces = []
+    traces.append(
+        go.Bar(
+            x=data["day_of_processing"],
+            y=data["quantite_traitee"],
+            hovertemplate=trace_hover_template,
+            name=trace_name,
+            marker_color="#8D533E",
+        )
+    )
+    if rubrique == "2760-1":
+        traces.append(
+            go.Scatter(
+                x=data["day_of_processing"],
+                y=data["quantite_traitee_cummulee"],
+                texttemplate="%{y:.2s}t",
+                textposition="top center",
+                hovertemplate="En %{x|%B} : <b>%{y:.2f}t</b> traitées en cummulé sur l'année<extra></extra>",
+                line_width=2,
+                name="Quantité traitée cummulée",
+                line_color="#272747",
+                mode="lines+text+markers",
+            )
+        )
+
+    fig = go.Figure(traces)
 
     fig.update_layout(
         margin={"t": 30, "l": 35, "r": 80},
@@ -830,7 +852,6 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str):
         plot_bgcolor="rgba(0,0,0,0)",
     )
 
-    max_y = df_grouped.select(pl.col("quantite_traitee_cummulee").max()).item()
     if not pd.isna(authorized_quantity):
         fig.add_hline(
             y=authorized_quantity,
@@ -851,27 +872,23 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str):
             font_size=13,
         )
 
-        if authorized_quantity > max_y:
-            max_y = authorized_quantity
-
     fig.update_yaxes(
-        range=[0, max_y * 1.3],
         gridcolor="#ccc",
         title="tonnes",
     )
 
     fig.update_xaxes(
         range=[
-            min(data["day_of_processing"]) - timedelta(days=30),
-            max(data["day_of_processing"]) + timedelta(days=30),
+            datetime(year=min(data["day_of_processing"]).year, month=1, day=1) - timedelta(days=trace_x_axis_margin),
+            datetime(year=min(data["day_of_processing"]).year, month=12, day=31) + timedelta(days=trace_x_axis_margin),
         ],
-        tickformat="%b %y",
+        tickformat=trace_xaxis_tickformat,
         tick0=min(data["day_of_processing"]),
-        dtick="M1",
+        dtick=trace_dtick,
         gridcolor="#ccc",
         zeroline=True,
         linewidth=1,
         linecolor="black",
     )
 
-    return pl.DataFrame([[siret], [fig.to_json()]], [key_column, "graph"])
+    return pl.DataFrame([[pivot_value], [fig.to_json()]], [key_column, "graph"])

@@ -25,7 +25,9 @@ def build_dataframes():
         "weekly_waste_processed_data",
         "accounts_by_naf_data",
         "waste_processed_by_naf_annual_stats",
-        "installations_icpe_data",
-        "waste_processed_icpe_data",
+        "icpe_installations_data",
+        "icpe_installations_waste_processed_data",
+        "icpe_departements_waste_processed_data",
+        "icpe_regions_waste_processed_data",
     ]:
         getattr(bsd_data, dataset_name).write_parquet(f"temp_data/{dataset_name}.parquet")

@@ -31,20 +31,84 @@ var f = locale.format(",.0f");
 var colorScale = d3.scaleSequential(d3.interpolateOranges);
 
 // Affiche les informations d'une région/département/installation dans une div
-function showRegionInfo(e) {
+function showRegionInfo(e, rubrique, featureType) {
     var properties = e.target.feature.properties;
-    document.getElementById('region-name').textContent = properties.nom ? properties.nom : properties.raison_sociale;
-    document.getElementById('region-nombre-installations').textContent = properties.num_installations ? "Nombre d'installations : " + f(properties.num_installations) : '';
-    document.getElementById('region-quantite-autorisee').textContent = "Quantité Autorisée : " + f(properties.quantite_autorisee) + "t";
-    document.getElementById('region-quantite-traitee').textContent = "Quantité Traitée : " + f(properties.quantite_traitee) + "t";
-    document.getElementById('region-ratio-traitement').textContent = "Quantité consommée : " + f(properties.quantite_traitee * 100 / properties.quantite_autorisee) + "%";
 
-    Plotly.purge('region-graphs');
+    var regionInfoDiv = document.getElementById("region-info");
+    regionInfoDiv.replaceChildren();
+
+    var processedQuantity_key = "moyenne_quantite_journaliere_traitee";
+    var unit = "t/j";
+    var processedQuantityPrefix = "Quantité journalière traitée en moyenne :";
+    var usedQuantityPrefix = "Quantité journalière consommée en moyenne :";
+    if (rubrique == "2760-1") {
+        processedQuantity_key = "cumul_quantite_traitee";
+        unit = "t/an";
+        processedQuantityPrefix = "Quantité traitée en cummulé :"
+        usedQuantityPrefix = "Quantité consommée sur l'année :"
+    }
+
+    if (featureType == "installation") {
+        e = document.createElement("h2")
+        e.textContent = properties.raison_sociale
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        e.textContent = `Code AIOT : ${properties.code_aiot}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        e.textContent = `SIRET : ${properties.siret}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        var authorizedQuantity = f(properties.quantite_autorisee)
+        e.textContent = `Quantité autorisée : ${authorizedQuantity} ${unit}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        var processedQuantity = properties[processedQuantity_key]
+        e.textContent = `${processedQuantityPrefix} ${f(processedQuantity)} ${unit}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        var usedQuantity = ""
+        if (authorizedQuantity) {
+            var usedQuantity = 100 * processedQuantity / properties.quantite_autorisee
+        }
+        e.textContent = `${usedQuantityPrefix} ${f(usedQuantity)}%`
+        regionInfoDiv.append(e)
+    } else {
+        e = document.createElement("h2")
+        e.textContent = properties.nom
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        e.textContent = `Nombre d'installations : ${properties.nombre_installations}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        e.textContent = `Quantité autorisée : ${properties.quantite_autorisee} ${unit}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        var processedQuantity = properties[processedQuantity_key]
+        e.textContent = `${processedQuantityPrefix} ${f(processedQuantity)} ${unit}`
+        regionInfoDiv.append(e)
+
+        e = document.createElement("p")
+        var usedQuantity = 100 * processedQuantity / properties.quantite_autorisee
+        e.textContent = `${usedQuantityPrefix} ${f(usedQuantity)}%`
+        regionInfoDiv.append(e)
+    }
+
+    idDivGraph = "graph"
+    Plotly.purge(idDivGraph);
 
     if (properties.graph) {
         var plotData = JSON.parse(properties.graph)
         Plotly.newPlot(
-            'region-graphs',
+            idDivGraph,
             plotData.data,
             plotData.layout);
     }
@@ -72,27 +136,27 @@ function styleSelected(e) {
 }
 
 // Gestionnaires d'événements pour interagir avec les polygones et les points
-function clickOnPolygonHandler(e) {
+function clickOnPolygonHandler(e, rubrique) {
     zoomToPolygon(e);
-    showRegionInfo(e);
+    showRegionInfo(e, rubrique, "region");
     styleSelected(e);
 }
 
-function onEachPolygonFeature(feature, layer) {
+function onEachPolygonFeature(feature, layer, rubrique) {
     layer.on({
-        click: clickOnPolygonHandler
+        click: (e) => { clickOnPolygonHandler(e, rubrique) }
     });
 
 }
 
-function clickOnPointHandler(e) {
+function clickOnPointHandler(e, rubrique) {
     zoomToPoint(e);
-    showRegionInfo(e);
+    showRegionInfo(e, rubrique, "installation");
 }
 
-function onEachPointFeature(feature, layer) {
+function onEachPointFeature(feature, layer, rubrique) {
     layer.on({
-        click: clickOnPointHandler
+        click: (e) => { clickOnPointHandler(e, rubrique) }
     });
 
 }
@@ -147,17 +211,17 @@ function initMapForRubrique(icpe_data, rubrique) {
     geojsonRegions = L.geoJSON(selectedData["regions"],
         {
             style: stylePolygon,
-            onEachFeature: onEachPolygonFeature
+            onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique) }
         })
     geojsonDepartements = L.geoJSON(selectedData["departements"],
         {
             style: stylePolygon,
-            onEachFeature: onEachPolygonFeature
+            onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique) }
         });
     geojsonInstallations = L.geoJson(selectedData["installations"],
         {
             pointToLayer: stylePoint,
-            onEachFeature: onEachPointFeature
+            onEachFeature: (feature, layer) => { onEachPointFeature(feature, layer, rubrique) }
         });
 
     setLayer(selectedLayer);
@@ -192,7 +256,7 @@ document.getElementById('toggle-installations').addEventListener('change', funct
 // Styles pour les régions/départements
 function stylePolygon(feature) {
     // Extract the relevant properties
-    var quantite_traitee = feature.properties.quantite_traitee;
+    var quantite_traitee = feature.properties.cumul_quantite_traitee ? feature.properties.cumul_quantite_traitee : feature.properties.moyenne_quantite_journaliere_traitee;
     var quantite_autorisee = feature.properties.quantite_autorisee;
 
     var ratio = quantite_traitee / quantite_autorisee;
@@ -200,10 +264,11 @@ function stylePolygon(feature) {
     // Calcul de la couleur
     var fillColor;
     var fillOpacity;
-    if (ratio == null) {
-        fillColor = white;
-        fillOpacity = 0.6
-    } else if (ratio > 1) {
+    if ((ratio == null) || (!Number.isFinite(ratio))) {
+        ratio = NaN
+    }
+
+    if (ratio > 1) {
         fillColor = 'url(#stripes)';
         fillOpacity = 1;
     } else {

@@ -40,8 +40,9 @@
                     </select>
                     <label class="fr-label" for="rubrique-select">Rubrique :</label>
                     <select class="fr-select" id="rubrique-select" name="select-rubrique">
-                        <option selected value="2790">2790</option>
                         <option value="2760-1">2760-1</option>
+                        <option selected value="2770">2770</option>
+                        <option selected value="2790">2790</option>
                     </select>
                     <label class="fr-label" for="layer-select">Choisissez une vue pour la carte :</label>
                     <select class="fr-select" id="layer-select" name="select-vue-carte">
@@ -63,90 +64,82 @@
             </div>
             <div id="main-container">
                 <div id="map"></div>
-                <div id="region-info">
-                    <h3 id="region-name">France</h3>
-                    <div id="region-nombre-installations"></div>
-                    <div id="region-quantite-autorisee"></div>
-                    <div id="region-quantite-traitee"></div>
-                    <div id="region-ratio-traitement"></div>
-                    <div id="region-graphs"></div>
+                <div id="side-container">
+                    <div id="region-info"></div>
+                    <div id="graph"></div>
                 </div>
             </div>
         </div>
         <script src="{% static "js/map.js" %}"></script>
         <script>
-const regionsGeoJSONUrl = '{% static "data/2790_installations_regions.geojson" %}';
-const departementsGeoJSONUrl = '{% static "data/2790_installations_departements.geojson" %}';
-const installationsGeoJSONUrl = '{% static "data/2790_installations.geojson" %}';
+        // Initialize map
+        var map = L.map('map').setView([46.2276, 2.2137], 5); // Centre de la France
 
-// Initialize map
-var map = L.map('map').setView([46.2276, 2.2137], 5); // Centre de la France
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: 'Données de la carte &copy; contributeurs d\'OpenStreetMap'
+        }).addTo(map);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: 'Données de la carte &copy; contributeurs d\'OpenStreetMap'
-}).addTo(map);
-
-// States
-var geojsonRegions, geojsonDepartements, geojsonInstallations, icpeData;
-selectedYear = document.getElementById('year-select').value;
-selectedRubrique = document.getElementById('rubrique-select').value;
-selectedLayer = document.getElementById('layer-select').value;
-installationsToggled = document.getElementById('toggle-installations').checked;
-currentLayer = null;
-currentSelectedLayer = null;
+        // States
+        var geojsonRegions, geojsonDepartements, geojsonInstallations, icpeData;
+        selectedYear = document.getElementById('year-select').value;
+        selectedRubrique = document.getElementById('rubrique-select').value;
+        selectedLayer = document.getElementById('layer-select').value;
+        installationsToggled = document.getElementById('toggle-installations').checked;
+        currentLayer = null;
+        currentSelectedLayer = null;
 
 
-// Charger et stocker les données icpe
-loadGeoJSONData(`/stats/icpe/${selectedYear}`).then(function(data) {
-    icpeData = data;
-    
-    initMapForRubrique(icpeData, selectedRubrique)
-    setInstallations()
+        // Charger et stocker les données icpe
+        loadGeoJSONData(`/stats/icpe/${selectedYear}`).then(function(data) {
+            icpeData = data;
+            
+            initMapForRubrique(icpeData, selectedRubrique)
+            setInstallations()
 
-    
-}).catch(function(error) {
-    console.error('Erreur lors du chargement des régions:', error);
-})
+            
+        }).catch(function(error) {
+            console.error('Erreur lors du chargement des régions:', error);
+        })
 
 
-var legend = L.control({ position: 'bottomright' });
+        var legend = L.control({ position: 'bottomright' });
 
-legend.onAdd = function (map) {
-    // Create a div for the legend
-    var div = L.DomUtil.create('div', 'info legend');
-    
-    // Create a gradient bar for the scale
-    var grades = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]; // The intervals to show on the color scale
-    var labels = [];
-    var from, to;
+        legend.onAdd = function (map) {
+            // Create a div for the legend
+            var div = L.DomUtil.create('div', 'info legend');
+            
+            // Create a gradient bar for the scale
+            var grades = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]; // The intervals to show on the color scale
+            var labels = [];
+            var from, to;
 
-    labels.push('<div>% de la quantité autorisée consommée</div>')
+            labels.push('<div>% de la quantité autorisée consommée</div>')
 
-    labels.push(
-        '<i style="background-color:#2f3640"></i> Pas de quantité autorisée');
-    // Loop through intervals and generate a label with colored square for each
-    for (var i = 0; i < grades.length -1; i++) {
-        from = grades[i];
-        to = grades[i + 1];
+            labels.push(
+                '<i style="background-color:#2f3640"></i> Pas de quantité autorisée');
+            // Loop through intervals and generate a label with colored square for each
+            for (var i = 0; i < grades.length -1; i++) {
+                from = grades[i];
+                to = grades[i + 1];
 
-        labels.push(
-            '<i style="background:' + colorScale(from/100) + '"></i> ' +
-            from + (to ? ' &ndash; ' + to : '+'));
-    }
+                labels.push(
+                    '<i style="background:' + colorScale(from/100) + '"></i> ' +
+                    from + (to ? ' &ndash; ' + to : '+'));
+            }
 
-    // Add one more label for values over 100
-    labels.push(
-        '<i class="stripe-pattern"></i> 100+');
+            // Add one more label for values over 100
+            labels.push(
+                '<i class="stripe-pattern"></i> 100+');
 
-    // Insert the labels into the div as inner HTML
-    div.innerHTML = labels.join('<br>');
+            // Insert the labels into the div as inner HTML
+            div.innerHTML = labels.join('<br>');
 
-    return div;
-};
+            return div;
+        };
 
-// Add the legend to the map
-legend.addTo(map);
+        // Add the legend to the map
+        legend.addTo(map);
 
         </script>
     </body>

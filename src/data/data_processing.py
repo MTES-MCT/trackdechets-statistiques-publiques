@@ -119,7 +119,7 @@ def get_total_quantity_processed(
 
     """
     quantity_processed_total = 0
-    for bs_type, df in all_bordereaux_data.items():
+    for _, df in all_bordereaux_data.items():
         if date_interval is not None:
             quantity_processed_total += (
                 df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
@@ -149,26 +149,50 @@ def get_total_number_of_accounts_created(
 
 def create_installations_geojson(
     df_installations: pl.DataFrame,
-    df_waste_processed: pl.DataFrame,
+    df_installations_waste_processed: pl.DataFrame,
     rubrique: str,
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> str:
     df_installations_filtered = df_installations.filter(pl.col("rubrique") == rubrique)
 
-    df_waste_processed = df_waste_processed.with_columns(pl.col("quantite_traitee").cast(pl.Float64))
-    df_waste_processed_filtered = df_waste_processed.filter(
+    df_installations_filtered = df_installations_filtered.group_by("code_aiot").agg(
+        pl.col("siret"),
+        pl.col("quantite_autorisee").sum(),
+        pl.col("latitude").max(),
+        pl.col("longitude").max(),
+        pl.col("raison_sociale").max(),
+        pl.col("etat_activite").max(),
+        pl.col("regime").max(),
+        pl.col("unite").max(),
+        pl.col("adresse1").max(),
+        pl.col("adresse2").max(),
+        pl.col("code_postal").max(),
+        pl.col("commune").max(),
+    )
+
+    df_waste_processed_filtered = df_installations_waste_processed.filter(
         (pl.col("rubrique") == rubrique) & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
     )
 
-    df_stats = df_waste_processed_filtered.group_by("siret").agg(pl.col("quantite_traitee").cast(pl.Float32).sum())
+    agg_expr = pl.col("quantite_traitee").sum().alias("cumul_quantite_traitee")
+    if rubrique in ["2790", "2770"]:
+        agg_expr = pl.col("quantite_traitee").mean().alias("moyenne_quantite_journaliere_traitee")
+    df_stats = df_waste_processed_filtered.group_by("code_aiot").agg(agg_expr)
 
-    df_graphs = df_waste_processed_filtered.group_by("siret").map_groups(lambda x: create_icpe_graph(x, "siret"))
-
-    df_installations_final = df_installations_filtered.join(df_stats, on="siret", how="left", validate="m:1").join(
-        df_graphs, on="siret", how="left", validate="m:1"
+    df_graphs = (
+        df_waste_processed_filtered.filter(pl.col("day_of_processing").is_not_null())
+        .group_by("code_aiot")
+        .map_groups(lambda x: create_icpe_graph(x, "code_aiot", rubrique))
     )
 
-    gdf_installations = gpd.GeoDataFrame(df_installations_final.to_pandas())
+    df_installations_final = df_installations_filtered.join(df_stats, on="code_aiot", how="left", validate="1:1").join(
+        df_graphs, on="code_aiot", how="left", validate="1:1"
+    )
+
+    df_installations_final = df_installations_final.to_pandas()
+    df_installations_final["siret"] = df_installations_final["siret"].str.join(", ")
+
+    gdf_installations = gpd.GeoDataFrame(df_installations_final)
     gdf_installations = gdf_installations.set_geometry(
         gdf_installations.apply(lambda x: Point(x["longitude"], x["latitude"]), axis=1)
     )
@@ -177,8 +201,7 @@ def create_installations_geojson(
 
 
 def create_regional_geojson(
-    df_installations: pl.DataFrame,
-    df_waste_processed: pl.DataFrame,
+    df_regional_waste_processed: pl.DataFrame,
     regional_geodataframe: gpd.GeoDataFrame,
     rubrique: str,
     regional_key_column: str,
@@ -186,40 +209,24 @@ def create_regional_geojson(
 ) -> str:
     gdf = regional_geodataframe
 
-    df_installations_filtered = df_installations.filter(pl.col("rubrique") == rubrique).with_columns(
-        pl.col(regional_key_column).cast(pl.String)
+    df_waste_processed_filtered = df_regional_waste_processed.filter(
+        (pl.col("rubrique") == rubrique)
+        & (
+            pl.col("day_of_processing").is_between(*date_interval, closed="left")
+            | pl.col("day_of_processing").is_null()
+        )
+    ).with_columns(pl.col(regional_key_column).cast(pl.String))
+
+    # Add annual stats and authorized quantity by departement/region
+    agg_expr = pl.col("quantite_traitee").mean().alias("moyenne_quantite_journaliere_traitee").fill_null(0)
+    if rubrique == "2760-1":
+        agg_expr = pl.col("quantite_traitee").sum().alias("cumul_quantite_traitee").fill_null(0)
+
+    annual_stats = df_waste_processed_filtered.group_by(regional_key_column).agg(
+        [agg_expr, pl.col("quantite_autorisee").max(), pl.col("nombre_installations").max()]
     )
-
-    df_waste_processed = df_waste_processed.with_columns(pl.col("quantite_traitee").cast(pl.Float64))
-
-    df_waste_processed_filtered = df_waste_processed.filter(
-        (pl.col("rubrique") == rubrique) & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
-    )
-
-    # Prepares daily waste processed for plotly graph creation by grouping by departement/region and day
-    df_waste_processed = (
-        df_installations_filtered.join(df_waste_processed_filtered, on="siret", how="inner")
-        .group_by([regional_key_column, "day_of_processing"])
-        .agg(pl.col("quantite_traitee").sum())
-    )
-
-    # Add annual processed waste by departement/region
-    annual_processed_waste = df_waste_processed.group_by(regional_key_column).agg(pl.col("quantite_traitee").sum())
     gdf = gdf.merge(
-        annual_processed_waste.to_pandas(),
-        left_on="code",
-        right_on=regional_key_column,
-        how="left",
-        validate="1:1",
-    )
-
-    # Add authorized quantity by departement/region
-    authorized_quantity = df_installations_filtered.group_by(regional_key_column).agg(
-        pl.col("quantite_autorisee").sum()
-    )
-
-    gdf = gdf.merge(
-        authorized_quantity.to_pandas(),
+        annual_stats.to_pandas(),
         left_on="code",
         right_on=regional_key_column,
         how="left",
@@ -228,14 +235,9 @@ def create_regional_geojson(
 
     # Create plotly graphs adding to daily waste processed the authorized quantity for each departement/region
     df_graphs = (
-        df_waste_processed.join(
-            pl.DataFrame(gdf[["code", "quantite_autorisee"]]),
-            left_on=regional_key_column,
-            right_on="code",
-            how="left",
-        )
+        df_waste_processed_filtered.filter(pl.col("day_of_processing").is_not_null())
         .group_by(regional_key_column)
-        .map_groups(lambda x: create_icpe_graph(x, key_column=regional_key_column))
+        .map_groups(lambda x: create_icpe_graph(x, key_column=regional_key_column, rubrique=rubrique))
     )
 
     gdf = gdf.merge(
