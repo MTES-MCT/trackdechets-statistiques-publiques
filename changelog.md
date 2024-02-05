@@ -5,6 +5,9 @@ Les changements importants de Trackdéchets préparation inspection sont documen
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et le projet suit un schéma de versionning inspiré de [Calendar Versioning](https://calver.org/).
 
+## 05/01/2024
+- Ajout des données pour 2024.
+
 ## 13/11/2023
 
 - Ajout des statistiques hebdomadaires des BSVHU.
@@ -17,4 +20,4 @@ afin d'afficher un graphe pour les bordereaux et un graphe pour les contenants.
 
 ## 19/09/2023
 
-- Implémentation initiale
+- Implémentation initiale.
