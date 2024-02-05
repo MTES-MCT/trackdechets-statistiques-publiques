@@ -19,6 +19,14 @@
                   hx-indicator="#yearly_spinner"
                   {% if computation.year == 2023 %}aria-current="page"{% endif %}>Année 2023</span>
         </li>
+        <li class="fr-nav__item">
+            <span class="fr-nav__link"
+                  hx-get="{% url 'yearly_stats' year=2024 %}"
+                  hx-trigger="click"
+                  hx-target="#yearly_wrapper"
+                  hx-indicator="#yearly_spinner"
+                  {% if computation.year == 2024 %}aria-current="page"{% endif %}>Année 2024</span>
+        </li>
     </ul>
 </nav>
 {% include "spinner.html" with spinner_id="yearly_spinner" %}
@@ -100,6 +108,9 @@
         {% include "spinner.html" with spinner_id="bsd_spinner" %}
     </div>
 </div>
+<p>
+    * Les déchets considérés comme dangereux sont les déchets avec un code déchets dangereux ET/OU contenants des Polluants Organiques Persistants (P.O.P) ET/OU déclarés comme dangereux.
+</p>
 <div>
     <h4>Établissements et utilisateurs</h4>
     <div class="callout-row">
