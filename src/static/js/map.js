@@ -333,6 +333,29 @@ document.getElementById('rubrique-select').addEventListener('change', function (
 
 });
 
+document.getElementById('metropole-zoom').addEventListener('click', function (e) {
+    map.flyTo(
+        [46.2276, 2.2137], 5
+    )
+
+});
+
+document.getElementById('mgg-zoom').addEventListener('click', function (e) {
+    map.flyTo(
+        [12, -56], 5.5
+    )
+
+});
+
+document.getElementById('mr-zoom').addEventListener('click', function (e) {
+    map.flyTo(
+        [-17, 50], 6
+    )
+
+});
+
+
+
 // Gestionnaire d'événements pour le bouton toggle des installations
 document.getElementById('toggle-installations').addEventListener('change', function (e) {
     installationsToggled = e.target.checked;

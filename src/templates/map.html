@@ -50,16 +50,24 @@
                         <option value="departements">Départementale</option>
                     </select>
                 </div>
-                <div class="fr-toggle">
-                    <input type="checkbox"
-                           class="fr-toggle__input"
-                           aria-describedby="toggle-installations-hint-text"
-                           id="toggle-installations">
-                    <label class="fr-toggle__label"
-                           for="toggle-installations"
-                           data-fr-checked-label="Activé"
-                           data-fr-unchecked-label="Désactivé">Afficher les installations</label>
-                    <p class="fr-hint-text" id="toggle-installations-hint-text">Cliquez pour afficher les ICPE sur la carte.</p>
+                <div>
+                    <div class="fr-toggle">
+                        <input type="checkbox"
+                               class="fr-toggle__input"
+                               aria-describedby="toggle-installations-hint-text"
+                               id="toggle-installations">
+                        <label class="fr-toggle__label"
+                               for="toggle-installations"
+                               data-fr-checked-label="Activé"
+                               data-fr-unchecked-label="Désactivé">Afficher les installations</label>
+                        <p class="fr-hint-text" id="toggle-installations-hint-text">Cliquez pour afficher les ICPE sur la carte.</p>
+                    </div>
+                    <div>
+                        <p>Zoom sur :</p>
+                        <button class="fr-btn" id="metropole-zoom">Métropole</button>
+                        <button class="fr-btn" id="mgg-zoom">Martinique, Guadeloupe et Guyane</button>
+                        <button class="fr-btn" id="mr-zoom">Mayotte et La Réunion</button>
+                    </div>
                 </div>
             </div>
             <div id="main-container">
