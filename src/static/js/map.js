@@ -67,12 +67,12 @@ async function showRegionInfo(event, rubrique, featureType) {
     var regionInfoDiv = document.getElementById("region-info");
     regionInfoDiv.replaceChildren();
 
-    var processedQuantity_key = "moyenne_quantite_journaliere_traitee";
+    var processedQuantityKey = "moyenne_quantite_journaliere_traitee";
     var unit = "t/j";
     var processedQuantityPrefix = "Quantité journalière traitée en moyenne :";
     var usedQuantityPrefix = "Quantité journalière consommée en moyenne :";
     if (rubrique == "2760-1") {
-        processedQuantity_key = "cumul_quantite_traitee";
+        processedQuantityKey = "cumul_quantite_traitee";
         unit = "t/an";
         processedQuantityPrefix = "Quantité traitée en cummulé :"
         usedQuantityPrefix = "Quantité consommée sur l'année :"
@@ -111,7 +111,7 @@ async function showRegionInfo(event, rubrique, featureType) {
         regionInfoDiv.append(e)
 
         e = document.createElement("p")
-        var processedQuantity = stats[processedQuantity_key]
+        var processedQuantity = stats[processedQuantityKey]
         e.textContent = `${processedQuantityPrefix} ${formatFloat(processedQuantity)} ${unit}`
         regionInfoDiv.append(e)
 
@@ -135,7 +135,7 @@ async function showRegionInfo(event, rubrique, featureType) {
             regionInfoDiv.append(e)
 
             e = document.createElement("p")
-            var processedQuantity = stats[processedQuantity_key]
+            var processedQuantity = stats[processedQuantityKey]
             e.textContent = `${processedQuantityPrefix} ${formatFloat(processedQuantity)} ${unit}`
             regionInfoDiv.append(e)
 
@@ -259,14 +259,12 @@ async function loadInstallations(year, rubrique) {
 
 async function loadRegionalGeojsons() {
     if (!regionsGeojson) {
-        console.log("Cache miss for regions");
         await loadGeoJSONData(regionsGeoJSONUrl).then((data) => {
             regionsGeojson = data;
         });
     };
 
     if (!departementsGeojson) {
-        console.log("Cache miss for regions");
         await loadGeoJSONData(departementsGeoJSONUrl).then((data) => {
             departementsGeojson = data;
         });
@@ -275,7 +273,7 @@ async function loadRegionalGeojsons() {
 }
 
 // Crée et configure les couches GeoJSON en fonction des données sélectionnées
-async function prepareMap(layer_name, rubrique, year) {
+async function prepareMap(layerName, rubrique, year) {
 
     // Si les couches existent déjà sur la carte, il faut les retirer
     if (regionsLayer) map.removeLayer(regionsLayer);
@@ -285,25 +283,23 @@ async function prepareMap(layer_name, rubrique, year) {
     await loadRegionalGeojsons();
 
 
-    await loadFeaturesStats(layer_name, year, rubrique);
-    if (layer_name == "regions") {
+    await loadFeaturesStats(layerName, year, rubrique);
+    if (layerName == "regions") {
         regionsLayer = L.geoJSON(regionsGeojson,
             {
                 style: stylePolygon,
                 onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique) }
             });
         map.addLayer(regionsLayer);
-        console.log("layer added");
     }
 
-    if (layer_name == "departements") {
+    if (layerName == "departements") {
         departementsLayer = L.geoJSON(departementsGeojson,
             {
                 style: stylePolygon,
                 onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique) }
             });
         map.addLayer(departementsLayer);
-        console.log("layer added");
     }
 
     await loadInstallations(year, rubrique);
@@ -355,7 +351,6 @@ document.getElementById('toggle-installations').addEventListener('change', funct
 // Styles pour les régions/départements
 function stylePolygon(feature) {
     // Extract the relevant properties
-    console.log("styling feature", feature)
     featureId = feature.properties.code
     featureStats = featuresStats[`${selectedLayer}.${selectedYear}.${selectedRubrique}`][featureId];
 
@@ -367,21 +362,19 @@ function stylePolygon(feature) {
 
     var ratio = featureStats ? featureStats.taux_consommation : null;
 
-    console.log(feature.properties, ratio)
-    // Calcul de la couleur
     var fillColor;
     var fillOpacity;
 
     if ((ratio == null) && (processedQuantity == null)) {
-        console.log("Bug")
+        // Case when there is no data
         fillColor = '#2f3640';
         fillOpacity = 0.6;
     } else if (((ratio == null) && (processedQuantity > 0)) || (ratio > 1)) {
-        console.log("stripes")
+        // Case when quantity processed is above authorization (also handles null authorization)
         fillColor = 'url(#stripes)';
         fillOpacity = 1;
     } else {
-        console.log("Normal")
+        // Nominal case
         fillColor = colorScale(ratio);
         fillOpacity = 0.6;
     }
@@ -390,14 +383,8 @@ function stylePolygon(feature) {
         fillColor: fillColor,
         weight: 1,
         opacity: 0.6,
-        color: '#2f3640', // couleur des bordures
+        color: '#2f3640',
         fillOpacity: 0.6
     }
 }
 
-
-// Style pour les points des installations (à modifier)
-function stylePoint(geoJsonPoint, latlng) {
-
-    return L.marker(latlng);
-}
