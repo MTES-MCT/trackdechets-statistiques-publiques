@@ -2,7 +2,6 @@ import json
 import logging
 import time
 
-import geopandas as gpd
 import polars as pl
 from django.conf import settings
 from sqlalchemy import create_engine
@@ -92,22 +91,3 @@ def get_waste_code_hierarchical_nomenclature() -> list[dict]:
         waste_code_hierarchy = json.load(f)
 
     return format_waste_codes(waste_code_hierarchy, add_top_level=True)
-
-
-def get_geojson_as_geodataframe(filename: str) -> gpd.GeoDataFrame:
-    """
-    Returns geojson as a GeoDataframe, useful for 'departements' and 'regions' data.
-
-    Parameters
-    ----------
-    filename: str
-        Name fo the GeoJSON file in the data static folder.
-
-    Returns
-    --------
-    GeoDataFrame
-        GeoDataFrame containing the GeoJSON data.
-    """
-    gdf = gpd.read_file(STATIC_DATA_PATH / filename)
-
-    return gdf

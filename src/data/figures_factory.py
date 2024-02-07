@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 import plotly.graph_objects as go
 import polars as pl
-import pandas as pd
 
 from data.plot_configs import (
     WEEKLY_BS_STATS_PLOT_CONFIGS,
@@ -855,7 +854,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
         plot_bgcolor="rgba(0,0,0,0)",
     )
 
-    if not pd.isna(authorized_quantity):
+    if authorized_quantity:
         fig.add_hline(
             y=authorized_quantity,
             line_dash="dot",

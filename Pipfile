@@ -17,8 +17,6 @@ pyarrow = "*"
 plotly = "*"
 gunicorn = "*"
 factory-boy = "*"
-geopandas = "*"
-pandas = "*"
 
 [dev-packages]
 isort = "*"
