@@ -176,71 +176,28 @@ def icpe_view_many(request, layer, year, rubrique):
     return JsonResponse({"data": results})
 
 
-def icpe_view_one(request, layer, year, rubrique, code):
-    metric_name = "moyenne_quantite_journaliere_traitee"
-
-    if rubrique == "2760-1":
-        metric_name = "cumul_quantite_traitee"
-
+def icpe_get_graph(request, layer, year, rubrique, code):
     layers_configs = {
         "installations": {
             "cls": InstallationsComputation,
-            "fields": [
-                "code_aiot",
-                "latitude",
-                "longitude",
-                "raison_sociale",
-                "siret",
-                "adresse1",
-                "adresse2",
-                "code_postal",
-                "commune",
-                "etat_activite",
-                "regime",
-                "unite",
-                "quantite_autorisee",
-                "taux_consommation",
-                metric_name,
-                "graph",
-            ],
             "specific_filter": {"code_aiot": code},
         },
         "regions": {
             "cls": RegionsComputation,
-            "fields": [
-                "code_region_insee",
-                "nom_region",
-                "quantite_autorisee",
-                "taux_consommation",
-                metric_name,
-                "nombre_installations",
-                "graph",
-            ],
             "specific_filter": {"code_region_insee": code},
         },
         "departements": {
             "cls": DepartementsComputation,
-            "fields": [
-                "code_departement_insee",
-                "nom_departement",
-                "quantite_autorisee",
-                "taux_consommation",
-                metric_name,
-                "nombre_installations",
-                "graph",
-            ],
             "specific_filter": {"code_departement_insee": code},
         },
     }
 
     layer_config = layers_configs[layer]
     model = layer_config["cls"]
-    fields = layer_config["fields"]
     specific_filter = layer_config["specific_filter"]
-    result = model.objects.filter(year=year, rubrique=rubrique, **specific_filter).values(*fields).first()
+    result = model.objects.filter(year=year, rubrique=rubrique, **specific_filter).values("graph").first()
 
     if not result:
         raise Http404
 
-    icpe_data = json.loads({"data": result})
-    return JsonResponse(icpe_data)
+    return JsonResponse({"graph": json.loads(result["graph"])})

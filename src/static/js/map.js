@@ -19,6 +19,21 @@ async function loadFeaturesStats(layer, year, rubrique) {
 
 }
 
+async function loadFeaturesGraph(layer, year, rubrique, code) {
+
+    if (featuresStats[`${layer}.${year}.${rubrique}`][code] == undefined) {
+        return;
+    }
+
+    if (featuresStats[`${layer}.${year}.${rubrique}`][code]["graph"] == undefined) {
+        console.log("cache miss feature graph")
+        response = await fetch(`/stats/icpe/${layer}/${year}/${rubrique}/${code}`);
+        data = await response.json();
+        featuresStats[`${layer}.${year}.${rubrique}`][code]["graph"] = data["graph"];
+    }
+
+}
+
 // Fonctions pour le zoom
 function zoomToPolygon(e) {
     map.fitBounds(e.target.getBounds(), { padding: [100, 100] });
@@ -43,7 +58,7 @@ var formatPercentage = locale.format(",.2%");
 var colorScale = d3.scaleSequential(d3.interpolateOranges);
 
 // Affiche les informations d'une région/département/installation dans une div
-function showRegionInfo(event, rubrique, featureType) {
+async function showRegionInfo(event, rubrique, featureType) {
 
     key = (featureType == "installation") ? event.target.options.code : event.target.feature.properties.code;
     layer = (featureType == "installation") ? "installations" : selectedLayer;
@@ -141,11 +156,11 @@ function showRegionInfo(event, rubrique, featureType) {
 
     }
 
-    idDivGraph = "graph"
+    idDivGraph = "graph";
     Plotly.purge(idDivGraph);
-
+    await loadFeaturesGraph(layer, selectedYear, selectedRubrique, key);
     if (stats && stats.graph) {
-        var plotData = JSON.parse(stats.graph)
+        var plotData = stats.graph;
         Plotly.newPlot(
             idDivGraph,
             plotData.data,
