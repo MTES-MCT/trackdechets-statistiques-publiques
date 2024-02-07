@@ -72,6 +72,9 @@
         </div>
         <script src="{% static "js/map.js" %}"></script>
         <script>
+        const regionsGeoJSONUrl = '{% static "geo/regions-avec-outre-mer.geojson" %}';
+        const departementsGeoJSONUrl = '{% static "geo/departements-avec-outre-mer.geojson" %}';
+
         // Initialize map
         var map = L.map('map').setView([46.2276, 2.2137], 5); // Centre de la France
 
@@ -81,26 +84,17 @@
         }).addTo(map);
 
         // States
-        var geojsonRegions, geojsonDepartements, geojsonInstallations, icpeData;
+        var regionsGeojson, departementsGeojson, regionsLayer, departementsLayer, installationsLayer;
+        var featuresStats = {};
+
         selectedYear = document.getElementById('year-select').value;
         selectedRubrique = document.getElementById('rubrique-select').value;
         selectedLayer = document.getElementById('layer-select').value;
         installationsToggled = document.getElementById('toggle-installations').checked;
+
         currentLayer = null;
         currentSelectedLayer = null;
 
-
-        // Charger et stocker les données icpe
-        loadGeoJSONData(`/stats/icpe/${selectedYear}`).then(function(data) {
-            icpeData = data;
-            
-            initMapForRubrique(icpeData, selectedRubrique)
-            setInstallations()
-
-            
-        }).catch(function(error) {
-            console.error('Erreur lors du chargement des régions:', error);
-        })
 
 
         var legend = L.control({ position: 'bottomright' });
@@ -114,10 +108,10 @@
             var labels = [];
             var from, to;
 
-            labels.push('<div>% de la quantité autorisée consommée</div>')
+            labels.push('<div>% de la quantité autorisée <br>consommée</div>')
 
             labels.push(
-                '<i style="background-color:#2f3640"></i> Pas de quantité autorisée');
+                '<i style="background-color:#2f3640"></i> Pas de données');
             // Loop through intervals and generate a label with colored square for each
             for (var i = 0; i < grades.length -1; i++) {
                 from = grades[i];
@@ -140,7 +134,9 @@
 
         // Add the legend to the map
         legend.addTo(map);
+        
 
+        prepareMap(selectedLayer, selectedRubrique, selectedYear)
         </script>
     </body>
 </html>

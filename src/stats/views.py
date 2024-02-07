@@ -1,12 +1,13 @@
 import datetime as dt
 import json
+import math
 
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.http import Http404, JsonResponse
 from django.views.generic import TemplateView
 
-from stats.models import Computation
+from stats.models import Computation, DepartementsComputation, InstallationsComputation, RegionsComputation
 
 
 class BaseRender(TemplateView):
@@ -104,8 +105,142 @@ def digest_view(request):
     return JsonResponse(digest)
 
 
-def icpe_view(request, year):
-    computation = Computation.objects.filter(year=year).first()
-    # Supposons que 'donnees_json' est le champ que vous voulez servir
-    icpe_data = json.loads(computation.icpe_data)
+def icpe_view_many(request, layer, year, rubrique):
+    metric_name = "moyenne_quantite_journaliere_traitee"
+    if rubrique == "2760-1":
+        metric_name = "cumul_quantite_traitee"
+
+    layers_configs = {
+        "installations": {
+            "cls": InstallationsComputation,
+            "fields": [
+                "code_aiot",
+                "latitude",
+                "longitude",
+                "raison_sociale",
+                "siret",
+                "adresse1",
+                "adresse2",
+                "code_postal",
+                "commune",
+                "etat_activite",
+                "regime",
+                "unite",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+            ],
+            "layer_key": "code_aiot",
+        },
+        "regions": {
+            "cls": RegionsComputation,
+            "fields": [
+                "code_region_insee",
+                "nom_region",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "nombre_installations",
+            ],
+            "layer_key": "code_region_insee",
+        },
+        "departements": {
+            "cls": DepartementsComputation,
+            "fields": [
+                "code_departement_insee",
+                "nom_departement",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "nombre_installations",
+            ],
+            "layer_key": "code_departement_insee",
+        },
+    }
+
+    layer_config = layers_configs[layer]
+    model = layer_config["cls"]
+    fields = layer_config["fields"]
+    layer_key = layer_config["layer_key"]
+
+    results = {}
+    for obj in model.objects.filter(year=year, rubrique=rubrique).values(*fields):
+        obj_clean = {
+            k: e if not isinstance(e, float) or not (math.isnan(e) or math.isinf(e)) else None for k, e in obj.items()
+        }
+        results[obj_clean[layer_key]] = obj_clean
+
+    if not results:
+        raise Http404
+
+    return JsonResponse({"data": results})
+
+
+def icpe_view_one(request, layer, year, rubrique, code):
+    metric_name = "moyenne_quantite_journaliere_traitee"
+
+    if rubrique == "2760-1":
+        metric_name = "cumul_quantite_traitee"
+
+    layers_configs = {
+        "installations": {
+            "cls": InstallationsComputation,
+            "fields": [
+                "code_aiot",
+                "latitude",
+                "longitude",
+                "raison_sociale",
+                "siret",
+                "adresse1",
+                "adresse2",
+                "code_postal",
+                "commune",
+                "etat_activite",
+                "regime",
+                "unite",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "graph",
+            ],
+            "specific_filter": {"code_aiot": code},
+        },
+        "regions": {
+            "cls": RegionsComputation,
+            "fields": [
+                "code_region_insee",
+                "nom_region",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "nombre_installations",
+                "graph",
+            ],
+            "specific_filter": {"code_region_insee": code},
+        },
+        "departements": {
+            "cls": DepartementsComputation,
+            "fields": [
+                "code_departement_insee",
+                "nom_departement",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "nombre_installations",
+                "graph",
+            ],
+            "specific_filter": {"code_departement_insee": code},
+        },
+    }
+
+    layer_config = layers_configs[layer]
+    model = layer_config["cls"]
+    fields = layer_config["fields"]
+    specific_filter = layer_config["specific_filter"]
+    result = model.objects.filter(year=year, rubrique=rubrique, **specific_filter).values(*fields).first()
+
+    if not result:
+        raise Http404
+
+    icpe_data = json.loads({"data": result})
     return JsonResponse(icpe_data)

@@ -796,6 +796,8 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
     trace_x_axis_margin = 7
     trace_xaxis_tickformat = None
     trace_dtick = None
+    gaph_class = go.Scatter
+
     if rubrique == "2760-1":
         group_by_expr = pl.col("day_of_processing").dt.truncate("1mo")
         df_waste = df.group_by(group_by_expr).agg(pl.col("quantite_traitee").sum())
@@ -808,12 +810,13 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
         trace_x_axis_margin = 30
         trace_xaxis_tickformat = "%b %y"
         trace_dtick = "M1"
+        gaph_class = go.Bar
 
     data = df_waste.to_dict(as_series=False)
 
     traces = []
     traces.append(
-        go.Bar(
+        gaph_class(
             x=data["day_of_processing"],
             y=data["quantite_traitee"],
             hovertemplate=trace_hover_template,
