@@ -2,7 +2,6 @@
 Utility functions used by data package.
 """
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 
 def get_data_date_interval_for_year(year: int = 2022) -> tuple[datetime, datetime]:

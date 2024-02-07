@@ -5,10 +5,6 @@ from datetime import datetime
 from typing import Tuple
 
 import polars as pl
-import geopandas as gpd
-import pandas as pd
-from shapely.geometry import Point
-
 from .figures_factory import create_icpe_graph
 
 

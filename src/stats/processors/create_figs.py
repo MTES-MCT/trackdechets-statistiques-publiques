@@ -1,6 +1,5 @@
-import json
 import polars as pl
-from data.data_extract import get_geojson_as_geodataframe, get_processing_operation_codes_data
+from data.data_extract import get_processing_operation_codes_data
 from data.data_processing import (
     create_icpe_installations_df,
     create_icpe_regional_df,
