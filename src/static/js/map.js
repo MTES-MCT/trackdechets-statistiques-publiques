@@ -61,6 +61,8 @@ var colorScale = d3.scaleSequential(d3.interpolateOranges);
 async function showRegionInfo(event, rubrique, featureType) {
 
     key = (featureType == "installation") ? event.target.options.code : event.target.feature.properties.code;
+    key = (featureType == "region") ? parseInt(key) : key;
+
     layer = (featureType == "installation") ? "installations" : selectedLayer;
     var stats = featuresStats[`${layer}.${selectedYear}.${selectedRubrique}`][key];
 

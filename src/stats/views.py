@@ -200,4 +200,8 @@ def icpe_get_graph(request, layer, year, rubrique, code):
     if not result:
         raise Http404
 
-    return JsonResponse({"graph": json.loads(result["graph"])})
+    resp = {"graph": None}
+    if result["graph"] is not None:
+        resp = {"graph": json.loads(result["graph"])}
+
+    return JsonResponse(resp)
