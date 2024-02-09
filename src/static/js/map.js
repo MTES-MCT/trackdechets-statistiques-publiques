@@ -163,10 +163,23 @@ async function showRegionInfo(event, rubrique, featureType) {
     await loadFeaturesGraph(layer, selectedYear, selectedRubrique, key);
     if (stats && stats.graph) {
         var plotData = stats.graph;
+
+
         Plotly.newPlot(
             idDivGraph,
             plotData.data,
-            plotData.layout);
+            plotData.layout,
+            {
+                "responsive": true,
+
+            }
+        );
+        Plotly.relayout(
+            idDivGraph,
+            {
+                "autosize": true
+            }
+        )
     }
 
 }
@@ -246,6 +259,11 @@ async function loadInstallations(year, rubrique) {
 
     markers = []
     for (const [key, value] of Object.entries(featuresStats[`installations.${selectedYear}.${selectedRubrique}`])) {
+
+        if ((value.latitude == null) || (value.longitude == null)) {
+            continue;
+        }
+
         markers.push(
             L.marker([value.latitude, value.longitude], { "title": value.raison_sociale, "code": key }).on('click',
                 (e) => {

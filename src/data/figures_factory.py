@@ -823,6 +823,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
             marker_color="#8D533E",
         )
     )
+    max_y = max(data["quantite_traitee"])
     if rubrique == "2760-1":
         traces.append(
             go.Scatter(
@@ -837,6 +838,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
                 mode="lines+text+markers",
             )
         )
+        max_y = max(data["quantite_traitee_cummulee"])
 
     fig = go.Figure(traces)
 
@@ -852,6 +854,8 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
         ),
         paper_bgcolor="#fff",
         plot_bgcolor="rgba(0,0,0,0)",
+        autosize=True,
+        height=400,
     )
 
     if authorized_quantity:
@@ -873,11 +877,9 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
             textangle=-90,
             font_size=13,
         )
+        max_y = max(max_y, authorized_quantity)
 
-    fig.update_yaxes(
-        gridcolor="#ccc",
-        title="tonnes",
-    )
+    fig.update_yaxes(gridcolor="#ccc", title="tonnes", tick0=0, range=[0, max_y * 1.3])
 
     fig.update_xaxes(
         range=[

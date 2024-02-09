@@ -159,8 +159,6 @@ def create_icpe_installations_df(
             pl.col("latitude").max(),
             pl.col("longitude").max(),
             pl.col("raison_sociale").max(),
-            pl.col("etat_activite").max(),
-            pl.col("regime").max(),
             pl.col("unite").max(),
             pl.col("adresse1").max(),
             pl.col("adresse2").max(),

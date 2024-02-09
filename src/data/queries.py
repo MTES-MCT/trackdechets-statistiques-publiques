@@ -44,7 +44,7 @@ icpe_installations_sql = """
 select 
     * 
 from 
-    refined_zone_stats_publiques.installations_icpe
+    refined_zone_stats_publiques.installations_icpe_2024
 """
 
 icpe_installations_waste_processed_sql = """
