@@ -109,6 +109,9 @@ def create_weekly_scatter_figure(
         Figure object ready to be plotted.
     """
 
+    if len(bs_weekly_data) == 0:
+        return go.Figure()
+
     match bs_type:
         case "BSFF":
             plot_configs = WEEKLY_BSFF_STATS_PLOT_CONFIGS
@@ -823,7 +826,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
             marker_color="#8D533E",
         )
     )
-    max_y = max(data["quantite_traitee"])
+    max_y = max(e for e in data["quantite_traitee"] if e is not None)
     if rubrique == "2760-1":
         traces.append(
             go.Scatter(
@@ -838,7 +841,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
                 mode="lines+text+markers",
             )
         )
-        max_y = max(data["quantite_traitee_cummulee"])
+        max_y = max(e for e in data["quantite_traitee_cummulee"] if e is not None)
 
     fig = go.Figure(traces)
 
