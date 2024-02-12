@@ -5,15 +5,10 @@
         <title>Carte des ICPE</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet"
-              href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-              crossorigin="" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-                crossorigin=""></script>
-        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-        <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+        <link rel="stylesheet" href="{% static "js/leaflet.css" %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" />
+        <script src="{% static "js/leaflet.js" %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="></script>
+        <script src="{% static "js/d3.v7.min.js" %}"></script>
+        <script src="{% static "js/plotly-2.27.0.min.js" %}" charset="utf-8"></script>
         <link rel="stylesheet" href="{% static "css/map.css" %}" />
         <link rel="stylesheet" href="{% static "css/dsfr.main.min.css" %}" />
         <link rel="stylesheet" href="{% static "css/style.css" %}" />
@@ -65,7 +60,7 @@
                     <div>
                         <p>Zoom sur :</p>
                         <button class="fr-btn" id="metropole-zoom">Métropole</button>
-                        <button class="fr-btn" id="mgg-zoom">Martinique, Guadeloupe et Guyane</button>
+                        <button class="fr-btn" id="mgg-zoom">Guadeloupe, Guyane et Martinique</button>
                         <button class="fr-btn" id="mr-zoom">Mayotte et La Réunion</button>
                     </div>
                 </div>
