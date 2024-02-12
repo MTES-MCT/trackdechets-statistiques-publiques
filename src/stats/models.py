@@ -100,6 +100,10 @@ class InstallationsComputation(models.Model):
         verbose_name_plural = _("Installations Computations")
         ordering = ("-created",)
         app_label = "stats"
+        indexes = [
+            models.Index(fields=["year", "rubrique"]),
+            models.Index(fields=["year", "rubrique", "code_aiot"]),
+        ]
 
 
 class RegionsComputation(models.Model):
@@ -127,6 +131,10 @@ class RegionsComputation(models.Model):
         verbose_name_plural = _("Regions Computations")
         ordering = ("-created",)
         app_label = "stats"
+        indexes = [
+            models.Index(fields=["year", "rubrique"]),
+            models.Index(fields=["year", "rubrique", "code_region_insee"]),
+        ]
 
 
 class DepartementsComputation(models.Model):
@@ -155,3 +163,7 @@ class DepartementsComputation(models.Model):
         verbose_name_plural = _("Regions Computations")
         ordering = ("-created",)
         app_label = "stats"
+        indexes = [
+            models.Index(fields=["year", "rubrique"]),
+            models.Index(fields=["year", "rubrique", "code_departement_insee"]),
+        ]
