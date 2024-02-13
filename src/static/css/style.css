@@ -58,11 +58,11 @@
   grid-column: span 6;
 }
 
-.operation-type-section > div:nth-child(1) {
+.operation-type-section>div:nth-child(1) {
   grid-column: span 8;
 }
 
-.operation-type-section > div:nth-child(2) {
+.operation-type-section>div:nth-child(2) {
   grid-column: span 4;
 }
 
@@ -76,7 +76,7 @@
   display: none;
 }
 
-.spinner > div {
+.spinner>div {
   background-color: #333;
   height: 100%;
   width: 6px;
@@ -107,8 +107,13 @@
 }
 
 @-webkit-keyframes sk-stretchdelay {
-  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
-  20% { -webkit-transform: scaleY(1.0) }
+  0%, 40%, 100% {
+    -webkit-transform: scaleY(0.4)
+  }
+
+  20% {
+    -webkit-transform: scaleY(1.0)
+  }
 }
 
 @keyframes sk-stretchdelay {
@@ -116,6 +121,7 @@
     transform: scaleY(0.4);
     -webkit-transform: scaleY(0.4);
   }
+
   20% {
     transform: scaleY(1.0);
     -webkit-transform: scaleY(1.0);
@@ -143,10 +149,25 @@
 .accordion-content.active {
   display: block;
 }
-.fr-tabs
-{
+
+.fr-tabs {
   margin-bottom: 2rem;
 }
-.fr-tabs__panel{
+
+.fr-tabs__panel {
   border: 1px solid #dddddd;
+}
+
+/* LG screens*/
+@media screen and (max-width:992px) {
+  .fr-callout {
+    grid-column: span 6;
+  }
+}
+
+/* MD screens*/
+@media screen and (max-width:768px) {
+  .fr-callout {
+    grid-column: span 12;
+  }
 }
