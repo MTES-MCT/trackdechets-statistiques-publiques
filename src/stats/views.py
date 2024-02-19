@@ -7,7 +7,13 @@ from django.core.mail import EmailMessage
 from django.http import Http404, JsonResponse
 from django.views.generic import TemplateView
 
-from stats.models import Computation, DepartementsComputation, InstallationsComputation, RegionsComputation
+from stats.models import (
+    Computation,
+    DepartementsComputation,
+    FranceComputation,
+    InstallationsComputation,
+    RegionsComputation,
+)
 
 
 class BaseRender(TemplateView):
@@ -132,18 +138,6 @@ def icpe_view_many(request, layer, year, rubrique):
             ],
             "layer_key": "code_aiot",
         },
-        "regions": {
-            "cls": RegionsComputation,
-            "fields": [
-                "code_region_insee",
-                "nom_region",
-                "quantite_autorisee",
-                "taux_consommation",
-                metric_name,
-                "nombre_installations",
-            ],
-            "layer_key": "code_region_insee",
-        },
         "departements": {
             "cls": DepartementsComputation,
             "fields": [
@@ -156,6 +150,30 @@ def icpe_view_many(request, layer, year, rubrique):
             ],
             "layer_key": "code_departement_insee",
         },
+        "regions": {
+            "cls": RegionsComputation,
+            "fields": [
+                "code_region_insee",
+                "nom_region",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "nombre_installations",
+            ],
+            "layer_key": "code_region_insee",
+        },
+        "france": {
+            "cls": FranceComputation,
+            "fields": [
+                "code_region_insee",
+                "nom_region",
+                "quantite_autorisee",
+                "taux_consommation",
+                metric_name,
+                "nombre_installations",
+            ],
+            "layer_key": None,
+        },
     }
 
     layer_config = layers_configs[layer]
@@ -164,6 +182,7 @@ def icpe_view_many(request, layer, year, rubrique):
     layer_key = layer_config["layer_key"]
 
     results = {}
+
     for obj in model.objects.filter(year=year, rubrique=rubrique).values(*fields):
         obj_clean = {
             k: e if not isinstance(e, float) or not (math.isnan(e) or math.isinf(e)) else None for k, e in obj.items()
@@ -182,13 +201,13 @@ def icpe_get_graph(request, layer, year, rubrique, code):
             "cls": InstallationsComputation,
             "specific_filter": {"code_aiot": code},
         },
-        "regions": {
-            "cls": RegionsComputation,
-            "specific_filter": {"code_region_insee": code},
-        },
         "departements": {
             "cls": DepartementsComputation,
             "specific_filter": {"code_departement_insee": code},
+        },
+        "regions": {
+            "cls": RegionsComputation,
+            "specific_filter": {"code_region_insee": code},
         },
     }
 
@@ -205,3 +224,33 @@ def icpe_get_graph(request, layer, year, rubrique, code):
         resp = {"graph": json.loads(result["graph"])}
 
     return JsonResponse(resp)
+
+
+def icpe_view_france(request, year, rubrique):
+    metric_name = "moyenne_quantite_journaliere_traitee"
+    if rubrique == "2760-1":
+        metric_name = "cumul_quantite_traitee"
+    fields = [
+        "quantite_autorisee",
+        metric_name,
+        "taux_consommation",
+        "nombre_installations",
+        "graph",
+    ]
+    result = FranceComputation.objects.filter(year=year, rubrique=rubrique).first()
+
+    if not result:
+        raise Http404
+
+    result_dict = {}
+    for k in fields:
+        val = getattr(result, k)
+
+        if k == "graph":
+            result_dict[k] = json.loads(val)
+        elif isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
+            result_dict[k] = None
+        else:
+            result_dict[k] = val
+
+    return JsonResponse({"data": result_dict})

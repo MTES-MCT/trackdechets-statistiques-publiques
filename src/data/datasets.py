@@ -15,6 +15,7 @@ from data.queries import (
     icpe_installations_waste_processed_sql,
     icpe_departements_waste_processed_sql,
     icpe_regions_waste_processed_sql,
+    icpe_france_waste_processed_sql,
 )
 
 from .data_extract import extract_dataset
@@ -39,6 +40,7 @@ class Computed:
     icpe_installations_waste_processed_data: pl.DataFrame
     icpe_departements_waste_processed_data: pl.DataFrame
     icpe_regions_waste_processed_data: pl.DataFrame
+    icpe_france_waste_processed_data: pl.DataFrame
 
 
 def get_data_df():
@@ -69,6 +71,7 @@ def get_data_df():
     icpe_installations_waste_processed_data = extract_dataset(icpe_installations_waste_processed_sql)
     icpe_departements_waste_processed_data = extract_dataset(icpe_departements_waste_processed_sql)
     icpe_regions_waste_processed_data = extract_dataset(icpe_regions_waste_processed_sql)
+    icpe_france_waste_processed_data = extract_dataset(icpe_france_waste_processed_sql)
 
     data = Computed(
         bsdd_weekly_data=bsdd_weekly_data,
@@ -84,5 +87,6 @@ def get_data_df():
         icpe_installations_waste_processed_data=icpe_installations_waste_processed_data,
         icpe_departements_waste_processed_data=icpe_departements_waste_processed_data,
         icpe_regions_waste_processed_data=icpe_regions_waste_processed_data,
+        icpe_france_waste_processed_data=icpe_france_waste_processed_data,
     )
     return data

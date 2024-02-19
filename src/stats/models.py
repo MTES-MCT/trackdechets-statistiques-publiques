@@ -106,6 +106,38 @@ class InstallationsComputation(models.Model):
         ]
 
 
+class DepartementsComputation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    year = models.PositiveSmallIntegerField(default=2023)
+    created = models.DateTimeField(_("Created"), default=timezone.now)
+
+    rubrique = models.TextField()
+
+    code_departement_insee = models.TextField()
+    nom_departement = models.TextField()
+    code_region_insee = models.TextField()
+
+    quantite_autorisee = models.FloatField(
+        null=True,
+    )
+
+    nombre_installations = models.FloatField(default=0)
+    cumul_quantite_traitee = models.FloatField(null=True)
+    moyenne_quantite_journaliere_traitee = models.FloatField(null=True)
+    taux_consommation = models.FloatField(null=True)
+    graph = models.JSONField(default=dict, null=True)
+
+    class Meta:
+        verbose_name = _("Regions Computation")
+        verbose_name_plural = _("Regions Computations")
+        ordering = ("-created",)
+        app_label = "stats"
+        indexes = [
+            models.Index(fields=["year", "rubrique"]),
+            models.Index(fields=["year", "rubrique", "code_departement_insee"]),
+        ]
+
+
 class RegionsComputation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     year = models.PositiveSmallIntegerField(default=2023)
@@ -137,16 +169,12 @@ class RegionsComputation(models.Model):
         ]
 
 
-class DepartementsComputation(models.Model):
+class FranceComputation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     year = models.PositiveSmallIntegerField(default=2023)
     created = models.DateTimeField(_("Created"), default=timezone.now)
 
     rubrique = models.TextField()
-
-    code_departement_insee = models.TextField()
-    nom_departement = models.TextField()
-    code_region_insee = models.TextField()
 
     quantite_autorisee = models.FloatField(
         null=True,
@@ -159,11 +187,10 @@ class DepartementsComputation(models.Model):
     graph = models.JSONField(default=dict, null=True)
 
     class Meta:
-        verbose_name = _("Regions Computation")
-        verbose_name_plural = _("Regions Computations")
+        verbose_name = _("France Computation")
+        verbose_name_plural = _("France Computations")
         ordering = ("-created",)
         app_label = "stats"
         indexes = [
             models.Index(fields=["year", "rubrique"]),
-            models.Index(fields=["year", "rubrique", "code_departement_insee"]),
         ]

@@ -29,5 +29,6 @@ def build_dataframes():
         "icpe_installations_waste_processed_data",
         "icpe_departements_waste_processed_data",
         "icpe_regions_waste_processed_data",
+        "icpe_france_waste_processed_data",
     ]:
         getattr(bsd_data, dataset_name).write_parquet(f"temp_data/{dataset_name}.parquet")

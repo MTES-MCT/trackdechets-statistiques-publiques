@@ -786,12 +786,10 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
     return fig
 
 
-def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.DataFrame:
-    pivot_value = df.select(pl.col(key_column).max()).item()
-
+def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -> pl.DataFrame:
     authorized_quantity = df.select(pl.col("quantite_autorisee").max()).item()
 
-    df_waste = df
+    df_waste = df.filter(pl.col("day_of_processing").is_not_null())
 
     trace_hover_template = "Le %{x|%d-%m-%Y} : <b>%{y:.2f}t</b> traitées<extra></extra>"
     trace_name = "Quantité journalière traitée"
@@ -802,7 +800,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
 
     if rubrique == "2760-1":
         group_by_expr = pl.col("day_of_processing").dt.truncate("1mo")
-        df_waste = df.group_by(group_by_expr).agg(pl.col("quantite_traitee").sum())
+        df_waste = df_waste.group_by(group_by_expr).agg(pl.col("quantite_traitee").sum())
         df_waste = df_waste.sort(pl.col("day_of_processing")).with_columns(
             pl.col("quantite_traitee").cum_sum().alias("quantite_traitee_cummulee")
         )
@@ -898,4 +896,8 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str, rubrique: str) -> pl.Da
         linecolor="black",
     )
 
-    return pl.DataFrame([[pivot_value], [fig.to_json()]], [key_column, "graph"])
+    res = fig.to_json()
+    if key_column is not None:
+        pivot_value = df.select(pl.col(key_column).max()).item()
+        res = pl.DataFrame([[pivot_value], [fig.to_json()]], [key_column, "graph"])
+    return res

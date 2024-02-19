@@ -34,6 +34,17 @@ async function loadFeaturesGraph(layer, year, rubrique, code) {
 
 }
 
+async function loadFranceStats(year, rubrique) {
+
+    if ((featuresStats == {}) || (featuresStats?.[`france.${year}.${rubrique}`] == undefined)) {
+        console.log("cache miss features stats")
+        response = await fetch(`/stats/icpe/france/${year}/${rubrique}`);
+        data = await response.json();
+        featuresStats[`france.${year}.${rubrique}`] = data["data"];
+    }
+
+}
+
 // Fonctions pour le zoom
 function zoomToPolygon(e) {
     map.fitBounds(e.target.getBounds(), { padding: [100, 100] });
@@ -81,6 +92,7 @@ async function showRegionInfo(event, rubrique, featureType) {
     }
 
     if (featureType == "installation") {
+
         e = document.createElement("h2")
         e.textContent = stats.raison_sociale
         regionInfoDiv.append(e)
@@ -205,21 +217,26 @@ function styleSelected(e) {
 }
 
 // Gestionnaires d'événements pour interagir avec les polygones et les points
-function clickOnPolygonHandler(e, rubrique) {
+function clickOnPolygonHandler(e, rubrique, featureType) {
     zoomToPolygon(e);
-    showRegionInfo(e, rubrique, "region");
+    toggleFranceStats("none");
+    showRegionInfo(e, rubrique, featureType);
     styleSelected(e);
+
 }
 
-function onEachPolygonFeature(feature, layer, rubrique) {
+
+
+function onEachPolygonFeature(feature, layer, rubrique, featureType) {
     layer.on({
-        click: (e) => { clickOnPolygonHandler(e, rubrique) }
+        click: (e) => { clickOnPolygonHandler(e, rubrique, featureType) }
     });
 
 }
 
 function clickOnPointHandler(e, rubrique) {
     zoomToPoint(e);
+    toggleFranceStats("none");
     showRegionInfo(e, rubrique, "installation");
 }
 
@@ -277,6 +294,7 @@ async function loadInstallations(year, rubrique) {
     installationsLayer = L.layerGroup(markers);
 }
 
+// Chargement des géométries départementales et régionales
 async function loadRegionalGeojsons() {
     if (!regionsGeojson) {
         await loadGeoJSONData(regionsGeoJSONUrl).then((data) => {
@@ -289,6 +307,88 @@ async function loadRegionalGeojsons() {
             departementsGeojson = data;
         });
     };
+
+}
+
+// Affichage des statistiques pour la france entière
+async function showFranceStats(rubrique, year) {
+    await loadFranceStats(year, rubrique);
+
+    var stats = featuresStats[`france.${selectedYear}.${selectedRubrique}`];
+
+
+    var processedQuantityKey = "moyenne_quantite_journaliere_traitee";
+    var unit = "t/j";
+    var processedQuantityPrefix = "Quantité journalière traitée en moyenne :";
+    var usedQuantityPrefix = "Quantité journalière consommée en moyenne :";
+    if (rubrique == "2760-1") {
+        processedQuantityKey = "cumul_quantite_traitee";
+        unit = "t/an";
+        processedQuantityPrefix = "Quantité traitée en cummulé :"
+        usedQuantityPrefix = "Quantité consommée sur l'année :"
+    }
+
+    var franceInfoDiv = document.getElementById("france-info");
+
+    franceInfoDiv.replaceChildren();
+
+    e = document.createElement("p");
+    e.textContent = `Nombre d'installations : ${stats.nombre_installations}`
+    franceInfoDiv.append(e)
+
+    e = document.createElement("p");
+    var authorizedQuantity = stats.quantite_autorisee != null ? formatInt(stats.quantite_autorisee) : "N/A";
+    e.textContent = `Quantité autorisée : ${authorizedQuantity} ${unit}`
+    franceInfoDiv.append(e);
+
+    e = document.createElement("p");
+    var processedQuantity = stats[processedQuantityKey]
+    e.textContent = `${processedQuantityPrefix} ${formatFloat(processedQuantity)} ${unit}`
+    franceInfoDiv.append(e);
+
+    e = document.createElement("p");
+    var usedQuantity = stats.taux_consommation != null ? formatPercentage(stats.taux_consommation) : "N/A";
+    e.textContent = `${usedQuantityPrefix} ${usedQuantity}`
+    franceInfoDiv.append(e);
+
+    idDivGraph = "france-graph";
+    Plotly.purge(idDivGraph);
+    if (stats && stats.graph) {
+        var plotData = stats.graph;
+
+
+        Plotly.newPlot(
+            idDivGraph,
+            plotData.data,
+            plotData.layout,
+            {
+                "responsive": true,
+
+            }
+        );
+        Plotly.relayout(
+            idDivGraph,
+            {
+                "autosize": true
+            }
+        )
+    }
+
+    toggleFranceStats("block")
+
+}
+
+function toggleFranceStats(display) {
+    var franceStatsDiv = document.getElementById("france-stats-container");
+    var regionStatsDiv = document.getElementById("region-stats-container");
+    if (display == "block") {
+        franceStatsDiv.style.display = display;
+        regionStatsDiv.style.display = "none"
+    } else if (display == "none") {
+        franceStatsDiv.style.display = display;
+        regionStatsDiv.style.display = "block"
+    }
+
 
 }
 
@@ -308,7 +408,7 @@ async function prepareMap(layerName, rubrique, year) {
         regionsLayer = L.geoJSON(regionsGeojson,
             {
                 style: stylePolygon,
-                onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique) }
+                onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique, "regions") }
             });
         map.addLayer(regionsLayer);
     }
@@ -317,7 +417,7 @@ async function prepareMap(layerName, rubrique, year) {
         departementsLayer = L.geoJSON(departementsGeojson,
             {
                 style: stylePolygon,
-                onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique) }
+                onEachFeature: (feature, layer) => { onEachPolygonFeature(feature, layer, rubrique, "departements") }
             });
         map.addLayer(departementsLayer);
     }
@@ -343,13 +443,14 @@ document.getElementById('year-select').addEventListener('change', function (e) {
 
     selectedYear = e.target.value;
     prepareMap(selectedLayer, selectedRubrique, selectedYear);
-
+    showFranceStats(selectedRubrique, selectedYear);
 });
 
 // Gestionnaire d'événements pour le sélecteur de rubrique
 document.getElementById('rubrique-select').addEventListener('change', function (e) {
     selectedRubrique = e.target.value;
     prepareMap(selectedLayer, selectedRubrique, selectedYear);
+    showFranceStats(selectedRubrique, selectedYear);
 
 });
 
@@ -389,6 +490,21 @@ document.getElementById('toggle-installations').addEventListener('change', funct
 
 });
 
+
+// Gestionnaires d'événements pour revenir aux stats France
+document.getElementById('back-to-france').addEventListener('click', function (e) {
+
+    if (currentSelectedLayer) {
+        currentSelectedLayer.setStyle({
+            color: '#2f3640',
+            weight: 1,
+        });
+    }
+    toggleFranceStats("block");
+
+
+
+});
 
 
 // Styles pour les régions/départements

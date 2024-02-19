@@ -18,7 +18,13 @@ from data.figures_factory import (
 )
 from data.utils import get_data_date_interval_for_year
 
-from ..models import Computation, DepartementsComputation, InstallationsComputation, RegionsComputation
+from ..models import (
+    Computation,
+    DepartementsComputation,
+    FranceComputation,
+    InstallationsComputation,
+    RegionsComputation,
+)
 
 
 def build_figs(year: int, clear_year: bool = False):
@@ -51,6 +57,7 @@ def build_figs(year: int, clear_year: bool = False):
         "temp_data/icpe_departements_waste_processed_data.parquet"
     )
     icpe_regions_waste_processed_data = pl.read_parquet("temp_data/icpe_regions_waste_processed_data.parquet")
+    icpe_france_waste_processed_data = pl.read_parquet("temp_data/icpe_france_waste_processed_data.parquet")
 
     bs_weekly_datasets = {
         "BSDD": bsdd_weekly_data_df,
@@ -220,3 +227,10 @@ def build_figs(year: int, clear_year: bool = False):
     DepartementsComputation.objects.bulk_create(
         DepartementsComputation(**e) for e in icpe_departements_data.iter_rows(named=True)
     )
+
+    icpe_france_data = create_icpe_regional_df(
+        icpe_france_waste_processed_data,
+        None,
+        date_interval,
+    )
+    FranceComputation.objects.bulk_create(FranceComputation(**e) for e in icpe_france_data.iter_rows(named=True))

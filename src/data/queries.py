@@ -67,3 +67,10 @@ select
 from
     refined_zone_stats_publiques.icpe_regions_daily_processed_waste
 """
+
+icpe_france_waste_processed_sql = """
+select
+    *
+from
+    refined_zone_stats_publiques.icpe_france_daily_processed_waste
+"""

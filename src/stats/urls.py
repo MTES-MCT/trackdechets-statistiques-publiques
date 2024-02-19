@@ -11,6 +11,7 @@ from .views import (
     UserView,
     digest_view,
     TemplateView,
+    icpe_view_france,
     icpe_view_many,
     icpe_get_graph,
 )
@@ -27,6 +28,7 @@ urlpatterns = [
     path("users/<int:year>", UserView.as_view(), name="users"),
     path("digest/", digest_view, name="stats_digest"),
     path("map/", TemplateView.as_view(template_name="map.html"), name="map"),
+    path("icpe/france/<int:year>/<str:rubrique>", icpe_view_france, name="icpe france"),
     path("icpe/<str:layer>/<int:year>/<str:rubrique>", icpe_view_many, name="icpe many"),
     path("icpe/<str:layer>/<int:year>/<str:rubrique>/<str:code>", icpe_get_graph, name="icpe get graph"),
 ]

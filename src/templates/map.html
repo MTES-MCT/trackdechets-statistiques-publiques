@@ -30,6 +30,7 @@
                 <div class="fr-select-group">
                     <label class="fr-label" for="year-select">Année :</label>
                     <select class="fr-select" id="year-select" name="select-annee">
+                        <option value="2024">2024</option>
                         <option selected value="2023">2023</option>
                         <option value="2022">2022</option>
                     </select>
@@ -68,8 +69,16 @@
             <div id="main-container">
                 <div id="map"></div>
                 <div id="side-container">
-                    <div id="region-info"></div>
-                    <div id="graph"></div>
+                    <div id="france-stats-container">
+                        <h2>France</h2>
+                        <div id="france-info"></div>
+                        <div id="france-graph"></div>
+                    </div>
+                    <div id="region-stats-container">
+                        <button id="back-to-france" class="fr-btn fr-btn--icon-left fr-icon-checkbox-circle-line">Retour</button>
+                        <div id="region-info"></div>
+                        <div id="graph"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,6 +149,7 @@
         
 
         prepareMap(selectedLayer, selectedRubrique, selectedYear)
+        showFranceStats(selectedRubrique, selectedYear)
         </script>
     </body>
 </html>
