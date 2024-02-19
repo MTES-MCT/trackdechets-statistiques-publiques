@@ -170,7 +170,7 @@ async function showRegionInfo(event, rubrique, featureType) {
 
     }
 
-    idDivGraph = "graph";
+    idDivGraph = "region-graph";
     Plotly.purge(idDivGraph);
     await loadFeaturesGraph(layer, selectedYear, selectedRubrique, key);
     if (stats && stats.graph) {

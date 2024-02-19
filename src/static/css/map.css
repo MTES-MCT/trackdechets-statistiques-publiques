@@ -1,7 +1,15 @@
 #page-container {
     display: flex;
-    height: 100vh;
+    height: 100%;
     flex-direction: column;
+}
+
+
+#main-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 70vh;
+    display: flex;
 }
 
 #viz-options {
@@ -9,13 +17,12 @@
     justify-content: center;
     align-items: self-start;
     gap: 30px;
-    margin-bottom: 20px;
     padding: 10px;
 }
 
 #map {
     flex-grow: 1;
-    width: 100%;
+    height: 100%;
 }
 
 
@@ -49,14 +56,13 @@
 
 #side-container {
     min-width: 40%;
-    height: 100%;
     padding: 20px;
     background: white;
     border: 1px solid #ddd;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
 }
 
-#graph {
+.graph {
     max-height: 350px;
 }
 
@@ -69,11 +75,6 @@
     margin: 0;
 }
 
-#main-container {
-    flex-grow: 1;
-    width: 100%;
-    display: flex;
-}
 
 .leaflet-control-zoom a {
     /* Important car le DSFR ajoute sinon une barre au boutons de contrôle de Zoom de leaflet */

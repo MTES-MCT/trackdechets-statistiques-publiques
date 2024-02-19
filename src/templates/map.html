@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="{% static "css/map.css" %}" />
         <link rel="stylesheet" href="{% static "css/dsfr.main.min.css" %}" />
         <link rel="stylesheet" href="{% static "css/style.css" %}" />
+        <link href="{% static "css/utility/utility.min.css" %}" rel="stylesheet">
     </head>
     <body style="margin: 0;">
         <!-- Define SVG pattern -->
@@ -72,12 +73,13 @@
                     <div id="france-stats-container">
                         <h2>France</h2>
                         <div id="france-info"></div>
-                        <div id="france-graph"></div>
+                        <div id="france-graph" class="graph"></div>
                     </div>
                     <div id="region-stats-container">
-                        <button id="back-to-france" class="fr-btn fr-btn--icon-left fr-icon-checkbox-circle-line">Retour</button>
+                        <button id="back-to-france"
+                                class="fr-btn fr-btn--icon-left fr-icon-arrow-left-line">Retour</button>
                         <div id="region-info"></div>
-                        <div id="graph"></div>
+                        <div id="region-graph" class="graph"></div>
                     </div>
                 </div>
             </div>
