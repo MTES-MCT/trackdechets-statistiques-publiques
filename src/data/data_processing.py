@@ -155,7 +155,10 @@ def create_icpe_installations_df(
 
         df_installations_filtered = df_installations_filtered.group_by("code_aiot").agg(
             pl.col("siret").max(),
-            pl.col("quantite_autorisee").sum(),
+            pl.when(pl.col("quantite_autorisee").is_null().all())
+            .then(None)
+            .otherwise(pl.col("quantite_autorisee").sum())
+            .alias("quantite_autorisee"),
             pl.col("latitude").max(),
             pl.col("longitude").max(),
             pl.col("raison_sociale").max(),
