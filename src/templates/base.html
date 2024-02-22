@@ -9,7 +9,7 @@
         <title>
             {% block title %}{% endblock %}
         </title>
-        <link rel="stylesheet" href="{% static "css/dsfr.main.min.css" %}" />
+        <link rel="stylesheet" href="{% static "css/dsfr.min.css" %}" />
         <link rel="stylesheet" href="{% static "css/style.css" %}" />
         <link rel="apple-touch-icon" sizes="120x120" href="{% static "img/apple-touch-icon.png" %}">
         <link rel="icon" type="image/png" sizes="32x32" href="{% static "img/favicon-32x32.png" %}">
@@ -21,7 +21,7 @@
     <body>
         {% block main %}{% endblock %}
         <script src="{% static "js/htmx.min.js" %}"></script>
-        <script src="{% static "js/plotly-2.18.1.min.js" %}" charset="utf-8"></script>
+        <script src="{% static "js/plotly-2.27.0.min.js" %}" charset="utf-8"></script>
         {% block scripts %}{% endblock %}
     </body>
 </html>

@@ -109,6 +109,9 @@ def create_weekly_scatter_figure(
         Figure object ready to be plotted.
     """
 
+    if len(bs_weekly_data) == 0:
+        return go.Figure()
+
     match bs_type:
         case "BSFF":
             plot_configs = WEEKLY_BSFF_STATS_PLOT_CONFIGS
@@ -662,22 +665,34 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
 
         id_sep = "#"
 
-        id_exprs = [pl.lit("Tous les établissements")]
+        col_names_to_agg = []
         if i < (len(categories) - 1):
             for tmp_cat in reversed(categories[i + 1 :]):
-                id_exprs.append(pl.col(f"libelle_{tmp_cat}").max())
-        id_exprs.append(pl.col(f"libelle_{cat}").max())
-        agg_exprs.append(pl.concat_str(id_exprs, sep=id_sep).alias("ids"))
-
-        temp_colors = colors
-        if cat != "section":
-            agg_exprs.append(pl.col("libelle_section").max())
+                tmp_col_name = f"libelle_{tmp_cat}"
+                agg_exprs.append(pl.col(tmp_col_name).max())
+                col_names_to_agg.append(tmp_col_name)
+        col_names_to_agg.append(f"libelle_{cat}")
+        # agg_exprs.extend(id_exprs)
+        # pl.concat_str(id_exprs, separator=id_sep).alias("ids")
 
         temp_df = temp_df.groupby(f"code_{cat}", maintain_order=True).agg(agg_exprs)
+
+        id_expr = pl.concat_str(
+            [pl.lit("Tous les établissements")] + [pl.col(e) for e in col_names_to_agg], separator=id_sep
+        )
+        temp_df = temp_df.with_columns(ids=id_expr)
+
+        temp_colors = colors
         temp_df = temp_df.join(temp_colors, on="libelle_section", how="left")
 
         parent_exp = (
-            pl.col("ids").str.split(id_sep).arr.reverse().arr.slice(1).arr.reverse().arr.join(id_sep).alias("parents")
+            pl.col("ids")
+            .str.split(id_sep)
+            .list.reverse()
+            .list.slice(1)
+            .list.reverse()
+            .list.join(id_sep)
+            .alias("parents")
         )
 
         labels_expr = pl.concat_str(
@@ -711,7 +726,18 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
             ]
         ).alias("hover_texts")
 
-        dfs.append(temp_df.with_columns([labels_expr, hover_expr, parent_exp]))
+        dfs.append(
+            temp_df.with_columns([labels_expr, hover_expr, parent_exp]).select(
+                [
+                    pl.col("ids"),
+                    pl.col("labels"),
+                    pl.col("parents"),
+                    pl.col("value"),
+                    pl.col("hover_texts"),
+                    pl.col("color"),
+                ]
+            )
+        )
 
     # Build plotly necessaries lists
     ids = ["Tous les établissements"]
@@ -758,3 +784,120 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
         modebar_activecolor="rgba(146, 146, 146, 0.7)",
     )
     return fig
+
+
+def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -> pl.DataFrame:
+    authorized_quantity = df.select(pl.col("quantite_autorisee").max()).item()
+
+    df_waste = df.filter(pl.col("day_of_processing").is_not_null())
+
+    trace_hover_template = "Le %{x|%d-%m-%Y} : <b>%{y:.2f}t</b> traitées<extra></extra>"
+    trace_name = "Quantité journalière traitée"
+    trace_x_axis_margin = 7
+    trace_xaxis_tickformat = None
+    trace_dtick = None
+    gaph_class = go.Scatter
+
+    if rubrique == "2760-1":
+        group_by_expr = pl.col("day_of_processing").dt.truncate("1mo")
+        df_waste = df_waste.group_by(group_by_expr).agg(pl.col("quantite_traitee").sum())
+        df_waste = df_waste.sort(pl.col("day_of_processing")).with_columns(
+            pl.col("quantite_traitee").cum_sum().alias("quantite_traitee_cummulee")
+        )
+
+        trace_hover_template = "En %{x|%B} : <b>%{y:.2f}t</b> traitées<extra></extra>"
+        trace_name = "Quantité mensuelle traitée"
+        trace_x_axis_margin = 30
+        trace_xaxis_tickformat = "%b %y"
+        trace_dtick = "M1"
+        gaph_class = go.Bar
+
+    data = df_waste.to_dict(as_series=False)
+
+    traces = []
+    traces.append(
+        gaph_class(
+            x=data["day_of_processing"],
+            y=data["quantite_traitee"],
+            hovertemplate=trace_hover_template,
+            name=trace_name,
+            marker_color="#8D533E",
+        )
+    )
+    max_y = max(e for e in data["quantite_traitee"] if e is not None)
+    if rubrique == "2760-1":
+        traces.append(
+            go.Scatter(
+                x=data["day_of_processing"],
+                y=data["quantite_traitee_cummulee"],
+                texttemplate="%{y:.2s}t",
+                textposition="top center",
+                hovertemplate="En %{x|%B} : <b>%{y:.2f}t</b> traitées en cummulé sur l'année<extra></extra>",
+                line_width=2,
+                name="Quantité traitée cummulée",
+                line_color="#272747",
+                mode="lines+text+markers",
+            )
+        )
+        max_y = max(e for e in data["quantite_traitee_cummulee"] if e is not None)
+
+    fig = go.Figure(traces)
+
+    fig.update_layout(
+        margin={"t": 30, "l": 35, "r": 80},
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            bgcolor="rgba(0,0,0,0)",
+            x=1,
+        ),
+        paper_bgcolor="#fff",
+        plot_bgcolor="rgba(0,0,0,0)",
+        autosize=True,
+        height=400,
+    )
+
+    if authorized_quantity:
+        fig.add_hline(
+            y=authorized_quantity,
+            line_dash="dot",
+            line_color="red",
+            line_width=3,
+        )
+        fig.add_annotation(
+            xref="x domain",
+            yref="y",
+            x=1,
+            y=authorized_quantity,
+            text=f"Quantité maximale <br>autorisée : <b>{authorized_quantity:.0f}</b> t/an",
+            font_color="red",
+            xanchor="left",
+            showarrow=False,
+            textangle=-90,
+            font_size=13,
+        )
+        max_y = max(max_y, authorized_quantity)
+
+    fig.update_yaxes(gridcolor="#ccc", title="tonnes", tick0=0, range=[0, max_y * 1.3])
+
+    fig.update_xaxes(
+        range=[
+            datetime(year=min(data["day_of_processing"]).year, month=1, day=1) - timedelta(days=trace_x_axis_margin),
+            datetime(year=min(data["day_of_processing"]).year, month=12, day=31) + timedelta(days=trace_x_axis_margin),
+        ],
+        tickformat=trace_xaxis_tickformat,
+        tick0=min(data["day_of_processing"]),
+        dtick=trace_dtick,
+        gridcolor="#ccc",
+        zeroline=True,
+        linewidth=1,
+        linecolor="black",
+    )
+
+    res = fig.to_json()
+    if key_column is not None:
+        pivot_value = df.select(pl.col(key_column).max()).item()
+        res = pl.DataFrame([[pivot_value], [fig.to_json()]], [key_column, "graph"])
+    return res

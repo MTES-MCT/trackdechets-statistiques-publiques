@@ -18,9 +18,10 @@ logger = logging.getLogger(__name__)
 def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
-    data_df = pl.read_sql(sql_string, connection_uri=settings.WAREHOUSE_URL)
-    if "semaine" in data_df.columns:
-        data_df = data_df.with_columns(pl.col("semaine").dt.replace_time_zone(None))
+    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL)
+    for col in ["semaine", "day_of_processing"]:
+        if col in data_df.columns:
+            data_df = data_df.with_columns(pl.col(col).dt.replace_time_zone(None))
     logger.info(
         "Loading stats duration: %s (query : %s)",
         time.time() - started_time,
@@ -39,9 +40,9 @@ def get_processing_operation_codes_data() -> pl.DataFrame:
     DataFrame
         DataFrame with processing operations codes and description.
     """
-    data = pl.read_sql(
+    data = pl.read_database_uri(
         "SELECT * FROM trusted_zone.codes_operations_traitements",
-        connection_uri=settings.WAREHOUSE_URL,
+        uri=settings.WAREHOUSE_URL,
     )
 
     return data
@@ -56,9 +57,9 @@ def get_departement_geographical_data() -> pl.DataFrame:
     DataFrame
         DataFrame with INSEE department geographical data.
     """
-    data = pl.read_sql(
+    data = pl.read_database_uri(
         "SELECT * FROM trusted_zone_insee.code_geo_departements",
-        connection_uri=settings.WAREHOUSE_URL,
+        uri=settings.WAREHOUSE_URL,
     )
 
     return data
@@ -73,7 +74,7 @@ def get_waste_nomenclature_data() -> pl.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pl.read_sql("SELECT * FROM trusted_zone.code_dechets", connection_uri=settings.WAREHOUSE_URL)
+    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL)
     return data
 
 

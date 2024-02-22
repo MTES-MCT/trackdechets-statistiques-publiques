@@ -1,6 +1,8 @@
 import polars as pl
 from data.data_extract import get_processing_operation_codes_data
 from data.data_processing import (
+    create_icpe_installations_df,
+    create_icpe_regional_df,
     get_recovered_and_eliminated_quantity_processed_by_week_series,
     get_total_bs_created,
     get_total_number_of_accounts_created,
@@ -16,13 +18,25 @@ from data.figures_factory import (
 )
 from data.utils import get_data_date_interval_for_year
 
-from ..models import Computation
+from ..models import (
+    Computation,
+    DepartementsComputation,
+    FranceComputation,
+    InstallationsComputation,
+    RegionsComputation,
+)
 
 
 def build_figs(year: int, clear_year: bool = False):
-    existing_computations = Computation.objects.filter(year=year)
+    existing_computations = [
+        Computation.objects.filter(year=year),
+        DepartementsComputation.objects.filter(year=year),
+        InstallationsComputation.objects.filter(year=year),
+        RegionsComputation.objects.filter(year=year),
+    ]
     if clear_year:
-        existing_computations.delete()
+        for computation_o in existing_computations:
+            computation_o.delete()
 
     date_interval = get_data_date_interval_for_year(year)
 
@@ -35,6 +49,15 @@ def build_figs(year: int, clear_year: bool = False):
     weekly_waste_processed_data_df = pl.read_parquet("temp_data/weekly_waste_processed_data.parquet")
     accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
     waste_processed_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_processed_by_naf_annual_stats.parquet")
+    icpe_installations_data = pl.read_parquet("temp_data/icpe_installations_data.parquet")
+    icpe_installations_waste_processed_data = pl.read_parquet(
+        "temp_data/icpe_installations_waste_processed_data.parquet"
+    )
+    icpe_departements_waste_processed_data = pl.read_parquet(
+        "temp_data/icpe_departements_waste_processed_data.parquet"
+    )
+    icpe_regions_waste_processed_data = pl.read_parquet("temp_data/icpe_regions_waste_processed_data.parquet")
+    icpe_france_waste_processed_data = pl.read_parquet("temp_data/icpe_france_waste_processed_data.parquet")
 
     bs_weekly_datasets = {
         "BSDD": bsdd_weekly_data_df,
@@ -153,6 +176,7 @@ def build_figs(year: int, clear_year: bool = False):
     produced_quantity_by_category_fig = create_treemap_companies_figure(
         waste_processed_by_naf_annual_stats_df, use_quantity=True, year=year
     )
+
     Computation.objects.create(
         year=year,
         total_bs_created=total_bs_created,
@@ -180,3 +204,33 @@ def build_figs(year: int, clear_year: bool = False):
         user_created_weekly=user_created_weekly_fig.to_json(),
         company_counts_by_category=treemap_companies_figure.to_json(),
     )
+
+    icpe_installations_data = create_icpe_installations_df(
+        icpe_installations_data, icpe_installations_waste_processed_data, date_interval
+    )
+    InstallationsComputation.objects.bulk_create(
+        InstallationsComputation(**e) for e in icpe_installations_data.iter_rows(named=True)
+    )
+
+    icpe_regions_data = create_icpe_regional_df(
+        icpe_regions_waste_processed_data,
+        "code_region_insee",
+        date_interval,
+    )
+    RegionsComputation.objects.bulk_create(RegionsComputation(**e) for e in icpe_regions_data.iter_rows(named=True))
+
+    icpe_departements_data = create_icpe_regional_df(
+        icpe_departements_waste_processed_data,
+        "code_departement_insee",
+        date_interval,
+    )
+    DepartementsComputation.objects.bulk_create(
+        DepartementsComputation(**e) for e in icpe_departements_data.iter_rows(named=True)
+    )
+
+    icpe_france_data = create_icpe_regional_df(
+        icpe_france_waste_processed_data,
+        None,
+        date_interval,
+    )
+    FranceComputation.objects.bulk_create(FranceComputation(**e) for e in icpe_france_data.iter_rows(named=True))
