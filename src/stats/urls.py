@@ -1,5 +1,5 @@
 from django.urls import path
-
+from django.views.generic import TemplateView
 from .views import (
     BaseRender,
     BsdasriView,
@@ -10,7 +10,6 @@ from .views import (
     CompanyView,
     UserView,
     digest_view,
-    TemplateView,
     icpe_view_france,
     icpe_view_many,
     icpe_get_graph,
