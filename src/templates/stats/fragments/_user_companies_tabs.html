@@ -8,7 +8,7 @@
                 aria-controls="tabpanel-1-panel"
                 hx-get="{% url 'companies' year=computation.year %}"
                 hx-trigger="click"
-                hx-indicator="#users_companies_spinner"
+                hx-indicator="#users_companies_spinner2"
                 hx-target="#users_companies_wrapper">Établissements</button>
     </li>
     <li role="presentation">
@@ -20,7 +20,8 @@
                 aria-controls="tabpanel-2-panel"
                 hx-get="{% url 'users' year=computation.year %}"
                 hx-trigger="click"
-                hx-indicator="#users_companies_spinner"
+                hx-indicator="#users_companies_spinner2"
                 hx-target="#users_companies_wrapper">Utilisateurs</button>
     </li>
 </ul>
+{% include "spinner.html" with spinner_id="users_companies_spinner2" %}
