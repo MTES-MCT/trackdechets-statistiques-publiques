@@ -48,7 +48,7 @@ def build_figs(year: int, clear_year: bool = False):
     accounts_weekly_data_df = pl.read_parquet("temp_data/accounts_weekly_data.parquet")
     weekly_waste_processed_data_df = pl.read_parquet("temp_data/weekly_waste_processed_data.parquet")
     accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
-    waste_processed_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_processed_by_naf_annual_stats.parquet")
+    waste_produced_by_naf_annual_stats_df = pl.read_parquet("temp_data/waste_produced_by_naf_annual_stats.parquet")
     icpe_installations_data = pl.read_parquet("temp_data/icpe_installations_data.parquet")
     icpe_installations_waste_processed_data = pl.read_parquet(
         "temp_data/icpe_installations_waste_processed_data.parquet"
@@ -174,7 +174,7 @@ def build_figs(year: int, clear_year: bool = False):
     treemap_companies_figure = create_treemap_companies_figure(accounts_by_naf_data_df, year=year)
 
     produced_quantity_by_category_fig = create_treemap_companies_figure(
-        waste_processed_by_naf_annual_stats_df, use_quantity=True, year=year
+        waste_produced_by_naf_annual_stats_df, use_quantity=True, year=year
     )
 
     Computation.objects.create(

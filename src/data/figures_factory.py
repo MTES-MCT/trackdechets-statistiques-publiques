@@ -631,15 +631,15 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
     # Init values
 
     stat_col = "nombre_etablissements"
-    value_expr = pl.col("nombre_etablissements").sum().alias("value")
+    value_expr = pl.col(stat_col).sum().alias("value")
     value_suffix = pl.lit("</b>")
     hover_expr_str = "</b> établissements inscrits dans la {label} NAF "
     hover_expr_lit_nulls = pl.lit("</b> établissements inscrits ayant un code NAF inconnu ")
     hover_expr_lit_end = pl.lit("%</b> du total des établissements inscrits.<extra></extra>")
     unit = ""
     if use_quantity:
-        stat_col = "quantite_traitee"
-        value_expr = pl.col("quantite_traitee").sum().alias("value")
+        stat_col = "quantite_produite"
+        value_expr = pl.col(stat_col).sum().alias("value")
         value_suffix = pl.lit("t</b>")
         hover_expr_str = " tonnes</b> produites par des établissements inscrits dans la {label} NAF "
         hover_expr_lit_nulls = pl.lit(" tonnes</b> produites par des établissements ayant un code NAF inconnu ")
@@ -667,13 +667,13 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
 
         col_names_to_agg = []
         if i < (len(categories) - 1):
+            # Create the expression to get the value of higher pivot dimensions
+            # (e.g for "code_sous_classe" it will take the max of "code_classe" and upper hierarchies)
             for tmp_cat in reversed(categories[i + 1 :]):
                 tmp_col_name = f"libelle_{tmp_cat}"
                 agg_exprs.append(pl.col(tmp_col_name).max())
                 col_names_to_agg.append(tmp_col_name)
         col_names_to_agg.append(f"libelle_{cat}")
-        # agg_exprs.extend(id_exprs)
-        # pl.concat_str(id_exprs, separator=id_sep).alias("ids")
 
         temp_df = temp_df.groupby(f"code_{cat}", maintain_order=True).agg(agg_exprs)
 
