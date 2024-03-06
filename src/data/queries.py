@@ -33,7 +33,7 @@ from
     refined_zone_stats_publiques.annual_company_accounts_created_by_naf
 """
 
-waste_processed_by_naf_annual_stats_sql = """
+waste_produced_by_naf_annual_stats_sql = """
 select
     *
 from

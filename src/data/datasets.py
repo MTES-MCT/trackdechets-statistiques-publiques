@@ -9,7 +9,7 @@ from data.queries import (
     accounts_by_naf_annual_stats_sql,
     accounts_weekly_stats_sql,
     bs_weekly_data_sql,
-    waste_processed_by_naf_annual_stats_sql,
+    waste_produced_by_naf_annual_stats_sql,
     weekly_waste_processed_stats_sql,
     icpe_installations_sql,
     icpe_installations_waste_processed_sql,
@@ -34,7 +34,7 @@ class Computed:
     weekly_waste_processed_data: pl.DataFrame
 
     accounts_by_naf_data: pl.DataFrame
-    waste_processed_by_naf_annual_stats: pl.DataFrame
+    waste_produced_by_naf_annual_stats: pl.DataFrame
 
     icpe_installations_data: pl.DataFrame
     icpe_installations_waste_processed_data: pl.DataFrame
@@ -65,7 +65,7 @@ def get_data_df():
     weekly_waste_processed_data = extract_dataset(weekly_waste_processed_stats_sql)
 
     accounts_by_naf_data = extract_dataset(accounts_by_naf_annual_stats_sql)
-    waste_processed_by_naf_annual_stats = extract_dataset(waste_processed_by_naf_annual_stats_sql)
+    waste_produced_by_naf_annual_stats = extract_dataset(waste_produced_by_naf_annual_stats_sql)
 
     icpe_installations_data = extract_dataset(icpe_installations_sql)
     icpe_installations_waste_processed_data = extract_dataset(icpe_installations_waste_processed_sql)
@@ -82,7 +82,7 @@ def get_data_df():
         accounts_weekly_data=accounts_weekly_data,
         weekly_waste_processed_data=weekly_waste_processed_data,
         accounts_by_naf_data=accounts_by_naf_data,
-        waste_processed_by_naf_annual_stats=waste_processed_by_naf_annual_stats,
+        waste_produced_by_naf_annual_stats=waste_produced_by_naf_annual_stats,
         icpe_installations_data=icpe_installations_data,
         icpe_installations_waste_processed_data=icpe_installations_waste_processed_data,
         icpe_departements_waste_processed_data=icpe_departements_waste_processed_data,
