@@ -360,9 +360,8 @@ def get_mean_quantity_by_bsff_packagings(bsff_data: pl.DataFrame) -> float:
     if len(bsff_data) > 0:
         mean_quantity_by_packaging = round(
             bsff_data.select(
-                (
-                    pl.col("quantite_traitee_operations_finales") / pl.col("traitements_contenants_operations_finales")
-                ).mean()
+                pl.col("quantite_traitee_operations_finales").sum()
+                / pl.col("traitements_contenants_operations_finales").sum()
             ).item()
             * 1000,
             2,
