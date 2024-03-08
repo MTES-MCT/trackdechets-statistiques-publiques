@@ -1,13 +1,28 @@
 {% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsdd" year=computation.year %}
 {% include "spinner.html" with spinner_id="bsd_spinner" %}
+{% load stats %}
 <div id="tabpanel-1-panel"
      class="fr-tabs__panel fr-tabs__panel--selected"
      role="tabpanel"
      aria-labelledby="tabpanel-1"
      tabindex="0">
+    <div class="callout-row">
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsdd_bordereaux_created|number }}</p>
+            <div class="number-text">
+                <p>BSDD créés</p>
+            </div>
+        </div>
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsdd_quantity_processed|number }}</p>
+            <div class="number-text">
+                <p>tonnes de déchets dangereux* tracés et traités</p>
+            </div>
+        </div>
+    </div>
     <h4>Nombre de Bordereaux de Suivi de Déchets Dangereux par semaine</h4>
     <div id="bsdd_counts_weekly_graph"></div>
-    <h4>Quantités de Déchets Dangereux par semaine</h4>
+    <h4>Quantités de Déchets Dangereux* par semaine</h4>
     <div id="bsdd_quantites_weekly_graph"></div>
 </div>
 <script>

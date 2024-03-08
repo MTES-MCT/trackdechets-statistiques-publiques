@@ -1,10 +1,25 @@
 {% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsda" year=computation.year %}
 {% include "spinner.html" with spinner_id="bsd_spinner" %}
+{% load stats %}
 <div id="tabpanel-2-panel"
      class="fr-tabs__panel fr-tabs__panel--selected"
      role="tabpanel"
      aria-labelledby="tabpanel-2"
      tabindex="0">
+    <div class="callout-row">
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsda_bordereaux_created|number }}</p>
+            <div class="number-text">
+                <p>BSDA créés</p>
+            </div>
+        </div>
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsda_quantity_processed|number }}</p>
+            <div class="number-text">
+                <p>tonnes de déchets d'amiante tracés et traités</p>
+            </div>
+        </div>
+    </div>
     <h4>Nombre de Bordereaux de Suivi de Déchets Amiante par semaine</h4>
     <div id="bsda_counts_weekly_graph"></div>
     <h4>Quantités de Déchets Amiante par semaine</h4>

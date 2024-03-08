@@ -1,10 +1,25 @@
 {% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsvhu" year=computation.year %}
 {% include "spinner.html" with spinner_id="bsd_spinner" %}
+{% load stats %}
 <div id="tabpanel-5-panel"
      class="fr-tabs__panel fr-tabs__panel--selected"
      role="tabpanel"
      aria-labelledby="tabpanel-5"
      tabindex="0">
+    <div class="callout-row">
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsvhu_bordereaux_created|number }}</p>
+            <div class="number-text">
+                <p>BSVHU créés</p>
+            </div>
+        </div>
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsvhu_quantity_processed|number }}</p>
+            <div class="number-text">
+                <p>tonnes de véhicules hors d'usage tracés et traités</p>
+            </div>
+        </div>
+    </div>
     <h4>Nombre de Bordereaux de Suivi de Véhicules Hors d'Usage par semaine</h4>
     <div id="bsvhu_counts_weekly_graph"></div>
     <h4>Quantités de Véhicules Hors d'Usage par semaine</h4>
