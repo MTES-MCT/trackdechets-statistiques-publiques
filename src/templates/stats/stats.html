@@ -44,19 +44,19 @@
             <h2 id="callout-title">Depuis 2020, Trackdéchets c'est...</h2>
             <div class="callout-row">
                 <div class="fr-callout">
-                    <p class="callout-number small-number">{{ computation.total_quantity_processed|number }}</p>
+                    <p class="callout-number small-number">{{ computation.total_quantity_processed|number|safe }}</p>
                     <div class="number-text">
                         <p>tonnes de déchets dangereux* tracés et traités au total</p>
                     </div>
                 </div>
                 <div class="fr-callout">
-                    <p class="callout-number small-number">{{ computation.total_bs_created|number }}</p>
+                    <p class="callout-number small-number">{{ computation.total_bs_created|number|safe }}</p>
                     <div class="number-text">
                         <p>bordereaux créés au total</p>
                     </div>
                 </div>
                 <div class="fr-callout">
-                    <p class="callout-number small-number">{{ computation.total_companies_created|number }}</p>
+                    <p class="callout-number small-number">{{ computation.total_companies_created|number|safe }}</p>
                     <div class="number-text">
                         <p>établissements inscrits au total</p>
                     </div>
