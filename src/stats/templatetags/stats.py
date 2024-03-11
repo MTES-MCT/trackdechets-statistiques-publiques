@@ -8,4 +8,4 @@ def number(nb):
     """Format a given number with thousands separators (spaces)"""
     if not nb:
         return ""
-    return "{:,}".format(nb).replace(",", " ")
+    return "{:,}".format(nb).replace(",", "&nbsp;")

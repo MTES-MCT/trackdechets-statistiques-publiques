@@ -9,7 +9,7 @@ def format_number(input_number: float, precision: int = 0) -> str:
     if input_number is None:
         return ""
     input_number = round(input_number, precision)
-    return re.sub(r"\.0+$", "", "{:,}".format(input_number).replace(",", " "))
+    return re.sub(r"\.0+$", "", "{:,}".format(input_number).replace(",", "&nbsp;"))
 
 
 def break_long_line(line: str, max_line_length: int = 26) -> str:

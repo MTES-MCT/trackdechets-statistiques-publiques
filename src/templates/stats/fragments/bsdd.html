@@ -8,13 +8,13 @@
      tabindex="0">
     <div class="callout-row">
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsdd_bordereaux_created|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsdd_bordereaux_created|number|safe }}</p>
             <div class="number-text">
                 <p>BSDD créés</p>
             </div>
         </div>
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsdd_quantity_processed|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsdd_quantity_processed|number|safe }}</p>
             <div class="number-text">
                 <p>tonnes de déchets dangereux* tracés et traités</p>
             </div>

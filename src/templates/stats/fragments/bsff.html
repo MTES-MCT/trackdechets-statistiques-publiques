@@ -12,25 +12,25 @@
     </p>
     <div class="callout-row">
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsff_bordereaux_created|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsff_bordereaux_created|number|safe }}</p>
             <div class="number-text">
                 <p>BSFF créés</p>
             </div>
         </div>
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsff_quantity_processed|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsff_quantity_processed|number|safe }}</p>
             <div class="number-text">
                 <p>tonnes de déchets de fluides frigorigènes tracés et traités</p>
             </div>
         </div>
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.mean_packagings_by_bsff|number }}</p>
+            <p class="callout-number small-number">{{ computation.mean_packagings_by_bsff|number|safe }}</p>
             <div class="number-text">
                 <p>contenants par BSFF en moyenne</p>
             </div>
         </div>
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.mean_quantity_by_bsff_packagings|number }}</p>
+            <p class="callout-number small-number">{{ computation.mean_quantity_by_bsff_packagings|number|safe }}</p>
             <div class="number-text">
                 <p>kg par contenants en moyenne</p>
             </div>

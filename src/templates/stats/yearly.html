@@ -33,13 +33,13 @@
 <h3 class="ta-center">Statistiques pour l'année {{ computation.year }}</h3>
 <div class="callout-row">
     <div class="fr-callout">
-        <p class="callout-number small-number">{{ computation.quantity_processed_yearly|number }}</p>
+        <p class="callout-number small-number">{{ computation.quantity_processed_yearly|number|safe }}</p>
         <div class="number-text">
             <p>tonnes de déchets dangereux* tracés et traités sur l'année {{ computation.year }}</p>
         </div>
     </div>
     <div class="fr-callout">
-        <p class="callout-number small-number">{{ computation.bs_created_yearly|number }}</p>
+        <p class="callout-number small-number">{{ computation.bs_created_yearly|number|safe }}</p>
         <div class="number-text">
             <p>bordereaux de déchets dangereux* créés sur l'année {{ computation.year }}</p>
         </div>
@@ -115,13 +115,13 @@
     <h4>Établissements et utilisateurs</h4>
     <div class="callout-row">
         <div class="fr-callout">
-            <p class="callout-number">{{ computation.company_created_total_life|number }}</p>
+            <p class="callout-number">{{ computation.company_created_total_life|number|safe }}</p>
             <div class="number-text ">
                 <p>nouveaux établissements inscrits sur l'année {{ computation.year }}</p>
             </div>
         </div>
         <div class="fr-callout">
-            <p class="callout-number">{{ computation.user_created_total_life|number }}</p>
+            <p class="callout-number">{{ computation.user_created_total_life|number|safe }}</p>
             <div class="number-text ">
                 <p>nouveaux utilisateurs inscrits sur l'année {{ computation.year }}</p>
             </div>

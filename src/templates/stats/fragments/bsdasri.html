@@ -8,13 +8,13 @@
      tabindex="0">
     <div class="callout-row">
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsdasri_bordereaux_created|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsdasri_bordereaux_created|number|safe }}</p>
             <div class="number-text">
                 <p>BSDASRI créés</p>
             </div>
         </div>
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsdasri_quantity_processed|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsdasri_quantity_processed|number|safe }}</p>
             <div class="number-text">
                 <p>tonnes de déchets d'activités de soins à risques infectieux tracés et traités</p>
             </div>

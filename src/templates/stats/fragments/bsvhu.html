@@ -8,13 +8,13 @@
      tabindex="0">
     <div class="callout-row">
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsvhu_bordereaux_created|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsvhu_bordereaux_created|number|safe }}</p>
             <div class="number-text">
                 <p>BSVHU créés</p>
             </div>
         </div>
         <div class="fr-callout bs-callout">
-            <p class="callout-number small-number">{{ computation.bsvhu_quantity_processed|number }}</p>
+            <p class="callout-number small-number">{{ computation.bsvhu_quantity_processed|number|safe }}</p>
             <div class="number-text">
                 <p>tonnes de véhicules hors d'usage tracés et traités</p>
             </div>
