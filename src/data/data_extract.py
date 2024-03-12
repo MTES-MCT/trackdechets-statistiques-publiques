@@ -19,9 +19,6 @@ def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
     data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL)
-    for col in ["semaine", "day_of_processing"]:
-        if col in data_df.columns:
-            data_df = data_df.with_columns(pl.col(col).dt.replace_time_zone(None))
     logger.info(
         "Loading stats duration: %s (query : %s)",
         time.time() - started_time,
