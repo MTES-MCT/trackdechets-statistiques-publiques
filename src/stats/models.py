@@ -34,6 +34,20 @@ class Computation(models.Model):
     bsdasri_quantities_weekly = models.JSONField(default=dict)
     bsvhu_quantities_weekly = models.JSONField(default=dict)
 
+    bsdd_bordereaux_created = models.PositiveBigIntegerField(default=0)
+    bsda_bordereaux_created = models.PositiveBigIntegerField(default=0)
+    bsff_bordereaux_created = models.PositiveBigIntegerField(default=0)
+    bsdasri_bordereaux_created = models.PositiveBigIntegerField(default=0)
+    bsvhu_bordereaux_created = models.PositiveBigIntegerField(default=0)
+    bsdd_quantity_processed = models.PositiveBigIntegerField(default=0)
+    bsda_quantity_processed = models.PositiveBigIntegerField(default=0)
+    bsff_quantity_processed = models.PositiveBigIntegerField(default=0)
+    bsdasri_quantity_processed = models.PositiveBigIntegerField(default=0)
+    bsvhu_quantity_processed = models.PositiveBigIntegerField(default=0)
+
+    mean_quantity_by_bsff_packagings = models.FloatField(default=0, null=True)
+    mean_packagings_by_bsff = models.FloatField(default=0, null=True)
+
     produced_quantity_by_category = models.JSONField(default=dict)
 
     company_created_total_life = models.JSONField(default=dict)

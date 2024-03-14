@@ -158,6 +158,11 @@
   border: 1px solid #dddddd;
 }
 
+.bs-callout {
+  padding-top: 0;
+  padding-bottom: 1rem;
+}
+
 /* LG screens*/
 @media screen and (max-width:992px) {
   .fr-callout {

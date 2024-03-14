@@ -3,7 +3,10 @@ from data.data_extract import get_processing_operation_codes_data
 from data.data_processing import (
     create_icpe_installations_df,
     create_icpe_regional_df,
+    get_mean_packagings_by_bsff,
+    get_mean_quantity_by_bsff_packagings,
     get_recovered_and_eliminated_quantity_processed_by_week_series,
+    get_summed_statistics,
     get_total_bs_created,
     get_total_number_of_accounts_created,
     get_total_quantity_processed,
@@ -27,7 +30,7 @@ from ..models import (
 )
 
 
-def build_figs(year: int, clear_year: bool = False):
+def build_stats_and_figs(year: int, clear_year: bool = False):
     existing_computations = [
         Computation.objects.filter(year=year),
         DepartementsComputation.objects.filter(year=year),
@@ -135,6 +138,25 @@ def build_figs(year: int, clear_year: bool = False):
         bs_type="BSDASRI",
     )
 
+    # BSx weekly stats
+    bsdd_bordereaux_created = get_summed_statistics(bsdd_weekly_filtered_df, "creations")
+    bsda_bordereaux_created = get_summed_statistics(bsda_weekly_filtered_df, "creations")
+    bsff_bordereaux_created = get_summed_statistics(bsff_weekly_filtered_df, "creations_bordereaux")
+    bsdasri_bordereaux_created = get_summed_statistics(bsdasri_weekly_filtered_df, "creations")
+    bsvhu_bordereaux_created = get_summed_statistics(bsvhu_weekly_filtered_df, "creations")
+
+    bsdd_quantity_processed = get_summed_statistics(bsdd_weekly_filtered_df, "quantite_traitee_operations_finales")
+    bsda_quantity_processed = get_summed_statistics(bsda_weekly_filtered_df, "quantite_traitee_operations_finales")
+    bsff_quantity_processed = get_summed_statistics(bsff_weekly_filtered_df, "quantite_traitee_operations_finales")
+    bsdasri_quantity_processed = get_summed_statistics(
+        bsdasri_weekly_filtered_df, "quantite_traitee_operations_finales"
+    )
+    bsvhu_quantity_processed = get_summed_statistics(bsvhu_weekly_filtered_df, "quantite_traitee_operations_finales")
+
+    # BSFF specific stats
+    mean_quantity_by_bsff_packagings = get_mean_quantity_by_bsff_packagings(bsff_weekly_filtered_df)
+    mean_packagings_by_bsff = get_mean_packagings_by_bsff(bsff_weekly_filtered_df)
+
     # Waste weight processed weekly
     (
         recovered_quantity_series,
@@ -197,6 +219,18 @@ def build_figs(year: int, clear_year: bool = False):
         bsff_quantities_weekly=bsff_quantities_weekly_fig.to_json(),
         bsdasri_quantities_weekly=bsdasri_quantities_weekly_fig.to_json(),
         bsvhu_quantities_weekly=bsvhu_quantities_weekly_fig.to_json(),
+        bsdd_bordereaux_created=bsdd_bordereaux_created,
+        bsda_bordereaux_created=bsda_bordereaux_created,
+        bsff_bordereaux_created=bsff_bordereaux_created,
+        bsdasri_bordereaux_created=bsdasri_bordereaux_created,
+        bsvhu_bordereaux_created=bsvhu_bordereaux_created,
+        bsdd_quantity_processed=bsdd_quantity_processed,
+        bsda_quantity_processed=bsda_quantity_processed,
+        bsff_quantity_processed=bsff_quantity_processed,
+        bsdasri_quantity_processed=bsdasri_quantity_processed,
+        bsvhu_quantity_processed=bsvhu_quantity_processed,
+        mean_quantity_by_bsff_packagings=mean_quantity_by_bsff_packagings,
+        mean_packagings_by_bsff=mean_packagings_by_bsff,
         produced_quantity_by_category=produced_quantity_by_category_fig.to_json(),
         company_created_total_life=company_created_total_life,
         user_created_total_life=user_created_total_life,
