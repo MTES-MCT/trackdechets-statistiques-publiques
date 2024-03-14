@@ -17,6 +17,7 @@ def build_dataframes():
 
     for dataset_name in [
         "bsdd_weekly_data",
+        "bsd_non_dangerous_weekly_data",
         "bsda_weekly_data",
         "bsff_weekly_data",
         "bsdasri_weekly_data",

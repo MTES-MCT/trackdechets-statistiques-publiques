@@ -24,6 +24,7 @@ from .data_extract import extract_dataset
 @dataclass
 class Computed:
     bsdd_weekly_data: pl.DataFrame
+    bsd_non_dangerous_weekly_data: pl.DataFrame
     bsda_weekly_data: pl.DataFrame
     bsff_weekly_data: pl.DataFrame
     bsdasri_weekly_data: pl.DataFrame
@@ -46,6 +47,9 @@ class Computed:
 def get_data_df():
     bsdd_weekly_data = extract_dataset(
         bs_weekly_data_sql.format("refined_zone_stats_publiques.bsdd_statistiques_hebdomadaires")
+    )
+    bsd_non_dangerous_weekly_data = extract_dataset(
+        bs_weekly_data_sql.format("refined_zone_stats_publiques.bsd_non_dangereux_statistiques_hebdomadaires")
     )
     bsda_weekly_data = extract_dataset(
         bs_weekly_data_sql.format("refined_zone_stats_publiques.bsda_statistiques_hebdomadaires")
@@ -75,6 +79,7 @@ def get_data_df():
 
     data = Computed(
         bsdd_weekly_data=bsdd_weekly_data,
+        bsd_non_dangerous_weekly_data=bsd_non_dangerous_weekly_data,
         bsda_weekly_data=bsda_weekly_data,
         bsff_weekly_data=bsff_weekly_data,
         bsdasri_weekly_data=bsdasri_weekly_data,

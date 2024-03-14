@@ -21,7 +21,9 @@ class Computation(models.Model):
 
     quantity_processed_weekly = models.JSONField(default=dict)
     quantity_processed_sunburst = models.JSONField(default=dict)
+
     bsdd_counts_weekly = models.JSONField(default=dict)
+    bsd_non_dangerous_counts_weekly = models.JSONField(default=dict)
     bsda_counts_weekly = models.JSONField(default=dict)
     bsff_counts_weekly = models.JSONField(default=dict)
     bsff_packagings_counts_weekly = models.JSONField(default=dict)
@@ -29,17 +31,20 @@ class Computation(models.Model):
     bsvhu_counts_weekly = models.JSONField(default=dict)
 
     bsdd_quantities_weekly = models.JSONField(default=dict)
+    bsd_non_dangerous_quantities_weekly = models.JSONField(default=dict)
     bsda_quantities_weekly = models.JSONField(default=dict)
     bsff_quantities_weekly = models.JSONField(default=dict)
     bsdasri_quantities_weekly = models.JSONField(default=dict)
     bsvhu_quantities_weekly = models.JSONField(default=dict)
 
     bsdd_bordereaux_created = models.PositiveBigIntegerField(default=0)
+    bsd_non_dangerous_bordereaux_created = models.PositiveBigIntegerField(default=0)
     bsda_bordereaux_created = models.PositiveBigIntegerField(default=0)
     bsff_bordereaux_created = models.PositiveBigIntegerField(default=0)
     bsdasri_bordereaux_created = models.PositiveBigIntegerField(default=0)
     bsvhu_bordereaux_created = models.PositiveBigIntegerField(default=0)
     bsdd_quantity_processed = models.PositiveBigIntegerField(default=0)
+    bsd_non_dangerous_quantity_processed = models.PositiveBigIntegerField(default=0)
     bsda_quantity_processed = models.PositiveBigIntegerField(default=0)
     bsff_quantity_processed = models.PositiveBigIntegerField(default=0)
     bsdasri_quantity_processed = models.PositiveBigIntegerField(default=0)

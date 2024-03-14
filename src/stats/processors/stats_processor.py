@@ -44,6 +44,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
     date_interval = get_data_date_interval_for_year(year)
 
     bsdd_weekly_data_df = pl.read_parquet("temp_data/bsdd_weekly_data.parquet")
+    bsd_non_dangerous_weekly_data_df = pl.read_parquet("temp_data/bsdd_weekly_data.parquet")
     bsda_weekly_data_df = pl.read_parquet("temp_data/bsda_weekly_data.parquet")
     bsff_weekly_data_df = pl.read_parquet("temp_data/bsff_weekly_data.parquet")
     bsdasri_weekly_data_df = pl.read_parquet("temp_data/bsdasri_weekly_data.parquet")
@@ -76,6 +77,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
 
     # BSx weekly figures
     bsdd_weekly_filtered_df = get_weekly_preprocessed_dfs(bsdd_weekly_data_df, date_interval)
+    bsd_non_dangerous_weekly_filtered_df = get_weekly_preprocessed_dfs(bsd_non_dangerous_weekly_data_df, date_interval)
     bsda_weekly_filtered_df = get_weekly_preprocessed_dfs(bsda_weekly_data_df, date_interval)
     bsff_weekly_filtered_df = get_weekly_preprocessed_dfs(bsff_weekly_data_df, date_interval)
     bsdasri_weekly_filtered_df = get_weekly_preprocessed_dfs(bsdasri_weekly_data_df, date_interval)
@@ -83,6 +85,11 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
 
     bsdd_counts_weekly_fig = create_weekly_scatter_figure(
         bsdd_weekly_filtered_df,
+        metric_type="counts",
+        bs_type="BSDD",
+    )
+    bsd_non_dangerous_counts_weekly_fig = create_weekly_scatter_figure(
+        bsd_non_dangerous_weekly_filtered_df,
         metric_type="counts",
         bs_type="BSDD",
     )
@@ -117,6 +124,11 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         metric_type="quantity",
         bs_type="BSDD",
     )
+    bsd_non_dangerous_quantities_weekly_fig = create_weekly_scatter_figure(
+        bsd_non_dangerous_weekly_filtered_df,
+        metric_type="quantity",
+        bs_type="BSDD",
+    )
     bsda_quantities_weekly_fig = create_weekly_scatter_figure(
         bsda_weekly_filtered_df,
         metric_type="quantity",
@@ -138,14 +150,18 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         bs_type="BSDASRI",
     )
 
-    # BSx weekly stats
+    # BSx annual stats
     bsdd_bordereaux_created = get_summed_statistics(bsdd_weekly_filtered_df, "creations")
+    bsd_non_dangerous_bordereaux_created = get_summed_statistics(bsd_non_dangerous_weekly_filtered_df, "creations")
     bsda_bordereaux_created = get_summed_statistics(bsda_weekly_filtered_df, "creations")
     bsff_bordereaux_created = get_summed_statistics(bsff_weekly_filtered_df, "creations_bordereaux")
     bsdasri_bordereaux_created = get_summed_statistics(bsdasri_weekly_filtered_df, "creations")
     bsvhu_bordereaux_created = get_summed_statistics(bsvhu_weekly_filtered_df, "creations")
 
     bsdd_quantity_processed = get_summed_statistics(bsdd_weekly_filtered_df, "quantite_traitee_operations_finales")
+    bsd_non_dangerous_quantity_processed = get_summed_statistics(
+        bsd_non_dangerous_weekly_filtered_df, "quantite_traitee_operations_finales"
+    )
     bsda_quantity_processed = get_summed_statistics(bsda_weekly_filtered_df, "quantite_traitee_operations_finales")
     bsff_quantity_processed = get_summed_statistics(bsff_weekly_filtered_df, "quantite_traitee_operations_finales")
     bsdasri_quantity_processed = get_summed_statistics(
@@ -153,7 +169,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
     )
     bsvhu_quantity_processed = get_summed_statistics(bsvhu_weekly_filtered_df, "quantite_traitee_operations_finales")
 
-    # BSFF specific stats
+    # BSFF specific annual stats
     mean_quantity_by_bsff_packagings = get_mean_quantity_by_bsff_packagings(bsff_weekly_filtered_df)
     mean_packagings_by_bsff = get_mean_packagings_by_bsff(bsff_weekly_filtered_df)
 
@@ -209,22 +225,26 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         quantity_processed_weekly=quantity_processed_weekly_fig.to_json(),
         quantity_processed_sunburst=quantity_processed_sunburst_fig.to_json(),
         bsdd_counts_weekly=bsdd_counts_weekly_fig.to_json(),
+        bsd_non_dangerous_counts_weekly=bsd_non_dangerous_counts_weekly_fig.to_json(),
         bsda_counts_weekly=bsda_counts_weekly_fig.to_json(),
         bsff_counts_weekly=bsff_counts_weekly_fig.to_json(),
         bsff_packagings_counts_weekly=bsff_packagings_counts_weekly_fig.to_json(),
         bsdasri_counts_weekly=bsdasri_counts_weekly_fig.to_json(),
         bsvhu_counts_weekly=bsvhu_counts_weekly_fig.to_json(),
         bsdd_quantities_weekly=bsdd_quantities_weekly_fig.to_json(),
+        bsd_non_dangerous_quantities_weekly=bsd_non_dangerous_quantities_weekly_fig.to_json(),
         bsda_quantities_weekly=bsda_quantities_weekly_fig.to_json(),
         bsff_quantities_weekly=bsff_quantities_weekly_fig.to_json(),
         bsdasri_quantities_weekly=bsdasri_quantities_weekly_fig.to_json(),
         bsvhu_quantities_weekly=bsvhu_quantities_weekly_fig.to_json(),
         bsdd_bordereaux_created=bsdd_bordereaux_created,
+        bsd_non_dangerous_bordereaux_created=bsd_non_dangerous_bordereaux_created,
         bsda_bordereaux_created=bsda_bordereaux_created,
         bsff_bordereaux_created=bsff_bordereaux_created,
         bsdasri_bordereaux_created=bsdasri_bordereaux_created,
         bsvhu_bordereaux_created=bsvhu_bordereaux_created,
         bsdd_quantity_processed=bsdd_quantity_processed,
+        bsd_non_dangerous_quantity_processed=bsd_non_dangerous_quantity_processed,
         bsda_quantity_processed=bsda_quantity_processed,
         bsff_quantity_processed=bsff_quantity_processed,
         bsdasri_quantity_processed=bsdasri_quantity_processed,
