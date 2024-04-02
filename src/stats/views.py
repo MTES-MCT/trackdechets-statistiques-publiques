@@ -74,6 +74,10 @@ class BsddView(BaseBsdView):
     template_name = "stats/fragments/bsdd.html"
 
 
+class BsdNonDangerousView(BaseBsdView):
+    template_name = "stats/fragments/bsd_non_dangerous.html"
+
+
 class BsdaView(BaseBsdView):
     template_name = "stats/fragments/bsda.html"
 

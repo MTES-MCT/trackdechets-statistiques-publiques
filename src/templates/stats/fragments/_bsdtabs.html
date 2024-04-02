@@ -15,47 +15,59 @@
     </li>
     <li role="presentation">
         <button id="tabpanel-2"
-                class="fr-tabs__tab  fr-tabs__tab--icon-left"
+                class="fr-tabs__tab   fr-tabs__tab--icon-left"
                 tabindex="0"
                 role="tab"
-                aria-selected="{% if bsdtype == "bsda" %}true{% else %}false{% endif %}"
+                aria-selected="{% if bsdtype == "bsd_non_dangerous" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-2-panel"
-                hx-get="{% url 'bsda' year %}"
+                hx-get="{% url 'bsd_non_dangerous' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
-                hx-target="#bsd_wrapper">Amiante</button>
+                hx-target="#bsd_wrapper">Déchets non dangereux</button>
     </li>
     <li role="presentation">
         <button id="tabpanel-3"
                 class="fr-tabs__tab  fr-tabs__tab--icon-left"
                 tabindex="0"
                 role="tab"
-                aria-selected="{% if bsdtype == "bsff" %}true{% else %}false{% endif %}"
+                aria-selected="{% if bsdtype == "bsda" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-3-panel"
-                hx-get="{% url 'bsff' year %}"
+                hx-get="{% url 'bsda' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
-                hx-target="#bsd_wrapper">Fluides frigorigènes</button>
+                hx-target="#bsd_wrapper">Amiante</button>
     </li>
     <li role="presentation">
         <button id="tabpanel-4"
                 class="fr-tabs__tab  fr-tabs__tab--icon-left"
                 tabindex="0"
                 role="tab"
-                aria-selected="{% if bsdtype == "bsdasri" %}true{% else %}false{% endif %}"
+                aria-selected="{% if bsdtype == "bsff" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-4-panel"
-                hx-get="{% url 'bsdasri'  year %}"
+                hx-get="{% url 'bsff' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
-                hx-target="#bsd_wrapper">Activité de Soins à Risques Infectieux</button>
+                hx-target="#bsd_wrapper">Fluides frigorigènes</button>
     </li>
     <li role="presentation">
         <button id="tabpanel-5"
                 class="fr-tabs__tab  fr-tabs__tab--icon-left"
                 tabindex="0"
                 role="tab"
-                aria-selected="{% if bsdtype == "bsvhu" %}true{% else %}false{% endif %}"
+                aria-selected="{% if bsdtype == "bsdasri" %}true{% else %}false{% endif %}"
                 aria-controls="tabpanel-5-panel"
+                hx-get="{% url 'bsdasri'  year %}"
+                hx-trigger="click"
+                hx-indicator="#bsd_spinner"
+                hx-target="#bsd_wrapper">Activité de Soins à Risques Infectieux</button>
+    </li>
+    <li role="presentation">
+        <button id="tabpanel-6"
+                class="fr-tabs__tab  fr-tabs__tab--icon-left"
+                tabindex="0"
+                role="tab"
+                aria-selected="{% if bsdtype == "bsvhu" %}true{% else %}false{% endif %}"
+                aria-controls="tabpanel-6-panel"
                 hx-get="{% url 'bsvhu'  year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"

@@ -44,7 +44,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
     date_interval = get_data_date_interval_for_year(year)
 
     bsdd_weekly_data_df = pl.read_parquet("temp_data/bsdd_weekly_data.parquet")
-    bsd_non_dangerous_weekly_data_df = pl.read_parquet("temp_data/bsdd_weekly_data.parquet")
+    bsd_non_dangerous_weekly_data_df = pl.read_parquet("temp_data/bsd_non_dangerous_weekly_data.parquet")
     bsda_weekly_data_df = pl.read_parquet("temp_data/bsda_weekly_data.parquet")
     bsff_weekly_data_df = pl.read_parquet("temp_data/bsff_weekly_data.parquet")
     bsdasri_weekly_data_df = pl.read_parquet("temp_data/bsdasri_weekly_data.parquet")
