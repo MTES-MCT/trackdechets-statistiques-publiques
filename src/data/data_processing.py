@@ -62,6 +62,54 @@ def get_recovered_and_eliminated_quantity_processed_by_week_series(
     return res
 
 
+def get_summed_statistics(
+    bordereaux_data: pl.DataFrame,
+    stat_column: str,
+    date_interval: Tuple[datetime, datetime] | None = None,
+) -> int:
+    """
+    Calculate the sum of a statistic in a specific date interval or for all dates.
+    The `stat_column` parameter is used to select appropriate statistic column in the DataFrame (e.g. "creations","traitements"...)
+
+    Parameters
+    ----------
+    bordereaux_data : pl.DataFrame
+        DataFrame containing the data for a particular "bordereau" type.
+    stat_column : str
+        The column name that holds the statistical information.
+    date_interval : Tuple[datetime, datetime], optional
+        A tuple of two datetime objects representing the start and end of
+        the desired time interval, by default None
+
+    Returns
+    -------
+    int
+        Number of bordereaux created in the given dataframe within specified
+        date interval.
+
+    Example
+    -------
+    >>> df = pl.DataFrame({"semaine": ["2021-01-01", "2021-02-01", "2021-02-05"],
+                          "creations": [3, 7, 9]})
+    >>> get_num_bordereaux_created(df, "creations", (datetime(2021,1,1), datetime(2021,2,2)))
+        10
+    """
+    if len(bordereaux_data) == 0:
+        return 0
+
+    if date_interval is not None:
+        summed = (
+            bordereaux_data.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
+            .select(stat_column)
+            .sum()
+            .item()
+        )
+    else:
+        summed = bordereaux_data.select(stat_column).sum().item()
+
+    return summed
+
+
 def get_total_bs_created(
     all_bordereaux_data: dict[str, pl.DataFrame],
     date_interval: Tuple[datetime, datetime] | None = None,
@@ -86,12 +134,8 @@ def get_total_bs_created(
         stat_column = "creations"
         if bs_type == "BSFF":
             stat_column = "creations_bordereaux"
-        if date_interval is not None:
-            bs_created_total += (
-                df.filter(pl.col("semaine").is_between(*date_interval, closed="left")).select(stat_column).sum().item()
-            )
-        else:
-            bs_created_total += df.select(stat_column).sum().item()
+
+        bs_created_total += get_summed_statistics(df, stat_column, date_interval)
 
     return bs_created_total
 
@@ -101,6 +145,7 @@ def get_total_quantity_processed(
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> int:
     """Returns the total quantity processed (only final processing operation codes).
+    The quantity is casted down to an integer.
 
     Parameters
     ----------
@@ -117,16 +162,7 @@ def get_total_quantity_processed(
     """
     quantity_processed_total = 0
     for _, df in all_bordereaux_data.items():
-        if date_interval is not None:
-            quantity_processed_total += (
-                df.filter(pl.col("semaine").is_between(*date_interval, closed="left"))
-                .select("quantite_traitee_operations_finales")
-                .sum()
-                .fill_null(0)
-                .item()
-            )
-        else:
-            quantity_processed_total += df.select("quantite_traitee_operations_finales").sum().item()
+        quantity_processed_total += get_summed_statistics(df, "quantite_traitee_operations_finales", date_interval)
 
     return int(quantity_processed_total)
 
@@ -294,3 +330,72 @@ def create_icpe_regional_df(
         df_concat = df_concat.filter(pl.col(regional_key_column).is_not_null())
 
     return df_concat
+
+
+def get_mean_quantity_by_bsff_packagings(bsff_data: pl.DataFrame) -> float:
+    """
+    Compute the mean waste quantity by BSFF packagings.
+
+    Parameters:
+    -----------
+    bsff_data : pl.DataFrame
+        Input data frame containing BSFF information.
+
+    Returns:
+    --------
+    mean_quantity_by_packaging : float
+        Mean quantity by BSFF packagings (converted into kilograms).
+
+    Example:
+    --------
+    >>> df = pl.DataFrame({"semaine": ["2022-01-01", "2022-01-05"],
+                           "quantite_traitee_operations_finales": [10, 15],
+                           "traitements_contenants_operations_finales": [5, 7]})
+    >>> get_mean_quantity_by_bsff_packagings(df, date_interval)
+    Out: 2071
+    """
+
+    mean_quantity_by_packaging = None
+
+    if len(bsff_data) > 0:
+        mean_quantity_by_packaging = round(
+            bsff_data.select(
+                pl.col("quantite_traitee_operations_finales").sum()
+                / pl.col("traitements_contenants_operations_finales").sum()
+            ).item()
+            * 1000,
+            2,
+        )
+
+    return mean_quantity_by_packaging
+
+
+def get_mean_packagings_by_bsff(bsff_data: pl.DataFrame) -> float:
+    """
+    Calculate and return the mean number of packagings per BSFF.
+
+    Parameters:
+    --------
+    bsff_data : pl.DataFrame
+        Input DataFrame containing the BSFF data with columns like 'semaine',
+        'traitements_contenants' and 'traitements_bordereaux'.
+
+    Returns:
+    --------
+    float
+        Mean number of packagings per BSFF.
+
+    Examples:
+    >>> bsff_data = pl.DataFrame({'semaine': ['2022-01-01', '2022-01-02'],
+                                  'traitements_contenants': [5, 6],
+                                  'traitements_bordereaux': [3, 4]})
+    >>> get_mean_packagings_by_bsff(bsff_data)
+    Out: 1.5833333333
+    """
+    mean_packagings_by_bssf = None
+    if len(bsff_data) > 0:
+        mean_packagings_by_bssf = round(
+            bsff_data.select((pl.col("traitements_contenants") / pl.col("traitements_bordereaux")).mean()).item(), 2
+        )
+
+    return mean_packagings_by_bssf

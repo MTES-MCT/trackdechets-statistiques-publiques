@@ -1,10 +1,25 @@
 {% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsdasri" year=computation.year %}
 {% include "spinner.html" with spinner_id="bsd_spinner" %}
+{% load stats %}
 <div id="tabpanel-4-panel"
      class="fr-tabs__panel fr-tabs__panel--selected"
      role="tabpanel"
      aria-labelledby="tabpanel-4"
      tabindex="0">
+    <div class="callout-row">
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsdasri_bordereaux_created|number|safe }}</p>
+            <div class="number-text">
+                <p>BSDASRI créés</p>
+            </div>
+        </div>
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsdasri_quantity_processed|number|safe }}</p>
+            <div class="number-text">
+                <p>tonnes de déchets d'activités de soins à risques infectieux tracés et traités</p>
+            </div>
+        </div>
+    </div>
     <h4>Nombre de Bordereaux de Suivi de Déchets d'Activités de Soins à Risques Infectieux par semaine</h4>
     <div id="bsdasri_counts_weekly_graph"></div>
     <h4>Quantités de Déchets d'Activités de Soins à Risques Infectieux par semaine</h4>
