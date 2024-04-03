@@ -3,6 +3,7 @@ import logging
 import time
 
 import polars as pl
+import polars.selectors as cs
 from django.conf import settings
 from sqlalchemy import create_engine
 
@@ -14,11 +15,26 @@ STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
 
 logger = logging.getLogger(__name__)
 
+FLOAT_COLUMNS = [
+    "quantite_tracee",
+    "quantite_emise",
+    "quantite_envoyee",
+    "quantite_recue",
+    "quantite_traitee",
+    "quantite_traitee_operations_non_finales",
+    "quantite_traitee_operations_finales",
+    "quantite_produite",
+]
+
 
 def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
-    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL)
+    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL, engine="adbc")
+    for colname, data_type in data_df.schema.items():
+        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
+            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+
     logger.info(
         "Loading stats duration: %s (query : %s)",
         time.time() - started_time,

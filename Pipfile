@@ -17,6 +17,8 @@ pyarrow = "*"
 plotly = "*"
 gunicorn = "*"
 factory-boy = "*"
+adbc-driver-manager = "*"
+adbc-driver-postgresql = "*"
 
 [dev-packages]
 isort = "*"
