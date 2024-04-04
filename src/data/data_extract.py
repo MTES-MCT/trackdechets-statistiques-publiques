@@ -14,11 +14,26 @@ STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
 
 logger = logging.getLogger(__name__)
 
+FLOAT_COLUMNS = [
+    "quantite_tracee",
+    "quantite_emise",
+    "quantite_envoyee",
+    "quantite_recue",
+    "quantite_traitee",
+    "quantite_traitee_operations_non_finales",
+    "quantite_traitee_operations_finales",
+    "quantite_produite",
+]
+
 
 def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
-    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL)
+    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL, engine="adbc")
+    for colname, data_type in data_df.schema.items():
+        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
+            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+
     logger.info(
         "Loading stats duration: %s (query : %s)",
         time.time() - started_time,
@@ -38,8 +53,7 @@ def get_processing_operation_codes_data() -> pl.DataFrame:
         DataFrame with processing operations codes and description.
     """
     data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone.codes_operations_traitements",
-        uri=settings.WAREHOUSE_URL,
+        "SELECT * FROM trusted_zone.codes_operations_traitements", uri=settings.WAREHOUSE_URL, engine="adbc"
     )
 
     return data
@@ -55,8 +69,7 @@ def get_departement_geographical_data() -> pl.DataFrame:
         DataFrame with INSEE department geographical data.
     """
     data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone_insee.code_geo_departements",
-        uri=settings.WAREHOUSE_URL,
+        "SELECT * FROM trusted_zone_insee.code_geo_departements", uri=settings.WAREHOUSE_URL, engine="adbc"
     )
 
     return data
@@ -71,7 +84,7 @@ def get_waste_nomenclature_data() -> pl.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL)
+    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL, engine="adbc")
     return data
 
 

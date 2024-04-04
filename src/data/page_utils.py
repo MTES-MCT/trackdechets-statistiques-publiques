@@ -1,6 +1,7 @@
 """
 This module contains utility functions useful for all pages.
 """
+
 import re
 
 

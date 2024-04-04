@@ -12,11 +12,12 @@ whitenoise = "*"
 pytest-django = "*"
 sentry-sdk = {extras = ["django"], version = "*"}
 polars = "*"
-connectorx =  "==0.3.2a2"
 pyarrow = "*"
 plotly = "*"
 gunicorn = "*"
 factory-boy = "*"
+adbc-driver-manager = "*"
+adbc-driver-postgresql = "*"
 
 [dev-packages]
 isort = "*"

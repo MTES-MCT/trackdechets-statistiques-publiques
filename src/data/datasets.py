@@ -1,6 +1,7 @@
-"""This module contains the raw datasets. 
+"""This module contains the raw datasets.
 The datasets are loaded in memory to be reusable by other functions.
 """
+
 from dataclasses import dataclass
 
 import polars as pl
@@ -9,13 +10,13 @@ from data.queries import (
     accounts_by_naf_annual_stats_sql,
     accounts_weekly_stats_sql,
     bs_weekly_data_sql,
-    waste_produced_by_naf_annual_stats_sql,
-    weekly_waste_processed_stats_sql,
+    icpe_departements_waste_processed_sql,
+    icpe_france_waste_processed_sql,
     icpe_installations_sql,
     icpe_installations_waste_processed_sql,
-    icpe_departements_waste_processed_sql,
     icpe_regions_waste_processed_sql,
-    icpe_france_waste_processed_sql,
+    waste_produced_by_naf_annual_stats_sql,
+    weekly_waste_processed_stats_sql,
 )
 
 from .data_extract import extract_dataset

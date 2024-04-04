@@ -1,10 +1,12 @@
 """
 Data gathering and processing
 """
+
 from datetime import datetime
 from typing import Tuple
 
 import polars as pl
+
 from .figures_factory import create_icpe_graph
 
 
