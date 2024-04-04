@@ -3,7 +3,6 @@ import logging
 import time
 
 import polars as pl
-import polars.selectors as cs
 from django.conf import settings
 from sqlalchemy import create_engine
 

@@ -1,4 +1,5 @@
 import polars as pl
+
 from data.data_extract import get_processing_operation_codes_data
 from data.data_processing import (
     create_icpe_installations_df,

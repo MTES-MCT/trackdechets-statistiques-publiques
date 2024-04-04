@@ -1,5 +1,5 @@
-"""This modules contains all the functions to create the Plotly figure needed or the App.
-"""
+"""This modules contains all the functions to create the Plotly figure needed or the App."""
+
 from datetime import datetime, timedelta
 
 import plotly.graph_objects as go
