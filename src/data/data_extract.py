@@ -53,8 +53,7 @@ def get_processing_operation_codes_data() -> pl.DataFrame:
         DataFrame with processing operations codes and description.
     """
     data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone.codes_operations_traitements",
-        uri=settings.WAREHOUSE_URL,
+        "SELECT * FROM trusted_zone.codes_operations_traitements", uri=settings.WAREHOUSE_URL, engine="adbc"
     )
 
     return data
@@ -70,8 +69,7 @@ def get_departement_geographical_data() -> pl.DataFrame:
         DataFrame with INSEE department geographical data.
     """
     data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone_insee.code_geo_departements",
-        uri=settings.WAREHOUSE_URL,
+        "SELECT * FROM trusted_zone_insee.code_geo_departements", uri=settings.WAREHOUSE_URL, engine="adbc"
     )
 
     return data
@@ -86,7 +84,7 @@ def get_waste_nomenclature_data() -> pl.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL)
+    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL, engine="adbc")
     return data
 
 

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e089088bf57bcb0e52181f109dda2d88edb30a7c99d2d662fdeb5f7d82f526ff"
+            "sha256": "5c48c4203dcf17022850f155bcaa09f36b116f32d2e0e1e46c5a773a6977f633"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -74,28 +74,6 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==2024.2.2"
-        },
-        "connectorx": {
-            "hashes": [
-                "sha256:10e7b022cd6c3c80ca09afab35f5fe57422ae4d5fe4e29f57a3fe55a9544b42c",
-                "sha256:22cd21577493cb12b37588910fde711801547f7225b72ecfce7b194588c979a5",
-                "sha256:282894167d7192003c8da4e4e497c64fc10e5bd3bc320fefb1fb44aa7e9b7397",
-                "sha256:2cba4d95553035be6bd28ac361aecc90ebe6ae1f3ed7a00a072aff7dae9c806d",
-                "sha256:50e2ade0885bdc792a981a0c3015577122cec50c9bf0369f8dfe8e6e377ce7cb",
-                "sha256:5ee730d9b248a6b3db81941dd52ad085da40525935659ec7320d4335ca567967",
-                "sha256:6a3f2537e335b45192fbd1ea556e6da196cd0a5fc3777d695ece6b058e9f0491",
-                "sha256:75d3433be6d3c455d2820d4ce2ef47efa9a9af3307dc837f1c26a63f97bf1813",
-                "sha256:8d7cc8a6ea76a45d54f02e7e29d6214d57f5aa01908f40283b76d5342e00db53",
-                "sha256:a0f0919cd9ce3402e507f74b2e53d8c7cb2fff0928ebad876b6291da58ffed2a",
-                "sha256:a847bd4afbfb048ab849e78cbf76c6efef9221ccb9c96a460d06729d61b59459",
-                "sha256:a9cb2111a76d41c7baf027285e4133ed2e383c1808187d58862d670ebfdc60d1",
-                "sha256:b9d86d57619e90c2eb4ddcb9f64b06645d60c63ae9016bc9d60d03b1e8a987e1",
-                "sha256:c3c65194efd1e74879041f34c4f832a55ef09d54f8261928b67a70d3d5ddd8e8",
-                "sha256:d2ea926696528cdfaf0caff24182ad06bf6a186c775538b2c20f25eb73c1b328",
-                "sha256:e9e69a8c10b852fe0e08091eb0d4ea2a73cccb1399b008d60799bde011dd0107"
-            ],
-            "index": "pypi",
-            "version": "==0.3.2a2"
         },
         "django": {
             "hashes": [
