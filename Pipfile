@@ -24,7 +24,6 @@ isort = "*"
 djlint = "*"
 django-debug-toolbar = "*"
 django-extensions = "*"
-ipykernel = "*"
 ruff = "*"
 
 [requires]
