@@ -79,7 +79,8 @@ Créer un .env à la racine contenant la viable WAREHOUSE_URL
     docker compose run web python manage.py migrate 
 ```
 
-Pour la comamnde build stats vous aurez besoin d'un tunnel ssh (demander à un dev)
+Pour la comamnde build stats vous aurez besoin d'un tunnel ssh écountant sur 0.0.0.0:10001 (demander à un dev)
+
 Créer les stats
 ```
    docker compose run web python manage.py build_stats 
