@@ -46,7 +46,7 @@ jobs:
           pipenv install --deploy --dev
 
       - name: Ruff lint
-        run: pipenv run ruff .
+        run: pipenv run ruff check .
 
       - name: Ruff format
         run: pipenv run ruff format --check .

@@ -70,6 +70,28 @@ Utiliser :
     $ ./lint.sh
 ```
 
+### Docker
+
+Créer un .env à la racine contenant la viable WAREHOUSE_URL
+
+```
+    docker compose build
+    docker compose run web python manage.py migrate 
+```
+
+Pour la comamnde build stats vous aurez besoin d'un tunnel ssh écountant sur 0.0.0.0:10001 (demander à un dev)
+
+Créer les stats
+```
+   docker compose run web python manage.py build_stats 
+```
+
+
+```
+    docker compose up
+```
+Le serveur est accessible sur localhost:8000
+
 ## Licence
 
 Le code source du logiciel est publié sous licence [MIT](https://fr.wikipedia.org/wiki/Licence_MIT).
