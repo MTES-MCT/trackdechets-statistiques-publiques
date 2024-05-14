@@ -381,7 +381,7 @@ async function loadInstallations(year, rubrique) {
         code: key,
       }).on("click", (e) => {
         clickOnPointHandler(e, selectedRubrique);
-        showRegionInfo(e, selectedRubrique, "installation");
+        //showRegionInfo(e, selectedRubrique, "installation");
       })
     );
   }
