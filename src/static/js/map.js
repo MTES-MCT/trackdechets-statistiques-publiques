@@ -50,11 +50,15 @@ async function loadFranceStats(year, rubrique) {
 
 // Fonctions pour le zoom
 function zoomToPolygon(e) {
-  map.fitBounds(e.target.getBounds(), { padding: [100, 100] });
+  let bounds = e.target.getBounds();
+  map.fitBounds(bounds, { paddingTopLeft: [700, 0] });
 }
 
 function zoomToPoint(e) {
-  map.flyTo(e.target.getLatLng(), 9);
+  let latlng = structuredClone(e.target.getLatLng());
+  latlng.lng = latlng.lng - 2;
+  map.flyTo(latlng, 8);
+
 }
 
 // D3.js
@@ -578,6 +582,7 @@ document.getElementById("toggle-side").addEventListener("click", function (e) {
   document
     .getElementById("side-container")
     .classList.toggle("side-container--closed");
+  setTimeout(function () { map.invalidateSize() }, 400);
 });
 
 // Gestion du toggle du panneau de stats
@@ -659,7 +664,7 @@ function stylePolygon(feature) {
   featureId = feature.properties.code;
   featureStats =
     featuresStats[`${selectedLayer}.${selectedYear}.${selectedRubrique}`][
-      featureId
+    featureId
     ];
 
   var processedQuantityKey = "moyenne_quantite_journaliere_traitee";
