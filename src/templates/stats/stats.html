@@ -29,7 +29,8 @@
                 <h3 class="fr-accordion__title">
                     <a class="fr-accordion__btn accordion-toggle"
                        aria-expanded="false"
-                       href="#accordion-content">En savoir plus</a>
+                       href="#accordion-content">En savoir
+                    plus</a>
                 </h3>
                 <div class="accordion-content" id="accordion-content">
                     <p>L'application Trackdéchets est utilisée en France pour tracer plusieurs types de déchets:</p>
@@ -72,7 +73,7 @@
             </div>
             <hr>
             <div id="yearly_wrapper">
-                <div hx-get="{% url 'yearly_stats' year=2023 %}"
+                <div hx-get="{% url 'yearly_stats' year=2024 %}"
                      hx-trigger="load"
                      hx-target="#yearly_wrapper"
                      hx-indicator="#yearly_spinner"></div>
@@ -90,43 +91,43 @@
 {% endblock %}
 {% block scripts %}
     <script>
-        function renderPlots(plotConfigs) {
-            for (let config of plotConfigs) {
-                let newConfig = {...config.data.config, locale: 'fr',displaylogo: false, responsive:true}
-                Plotly.newPlot(
-                    config.target,
-                    config.data.data,
-                    config.data.layout,
-                    newConfig)
+    function renderPlots(plotConfigs) {
+        for (let config of plotConfigs) {
+            let newConfig = { ...config.data.config, locale: 'fr', displaylogo: false, responsive: true }
+            Plotly.newPlot(
+                config.target,
+                config.data.data,
+                config.data.layout,
+                newConfig)
+        }
+    }
+
+    function onceReady(callback) {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", callback);
+        } else {
+            callback();
+        }
+    }
+
+    function accordion() {
+        document.addEventListener('click', function (event) {
+            if (!event.target.classList.contains('accordion-toggle')) return;
+            const content = document.querySelector(event.target.hash);
+            if (!content) return;
+            event.preventDefault();
+            event.target.setAttribute('aria-expanded', !(event.target.getAttribute('aria-expanded') === 'true'));
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                return;
             }
+
+            content.classList.toggle('active');
         }
+        )
+    }
 
-        function onceReady(callback) {
-            if (document.readyState === "loading") {
-                document.addEventListener("DOMContentLoaded", callback);
-            } else {
-                callback();
-            }
-        }
-
-        function accordion() {
-            document.addEventListener('click', function (event) {
-                    if (!event.target.classList.contains('accordion-toggle')) return;
-                    const content = document.querySelector(event.target.hash);
-                    if (!content) return;
-                    event.preventDefault();
-                    event.target.setAttribute('aria-expanded', !(event.target.getAttribute('aria-expanded') === 'true'));
-                    if (content.classList.contains('active')) {
-                        content.classList.remove('active');
-                        return;
-                    }
-
-                    content.classList.toggle('active');
-                }
-            )
-        }
-
-        onceReady(accordion);
+    onceReady(accordion);
 
     </script>
 {% endblock %}

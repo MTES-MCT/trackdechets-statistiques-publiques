@@ -5,13 +5,17 @@ Les changements importants de Trackdéchets préparation inspection sont documen
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et le projet suit un schéma de versionning inspiré de [Calendar Versioning](https://calver.org/).
 
+## 17/05/2024
+- Ajout d'une carte affichant les statistiques des installations de traitements de déchets dangereux
+- Affichage des stats 2024 par défaut.
+
 ## 05/01/2024
 - Ajout des données pour 2024.
 
 ## 13/11/2023
 
 - Ajout des statistiques hebdomadaires des BSVHU.
-- Modification de l'onglet des statistiques hebdomadaires des BSFF
+- Modification de l'onglet des statistiques hebdomadaires des BSFF.
 afin d'afficher un graphe pour les bordereaux et un graphe pour les contenants.
 
 ## 24/10/2023
