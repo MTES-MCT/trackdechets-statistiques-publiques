@@ -29,6 +29,7 @@ class Computed:
     bsff_weekly_data: pl.DataFrame
     bsdasri_weekly_data: pl.DataFrame
     bsvhu_weekly_data: pl.DataFrame
+    bsd_non_dangerous_weekly_data: pl.DataFrame
 
     accounts_weekly_data: pl.DataFrame
 
@@ -60,6 +61,9 @@ def get_data_df():
     bsvhu_weekly_data = extract_dataset(
         bs_weekly_data_sql.format("refined_zone_stats_publiques.bsvhu_statistiques_hebdomadaires")
     )
+    bsd_non_dangerous_weekly_data = extract_dataset(
+        bs_weekly_data_sql.format("refined_zone_stats_publiques.bsd_non_dangereux_statistiques_hebdomadaires")
+    )
 
     accounts_weekly_data = extract_dataset(accounts_weekly_stats_sql)
 
@@ -80,6 +84,7 @@ def get_data_df():
         bsff_weekly_data=bsff_weekly_data,
         bsdasri_weekly_data=bsdasri_weekly_data,
         bsvhu_weekly_data=bsvhu_weekly_data,
+        bsd_non_dangerous_weekly_data=bsd_non_dangerous_weekly_data,
         accounts_weekly_data=accounts_weekly_data,
         weekly_waste_processed_data=weekly_waste_processed_data,
         accounts_by_naf_data=accounts_by_naf_data,

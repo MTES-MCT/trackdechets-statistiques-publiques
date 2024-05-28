@@ -90,6 +90,10 @@ class BsvhuView(BaseBsdView):
     template_name = "stats/fragments/bsvhu.html"
 
 
+class BsddNonDangerousView(BaseBsdView):
+    template_name = "stats/fragments/bsd_non_dangerous.html"
+
+
 class CompanyView(BaseBsdView):
     template_name = "stats/fragments/company.html"
 
