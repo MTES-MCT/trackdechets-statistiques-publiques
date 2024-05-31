@@ -12,11 +12,13 @@ class Computation(models.Model):
 
     total_bs_created = models.PositiveBigIntegerField(default=0)
     total_quantity_processed = models.PositiveBigIntegerField(default=0)
+    total_quantity_processed_non_dangerous = models.PositiveBigIntegerField(default=0)
     total_companies_created = models.PositiveBigIntegerField(default=0)
 
     quantity_processed_total = models.JSONField(default=dict)
 
     quantity_processed_yearly = models.JSONField(default=dict)
+    quantity_processed_non_dangerous_yearly = models.PositiveBigIntegerField(default=0)
     bs_created_yearly = models.JSONField(default=dict)
 
     quantity_processed_weekly = models.JSONField(default=dict)

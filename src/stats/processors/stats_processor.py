@@ -72,8 +72,13 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         "BSVHU": bsvhu_weekly_data_df,
     }
 
-    total_bs_created = get_total_bs_created(bs_weekly_datasets)
+    total_bs_created = get_total_bs_created(
+        {**bs_weekly_datasets, "BS de déchets non dangereux": bsd_non_dangerous_weekly_data_df}
+    )
     total_quantity_processed = get_total_quantity_processed(bs_weekly_datasets)
+    total_quantity_processed_non_dangerous = get_summed_statistics(
+        bsd_non_dangerous_weekly_data_df, "quantite_traitee_operations_finales"
+    )
     total_companies_created = get_total_number_of_accounts_created(accounts_weekly_data_df, "comptes_etablissements")
 
     # BSx weekly figures
@@ -189,8 +194,11 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         bs_weekly_datasets,
         date_interval,
     )
+    quantity_processed_non_dangerous_yearly = get_summed_statistics(
+        bsd_non_dangerous_weekly_data_df, "quantite_traitee_operations_finales", date_interval
+    )
     bs_created_yearly = get_total_bs_created(
-        bs_weekly_datasets,
+        {**bs_weekly_datasets, "BS de déchets non dangereux": bsd_non_dangerous_weekly_data_df},
         date_interval,
     )
 
@@ -216,8 +224,10 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         year=year,
         total_bs_created=total_bs_created,
         total_quantity_processed=total_quantity_processed,
+        total_quantity_processed_non_dangerous=total_quantity_processed_non_dangerous,
         total_companies_created=total_companies_created,
         quantity_processed_yearly=quantity_processed_yearly,
+        quantity_processed_non_dangerous_yearly=quantity_processed_non_dangerous_yearly,
         bs_created_yearly=bs_created_yearly,
         quantity_processed_weekly=quantity_processed_weekly_fig.to_json(),
         quantity_processed_sunburst=quantity_processed_sunburst_fig.to_json(),

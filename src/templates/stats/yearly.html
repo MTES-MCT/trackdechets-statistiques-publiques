@@ -39,25 +39,27 @@
         </div>
     </div>
     <div class="fr-callout">
+        <p class="callout-number small-number">{{ computation.quantity_processed_non_dangerous_yearly|number|safe }}</p>
+        <div class="number-text">
+            <p>tonnes de déchets non dangereux tracés et traités sur l'année {{ computation.year }}</p>
+        </div>
+    </div>
+    <div class="fr-callout">
         <p class="callout-number small-number">{{ computation.bs_created_yearly|number|safe }}</p>
         <div class="number-text">
             <p>bordereaux de déchets dangereux* créés sur l'année {{ computation.year }}</p>
-        </div>
-    </div>
-    <div class="fr-callout processing-explanation-block">
-        <div class="number-text">
-            <p>
-                Les modes de traitement des déchets dangereux s'inscrivent dans la hiérarchie des traitements de
-                déchets. Ainsi la réutilisation, le recyclage ou la valorisation sont considérés comme
-                "valorisés" dans Trackdéchets, et sont comparés à l'élimination (pas de réutilisation, recyclage
-                ou valorisation possible dans les conditions techniques et économiques du moment).
-            </p>
         </div>
     </div>
 </div>
 <div class="fr-callout">
     <h4>Quantité de déchets dangereux* tracés et traités par semaine</h4>
     <div id="quantity_processed_weekly_graph"></div>
+    <p>
+        Les modes de traitement des déchets dangereux s'inscrivent dans la hiérarchie des traitements de
+        déchets. Ainsi la réutilisation, le recyclage ou la valorisation sont considérés comme
+        "valorisés" dans Trackdéchets, et sont comparés à l'élimination (pas de réutilisation, recyclage
+        ou valorisation possible dans les conditions techniques et économiques du moment).
+    </p>
 </div>
 <div class="callout-row operation-type-section">
     <div class="fr-callout">
