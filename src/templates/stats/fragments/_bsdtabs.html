@@ -11,7 +11,11 @@
                 hx-get="{% url 'bsdd' year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
-                hx-target="#bsd_wrapper">Déchets dangereux classiques</button>
+                hx-target="#bsd_wrapper">
+            Déchets Dangereux
+            <br />
+            Classiques
+        </button>
     </li>
     <li role="presentation">
         <button id="tabpanel-2"
@@ -47,7 +51,11 @@
                 hx-get="{% url 'bsdasri'  year %}"
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
-                hx-target="#bsd_wrapper">Activité de Soins à Risques Infectieux</button>
+                hx-target="#bsd_wrapper">
+            Activité de Soins
+            <br />
+            à Risques Infectieux
+        </button>
     </li>
     <li role="presentation">
         <button id="tabpanel-5"
@@ -60,5 +68,17 @@
                 hx-trigger="click"
                 hx-indicator="#bsd_spinner"
                 hx-target="#bsd_wrapper">Véhicules Hors d'Usage</button>
+    </li>
+    <li role="presentation">
+        <button id="tabpanel-6"
+                class="fr-tabs__tab  fr-tabs__tab--icon-left"
+                tabindex="0"
+                role="tab"
+                aria-selected="{% if bsdtype == "bsd_non_dangerous" %}true{% else %}false{% endif %}"
+                aria-controls="tabpanel-6-panel"
+                hx-get="{% url 'bsd_non_dangerous'  year %}"
+                hx-trigger="click"
+                hx-indicator="#bsd_spinner"
+                hx-target="#bsd_wrapper">Déchets Non Dangereux</button>
     </li>
 </ul>

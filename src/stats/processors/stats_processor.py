@@ -49,6 +49,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
     bsff_weekly_data_df = pl.read_parquet("temp_data/bsff_weekly_data.parquet")
     bsdasri_weekly_data_df = pl.read_parquet("temp_data/bsdasri_weekly_data.parquet")
     bsvhu_weekly_data_df = pl.read_parquet("temp_data/bsvhu_weekly_data.parquet")
+    bsd_non_dangerous_weekly_data_df = pl.read_parquet("temp_data/bsd_non_dangerous_weekly_data.parquet")
     accounts_weekly_data_df = pl.read_parquet("temp_data/accounts_weekly_data.parquet")
     weekly_waste_processed_data_df = pl.read_parquet("temp_data/weekly_waste_processed_data.parquet")
     accounts_by_naf_data_df = pl.read_parquet("temp_data/accounts_by_naf_data.parquet")
@@ -71,8 +72,13 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         "BSVHU": bsvhu_weekly_data_df,
     }
 
-    total_bs_created = get_total_bs_created(bs_weekly_datasets)
+    total_bs_created = get_total_bs_created(
+        {**bs_weekly_datasets, "BS de déchets non dangereux": bsd_non_dangerous_weekly_data_df}
+    )
     total_quantity_processed = get_total_quantity_processed(bs_weekly_datasets)
+    total_quantity_processed_non_dangerous = get_summed_statistics(
+        bsd_non_dangerous_weekly_data_df, "quantite_traitee_operations_finales"
+    )
     total_companies_created = get_total_number_of_accounts_created(accounts_weekly_data_df, "comptes_etablissements")
 
     # BSx weekly figures
@@ -81,6 +87,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
     bsff_weekly_filtered_df = get_weekly_preprocessed_dfs(bsff_weekly_data_df, date_interval)
     bsdasri_weekly_filtered_df = get_weekly_preprocessed_dfs(bsdasri_weekly_data_df, date_interval)
     bsvhu_weekly_filtered_df = get_weekly_preprocessed_dfs(bsvhu_weekly_data_df, date_interval)
+    bsd_non_dangerous_weekly_filtered_df = get_weekly_preprocessed_dfs(bsd_non_dangerous_weekly_data_df, date_interval)
 
     bsdd_counts_weekly_fig = create_weekly_scatter_figure(
         bsdd_weekly_filtered_df,
@@ -112,6 +119,9 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         metric_type="counts",
         bs_type="BSVHU",
     )
+    bsd_non_dangerous_counts_weekly_fig = create_weekly_scatter_figure(
+        bsd_non_dangerous_weekly_filtered_df, metric_type="counts", bs_type="BS de déchets non dangereux"
+    )
 
     bsdd_quantities_weekly_fig = create_weekly_scatter_figure(
         bsdd_weekly_filtered_df,
@@ -138,6 +148,9 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         metric_type="quantity",
         bs_type="BSDASRI",
     )
+    bsd_non_dangerous_quantities_weekly_fig = create_weekly_scatter_figure(
+        bsd_non_dangerous_weekly_filtered_df, metric_type="quantity", bs_type="BS de déchets non dangereux"
+    )
 
     # BSx weekly stats
     bsdd_bordereaux_created = get_summed_statistics(bsdd_weekly_filtered_df, "creations")
@@ -145,6 +158,7 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
     bsff_bordereaux_created = get_summed_statistics(bsff_weekly_filtered_df, "creations_bordereaux")
     bsdasri_bordereaux_created = get_summed_statistics(bsdasri_weekly_filtered_df, "creations")
     bsvhu_bordereaux_created = get_summed_statistics(bsvhu_weekly_filtered_df, "creations")
+    bsd_non_dangerous_bordereaux_created = get_summed_statistics(bsd_non_dangerous_weekly_filtered_df, "creations")
 
     bsdd_quantity_processed = get_summed_statistics(bsdd_weekly_filtered_df, "quantite_traitee_operations_finales")
     bsda_quantity_processed = get_summed_statistics(bsda_weekly_filtered_df, "quantite_traitee_operations_finales")
@@ -153,6 +167,9 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         bsdasri_weekly_filtered_df, "quantite_traitee_operations_finales"
     )
     bsvhu_quantity_processed = get_summed_statistics(bsvhu_weekly_filtered_df, "quantite_traitee_operations_finales")
+    bsd_non_dangerous_quantity_processed = get_summed_statistics(
+        bsd_non_dangerous_weekly_filtered_df, "quantite_traitee_operations_finales"
+    )
 
     # BSFF specific stats
     mean_quantity_by_bsff_packagings = get_mean_quantity_by_bsff_packagings(bsff_weekly_filtered_df)
@@ -177,8 +194,11 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         bs_weekly_datasets,
         date_interval,
     )
+    quantity_processed_non_dangerous_yearly = get_summed_statistics(
+        bsd_non_dangerous_weekly_data_df, "quantite_traitee_operations_finales", date_interval
+    )
     bs_created_yearly = get_total_bs_created(
-        bs_weekly_datasets,
+        {**bs_weekly_datasets, "BS de déchets non dangereux": bsd_non_dangerous_weekly_data_df},
         date_interval,
     )
 
@@ -204,8 +224,10 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         year=year,
         total_bs_created=total_bs_created,
         total_quantity_processed=total_quantity_processed,
+        total_quantity_processed_non_dangerous=total_quantity_processed_non_dangerous,
         total_companies_created=total_companies_created,
         quantity_processed_yearly=quantity_processed_yearly,
+        quantity_processed_non_dangerous_yearly=quantity_processed_non_dangerous_yearly,
         bs_created_yearly=bs_created_yearly,
         quantity_processed_weekly=quantity_processed_weekly_fig.to_json(),
         quantity_processed_sunburst=quantity_processed_sunburst_fig.to_json(),
@@ -215,21 +237,25 @@ def build_stats_and_figs(year: int, clear_year: bool = False):
         bsff_packagings_counts_weekly=bsff_packagings_counts_weekly_fig.to_json(),
         bsdasri_counts_weekly=bsdasri_counts_weekly_fig.to_json(),
         bsvhu_counts_weekly=bsvhu_counts_weekly_fig.to_json(),
+        bsd_non_dangerous_counts_weekly=bsd_non_dangerous_counts_weekly_fig.to_json(),
         bsdd_quantities_weekly=bsdd_quantities_weekly_fig.to_json(),
         bsda_quantities_weekly=bsda_quantities_weekly_fig.to_json(),
         bsff_quantities_weekly=bsff_quantities_weekly_fig.to_json(),
         bsdasri_quantities_weekly=bsdasri_quantities_weekly_fig.to_json(),
         bsvhu_quantities_weekly=bsvhu_quantities_weekly_fig.to_json(),
+        bsd_non_dangerous_quantities_weekly=bsd_non_dangerous_quantities_weekly_fig.to_json(),
         bsdd_bordereaux_created=bsdd_bordereaux_created,
         bsda_bordereaux_created=bsda_bordereaux_created,
         bsff_bordereaux_created=bsff_bordereaux_created,
         bsdasri_bordereaux_created=bsdasri_bordereaux_created,
         bsvhu_bordereaux_created=bsvhu_bordereaux_created,
+        bsd_non_dangerous_bordereaux_created=bsd_non_dangerous_bordereaux_created,
         bsdd_quantity_processed=bsdd_quantity_processed,
         bsda_quantity_processed=bsda_quantity_processed,
         bsff_quantity_processed=bsff_quantity_processed,
         bsdasri_quantity_processed=bsdasri_quantity_processed,
         bsvhu_quantity_processed=bsvhu_quantity_processed,
+        bsd_non_dangerous_quantity_processed=bsd_non_dangerous_quantity_processed,
         mean_quantity_by_bsff_packagings=mean_quantity_by_bsff_packagings,
         mean_packagings_by_bsff=mean_packagings_by_bsff,
         produced_quantity_by_category=produced_quantity_by_category_fig.to_json(),

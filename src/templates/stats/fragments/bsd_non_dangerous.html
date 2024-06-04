@@ -1,0 +1,52 @@
+{% include "stats/fragments/_bsdtabs.html"  with bsdtype="bsd_non_dangerous" year=computation.year %}
+{% include "spinner.html" with spinner_id="bsd_spinner" %}
+{% load stats %}
+<div id="tabpanel-6-panel"
+     class="fr-tabs__panel fr-tabs__panel--selected"
+     role="tabpanel"
+     aria-labelledby="tabpanel-6"
+     tabindex="0">
+    <div class="callout-row">
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsd_non_dangerous_bordereaux_created|number|safe }}</p>
+            <div class="number-text">
+                <p>BS de déchets non dangereux créés</p>
+            </div>
+        </div>
+        <div class="fr-callout bs-callout">
+            <p class="callout-number small-number">{{ computation.bsd_non_dangerous_quantity_processed|number|safe }}</p>
+            <div class="number-text">
+                <p>tonnes de déchets non dangereux tracés et traités</p>
+            </div>
+        </div>
+    </div>
+    <h4>Nombre de Bordereaux de Suivi de Déchets Non Dangereux par semaine</h4>
+    <div id="bsd_non_dangerous_counts_weekly_graph"></div>
+    <h4>Quantités de Déchets Non Dangereux par semaine</h4>
+    <div id="bsd_non_dangerous_quantites_weekly_graph"></div>
+</div>
+<script>
+        {% autoescape off %}
+            function bsd_non_dangerous() {
+                const counts_weekly = {{ computation.bsd_non_dangerous_counts_weekly }};
+                const quantities_weekly = {{ computation.bsd_non_dangerous_quantities_weekly }};
+                const configs = [{
+                    "data":  counts_weekly,
+                    "target": "bsd_non_dangerous_counts_weekly_graph"
+                },
+                    {
+                        "data": quantities_weekly,
+                        "target": "bsd_non_dangerous_quantites_weekly_graph"
+                    }
+
+                ];
+
+              renderPlots(configs);
+
+
+            }
+        {% endautoescape %}
+
+
+      onceReady(bsd_non_dangerous);
+</script>

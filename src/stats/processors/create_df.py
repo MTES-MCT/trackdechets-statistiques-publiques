@@ -5,7 +5,7 @@ from data.datasets import get_data_df
 
 
 def build_dataframes():
-    # store dataframes as json in temp files
+    # store dataframes as parquet in temp files
     root = r"temp_data"  # unversionned dir
     try:
         shutil.rmtree(root)
@@ -21,6 +21,7 @@ def build_dataframes():
         "bsff_weekly_data",
         "bsdasri_weekly_data",
         "bsvhu_weekly_data",
+        "bsd_non_dangerous_weekly_data",
         "accounts_weekly_data",
         "weekly_waste_processed_data",
         "accounts_by_naf_data",
