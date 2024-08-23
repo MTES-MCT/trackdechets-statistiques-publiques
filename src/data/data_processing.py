@@ -7,6 +7,8 @@ from typing import Tuple
 
 import polars as pl
 
+from stats.processors.constants import ANNUAL_ICPE_RUBRIQUES, DAILY_ICPE_RUBRIQUES, ICPE_RUBRIQUES
+
 from .figures_factory import create_icpe_graph
 
 
@@ -188,8 +190,8 @@ def create_icpe_installations_df(
     date_interval: Tuple[datetime, datetime] | None = None,
 ) -> pl.DataFrame:
     df_list = []
-    for rubrique in ["2790", "2760-1", "2770"]:
-        df_installations_filtered = df_installations.filter(pl.col("rubrique") == rubrique)
+    for rubrique in ICPE_RUBRIQUES:
+        df_installations_filtered = df_installations.filter(pl.col("rubrique").str.contains(rubrique))
 
         df_installations_filtered = df_installations_filtered.group_by("code_aiot").agg(
             pl.col("siret").max(),
@@ -208,12 +210,14 @@ def create_icpe_installations_df(
         )
 
         df_waste_processed_filtered = df_installations_waste_processed.filter(
-            (pl.col("rubrique") == rubrique) & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
+            pl.col("rubrique").str.contains(rubrique)
+            & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
         )
 
         agg_expr = pl.col("quantite_traitee").sum().alias("cumul_quantite_traitee").fill_null(0)
         metric_expr = (pl.col("cumul_quantite_traitee") / pl.col("quantite_autorisee")).alias("taux_consommation")
-        if rubrique in ["2790", "2770"]:
+
+        if rubrique in DAILY_ICPE_RUBRIQUES:
             agg_expr = pl.col("quantite_traitee").mean().alias("moyenne_quantite_journaliere_traitee").fill_null(0)
             metric_expr = (pl.col("moyenne_quantite_journaliere_traitee") / pl.col("quantite_autorisee")).alias(
                 "taux_consommation"
@@ -268,9 +272,9 @@ def create_icpe_regional_df(
         rate of consumption, authorized quantity, number of installations and plotly graph.
     """
     df_list = []
-    for rubrique in ["2790", "2760-1", "2770"]:
+    for rubrique in ICPE_RUBRIQUES:
         df_waste_processed_filtered = df_regional_waste_processed.filter(
-            (pl.col("rubrique") == rubrique)
+            pl.col("rubrique").str.contains(rubrique)
             & (
                 pl.col("day_of_processing").is_between(*date_interval, closed="left")
                 | pl.col("day_of_processing").is_null()
@@ -287,7 +291,7 @@ def create_icpe_regional_df(
         metric_expr = (pl.col("moyenne_quantite_journaliere_traitee") / pl.col("quantite_autorisee")).alias(
             "taux_consommation"
         )
-        if rubrique == "2760-1":
+        if rubrique in ANNUAL_ICPE_RUBRIQUES:
             agg_expr = pl.col("quantite_traitee").sum().alias("cumul_quantite_traitee").fill_null(0)
             metric_expr = (pl.col("cumul_quantite_traitee") / pl.col("quantite_autorisee")).alias("taux_consommation")
 

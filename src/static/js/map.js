@@ -1,3 +1,5 @@
+var annualRubriques = ['2760-1', '2760-2']
+
 // Fonction pour charger les données GeoJSON
 async function loadGeoJSONData(url) {
   return fetch(url).then(function (response) {
@@ -97,7 +99,7 @@ async function showRegionInfo(event, rubrique, featureType) {
   let unit = "t/j";
   let processedQuantityPrefix = "Quantité journalière traitée en moyenne :";
   let usedQuantityPrefix = "Quantité journalière consommée en moyenne :";
-  if (rubrique == "2760-1") {
+  if (annualRubriques.includes(rubrique)){
     processedQuantityKey = "cumul_quantite_traitee";
     unit = "t/an";
     processedQuantityPrefix = "Quantité traitée en cummulé :";
@@ -414,7 +416,7 @@ async function showFranceStats(rubrique, year) {
   let unit = "t/j";
   let processedQuantityPrefix = "Quantité journalière traitée en moyenne :";
   let usedQuantityPrefix = "Quantité journalière consommée en moyenne :";
-  if (rubrique == "2760-1") {
+  if (annualRubriques.includes(rubrique)) {
     processedQuantityKey = "cumul_quantite_traitee";
     unit = "t/an";
     processedQuantityPrefix = "Quantité traitée en cummulé :";
@@ -668,7 +670,7 @@ function stylePolygon(feature) {
     ];
 
   var processedQuantityKey = "moyenne_quantite_journaliere_traitee";
-  if (selectedRubrique == "2760-1") {
+  if (annualRubriques.includes(selectedRubrique)) {
     processedQuantityKey = "cumul_quantite_traitee";
   }
   var processedQuantity = featureStats
