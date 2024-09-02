@@ -330,7 +330,9 @@ function onEachPolygonFeature(feature, layer, rubrique, featureType) {
     click: (e) => {
       clickOnPolygonHandler(e, rubrique, featureType);
     },
+
   });
+
 }
 
 function clickOnPointHandler(e, rubrique) {
@@ -383,8 +385,7 @@ async function loadInstallations(year, rubrique) {
         code: key,
       }).on("click", (e) => {
         clickOnPointHandler(e, selectedRubrique);
-        //showRegionInfo(e, selectedRubrique, "installation");
-      })
+      }).bindTooltip(`${value.raison_sociale}`)
     );
   }
 
@@ -554,6 +555,7 @@ async function prepareMap(layerName, rubrique, year) {
       style: stylePolygon,
       onEachFeature: (feature, layer) => {
         onEachPolygonFeature(feature, layer, rubrique, "regions");
+        layer.bindTooltip(`${feature.properties.nom}`);
       },
     });
     map.addLayer(regionsLayer);
@@ -564,6 +566,7 @@ async function prepareMap(layerName, rubrique, year) {
       style: stylePolygon,
       onEachFeature: (feature, layer) => {
         onEachPolygonFeature(feature, layer, rubrique, "departements");
+        layer.bindTooltip(`${feature.properties.nom}`);
       },
     });
     map.addLayer(departementsLayer);
