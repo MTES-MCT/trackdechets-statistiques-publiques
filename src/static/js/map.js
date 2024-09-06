@@ -99,7 +99,7 @@ async function showRegionInfo(event, rubrique, featureType) {
   let unit = "t/j";
   let processedQuantityPrefix = "Quantité journalière traitée en moyenne :";
   let usedQuantityPrefix = "Quantité journalière consommée en moyenne :";
-  if (annualRubriques.includes(rubrique)){
+  if (annualRubriques.includes(rubrique)) {
     processedQuantityKey = "cumul_quantite_traitee";
     unit = "t/an";
     processedQuantityPrefix = "Quantité traitée en cummulé :";
@@ -379,11 +379,45 @@ async function loadInstallations(year, rubrique) {
       continue;
     }
 
+
+    marker_options = {
+      title: value.raison_sociale,
+      code: key,
+    }
+
+    // Determine marker color based on the value variable
+    let markerColor;
+    if ((value["quantite_autorisee"] == 0) || (value["quantite_autorisee"] == null)) {
+      markerColor = "red"; // Low value, green marker
+    } else if (
+      (!annualRubriques.includes(selectedRubrique) && ((value["moyenne_quantite_journaliere_traitee"] == null) || (value["moyenne_quantite_journaliere_traitee"] == 0)))
+      ||
+      (annualRubriques.includes(selectedRubrique) && ((value["cumul_quantite_traitee"] == null) || (value["cumul_quantite_traitee"] == 0)))
+    ) {
+      markerColor = "yellow"; // Medium value, orange marker
+    }else if (
+      (!annualRubriques.includes(selectedRubrique) && ((value["taux_consommation"] != null) && (value["taux_consommation"] <= 0.2)))
+    ) {
+      markerColor = "dark"; // Medium value, orange marker
+    } else {
+      markerColor = "blue"; // High value, red marker
+    }
+
+    marker_options = {
+      ...marker_options, icon: L.icon({
+        iconUrl: `/static/img/${markerColor}_icon.png`,
+        iconSize: [30, 30],
+        popupAnchor: [1, -34]
+      })
+    }
+
+
+
+
+
+
     markers.push(
-      L.marker([value.latitude, value.longitude], {
-        title: value.raison_sociale,
-        code: key,
-      }).on("click", (e) => {
+      L.marker([value.latitude, value.longitude], marker_options).on("click", (e) => {
         clickOnPointHandler(e, selectedRubrique);
       }).bindTooltip(`${value.raison_sociale}`)
     );
@@ -547,6 +581,8 @@ async function prepareMap(layerName, rubrique, year) {
   if (departementsLayer) map.removeLayer(departementsLayer);
   if (installationsLayer) map.removeLayer(installationsLayer);
 
+
+
   await loadRegionalGeojsons();
 
   await loadFeaturesStats(layerName, year, rubrique);
@@ -617,6 +653,11 @@ document
   .getElementById("rubrique-select")
   .addEventListener("change", function (e) {
     selectedRubrique = e.target.value;
+
+    if (!annualRubriques.includes(selectedRubrique)) {
+      var legend_div = document.getElementById("icon-legend")
+      legend_div.display = 'block';
+    };
     prepareMap(selectedLayer, selectedRubrique, selectedYear);
     showFranceStats(selectedRubrique, selectedYear);
   });
