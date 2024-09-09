@@ -388,19 +388,19 @@ async function loadInstallations(year, rubrique) {
     // Determine marker color based on the value variable
     let markerColor;
     if ((value["quantite_autorisee"] == 0) || (value["quantite_autorisee"] == null)) {
-      markerColor = "red"; // Low value, green marker
+      markerColor = "red"; 
     } else if (
       (!annualRubriques.includes(selectedRubrique) && ((value["moyenne_quantite_journaliere_traitee"] == null) || (value["moyenne_quantite_journaliere_traitee"] == 0)))
       ||
       (annualRubriques.includes(selectedRubrique) && ((value["cumul_quantite_traitee"] == null) || (value["cumul_quantite_traitee"] == 0)))
     ) {
-      markerColor = "yellow"; // Medium value, orange marker
+      markerColor = "yellow"; 
     }else if (
       (!annualRubriques.includes(selectedRubrique) && ((value["taux_consommation"] != null) && (value["taux_consommation"] <= 0.2)))
     ) {
-      markerColor = "dark"; // Medium value, orange marker
+      markerColor = "dark"; 
     } else {
-      markerColor = "blue"; // High value, red marker
+      markerColor = "blue";
     }
 
     marker_options = {
