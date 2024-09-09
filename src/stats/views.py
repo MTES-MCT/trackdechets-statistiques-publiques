@@ -14,6 +14,7 @@ from stats.models import (
     InstallationsComputation,
     RegionsComputation,
 )
+from stats.processors.constants import ANNUAL_ICPE_RUBRIQUES
 
 
 class BaseRender(TemplateView):
@@ -117,7 +118,7 @@ def digest_view(request):
 
 def icpe_view_many(request, layer, year, rubrique):
     metric_name = "moyenne_quantite_journaliere_traitee"
-    if rubrique == "2760-1":
+    if rubrique in ANNUAL_ICPE_RUBRIQUES:
         metric_name = "cumul_quantite_traitee"
 
     layers_configs = {
@@ -232,7 +233,7 @@ def icpe_get_graph(request, layer, year, rubrique, code):
 
 def icpe_view_france(request, year, rubrique):
     metric_name = "moyenne_quantite_journaliere_traitee"
-    if rubrique == "2760-1":
+    if rubrique in ANNUAL_ICPE_RUBRIQUES:
         metric_name = "cumul_quantite_traitee"
     fields = [
         "quantite_autorisee",

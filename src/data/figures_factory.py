@@ -10,6 +10,7 @@ from data.plot_configs import (
     WEEKLY_BSFF_PACKAGINGS_STATS_PLOT_CONFIGS,
     WEEKLY_BSFF_STATS_PLOT_CONFIGS,
 )
+from stats.processors.constants import ANNUAL_ICPE_RUBRIQUES
 
 from .page_utils import break_long_line, format_number
 
@@ -797,8 +798,9 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -
     trace_xaxis_tickformat = None
     trace_dtick = None
     gaph_class = go.Scatter
+    authorized_quantity_unit = "t/j"
 
-    if rubrique == "2760-1":
+    if rubrique in ANNUAL_ICPE_RUBRIQUES:
         group_by_expr = pl.col("day_of_processing").dt.truncate("1mo")
         df_waste = df_waste.group_by(group_by_expr).agg(pl.col("quantite_traitee").sum())
         df_waste = df_waste.sort(pl.col("day_of_processing")).with_columns(
@@ -811,6 +813,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -
         trace_xaxis_tickformat = "%b %y"
         trace_dtick = "M1"
         gaph_class = go.Bar
+        authorized_quantity_unit = "t/an"
 
     data = df_waste.to_dict(as_series=False)
 
@@ -825,7 +828,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -
         )
     )
     max_y = max(e for e in data["quantite_traitee"] if e is not None)
-    if rubrique == "2760-1":
+    if rubrique in ANNUAL_ICPE_RUBRIQUES:
         traces.append(
             go.Scatter(
                 x=data["day_of_processing"],
@@ -871,7 +874,7 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -
             yref="y",
             x=1,
             y=authorized_quantity,
-            text=f"Quantité maximale <br>autorisée : <b>{authorized_quantity:.0f}</b> t/an",
+            text=f"Quantité maximale <br>autorisée : <b>{authorized_quantity:.0f}</b> {authorized_quantity_unit}",
             font_color="red",
             xanchor="left",
             showarrow=False,

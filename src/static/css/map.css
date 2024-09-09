@@ -159,3 +159,12 @@
 .grouped-info span {
   font-weight: bold;
 }
+
+.legend-img{
+  width: 35px;
+  height: 35px;
+}
+
+#icon-legend{
+  margin-top: 10px;
+}
