@@ -396,7 +396,7 @@ async function loadInstallations(year, rubrique) {
     ) {
       markerColor = "yellow"; 
     }else if (
-      (!annualRubriques.includes(selectedRubrique) && ((value["taux_consommation"] != null) && (value["taux_consommation"] <= 0.2)))
+      ((value["taux_consommation"] != null) && ((value["taux_consommation"] <= 0.2) || (value["taux_consommation"] >= 1)))
     ) {
       markerColor = "dark"; 
     } else {
