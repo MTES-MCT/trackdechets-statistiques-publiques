@@ -787,10 +787,12 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
     return fig
 
 
-def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -> pl.DataFrame:
+def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -> str:
     authorized_quantity = df.select(pl.col("quantite_autorisee").max()).item()
 
     df_waste = df.filter(pl.col("day_of_processing").is_not_null())
+    if len(df_waste) == 0:
+        return None
 
     trace_hover_template = "Le %{x|%d-%m-%Y} : <b>%{y:.2f}t</b> traitées<extra></extra>"
     trace_name = "Quantité journalière traitée"
