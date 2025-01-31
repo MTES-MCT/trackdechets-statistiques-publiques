@@ -193,6 +193,9 @@ def create_icpe_installations_df(
     for rubrique in ICPE_RUBRIQUES:
         df_installations_filtered = df_installations.filter(pl.col("rubrique").str.contains(rubrique))
 
+        if len(df_installations_filtered) == 0:
+            continue
+
         df_installations_filtered = df_installations_filtered.group_by("code_aiot").agg(
             pl.col("siret").max(),
             pl.when(pl.col("quantite_autorisee").is_null().all())
@@ -213,6 +216,9 @@ def create_icpe_installations_df(
             pl.col("rubrique").str.contains(rubrique)
             & (pl.col("day_of_processing").is_between(*date_interval, closed="left"))
         )
+
+        if len(df_installations_waste_processed) == 0:
+            continue
 
         agg_expr = pl.col("quantite_traitee").sum().alias("cumul_quantite_traitee").fill_null(0)
         metric_expr = (pl.col("cumul_quantite_traitee") / pl.col("quantite_autorisee")).alias("taux_consommation")
