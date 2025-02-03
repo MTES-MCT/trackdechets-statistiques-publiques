@@ -11,8 +11,5 @@ class Command(BaseCommand):
 
         clear_figs()
 
-        build_stats_and_figs(2022, clear_year=True)
-
-        build_stats_and_figs(2023, clear_year=True)
-
-        build_stats_and_figs(2024, clear_year=True)
+        for year in [2022, 2023, 2024, 2025]:
+            build_stats_and_figs(year, clear_year=True)

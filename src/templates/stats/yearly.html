@@ -27,6 +27,14 @@
                   hx-indicator="#yearly_spinner"
                   {% if computation.year == 2024 %}aria-current="page"{% endif %}>Année 2024</span>
         </li>
+        <li class="fr-nav__item">
+            <span class="fr-nav__link"
+                  hx-get="{% url 'yearly_stats' year=2025 %}"
+                  hx-trigger="click"
+                  hx-target="#yearly_wrapper"
+                  hx-indicator="#yearly_spinner"
+                  {% if computation.year == 2025 %}aria-current="page"{% endif %}>Année 2025</span>
+        </li>
     </ul>
 </nav>
 {% include "spinner.html" with spinner_id="yearly_spinner" %}
