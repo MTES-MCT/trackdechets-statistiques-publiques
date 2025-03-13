@@ -18,6 +18,8 @@ gunicorn = "*"
 factory-boy = "*"
 adbc-driver-manager = "*"
 adbc-driver-postgresql = "*"
+clickhouse-sqlalchemy = "*"
+sshtunnel = "*"
 
 [dev-packages]
 isort = "*"

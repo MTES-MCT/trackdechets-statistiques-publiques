@@ -1,10 +1,13 @@
 import json
 import logging
+import os
+import tempfile
 import time
 
 import polars as pl
 from django.conf import settings
 from sqlalchemy import create_engine
+import sshtunnel
 
 from data.utils import format_waste_codes
 
@@ -29,16 +32,37 @@ FLOAT_COLUMNS = [
 def extract_dataset(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
-    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL, engine="adbc")
-    for colname, data_type in data_df.schema.items():
-        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
-            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+    # Create SSH KEY:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as fp:
+        fp.write(settings.DWH_SSH_KEY)
+        fp.close()
 
-    logger.info(
-        "Loading stats duration: %s (query : %s)",
-        time.time() - started_time,
-        sql_string,
-    )
+        os.chmod(fp.name, 0o600)
+
+        with sshtunnel.open_tunnel(
+            (settings.DWH_SSH_HOST, int(settings.DWH_SSH_PORT)),
+            ssh_username=settings.DWH_SSH_USERNAME,
+            ssh_pkey=fp.name,
+            remote_bind_address=("localhost", int(settings.DWH_PORT)),
+        ) as tunnel:
+            local_port = tunnel.local_bind_port
+            local_host = tunnel.local_bind_host
+
+            SQLALCHEMY_DATABASE_URL = (
+                f"clickhouse+native://{settings.DWH_USERNAME}:{settings.DWH_PASSWORD}@{local_host}:{local_port}"
+            )
+
+            engine = create_engine(SQLALCHEMY_DATABASE_URL)
+            data_df = pl.read_database(sql_string, connection=engine)
+            for colname, data_type in data_df.schema.items():
+                if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
+                    data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+
+            logger.info(
+                "Loading stats duration: %s (query : %s)",
+                time.time() - started_time,
+                sql_string,
+            )
 
     return data_df
 
