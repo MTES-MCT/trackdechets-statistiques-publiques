@@ -54,15 +54,16 @@ def extract_dataset(sql_string: str) -> pl.DataFrame:
 
             engine = create_engine(SQLALCHEMY_DATABASE_URL)
             data_df = pl.read_database(sql_string, connection=engine)
-            for colname, data_type in data_df.schema.items():
-                if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
-                    data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
 
-            logger.info(
-                "Loading stats duration: %s (query : %s)",
-                time.time() - started_time,
-                sql_string,
-            )
+    for colname, data_type in data_df.schema.items():
+        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
+            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+
+    logger.info(
+        "Loading stats duration: %s (query : %s)",
+        time.time() - started_time,
+        sql_string,
+    )
 
     return data_df
 
