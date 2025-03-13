@@ -71,7 +71,7 @@ Utiliser :
 
 ### Docker
 
-Créer un .env à la racine contenant la viable WAREHOUSE_URL
+Créer un .env à la racine contenant les variables permettant de se connecter au DataWarehouse (voir le env.dist)
 
 ```
     docker compose build
