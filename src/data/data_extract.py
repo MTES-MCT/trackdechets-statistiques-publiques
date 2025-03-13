@@ -9,9 +9,9 @@ import sshtunnel
 from django.conf import settings
 from sqlalchemy import create_engine
 
+from data.ssh_utils import ssh_tunnel
 from data.utils import format_waste_codes
 
-DB_ENGINE = create_engine(settings.WAREHOUSE_URL)
 SQL_PATH = settings.BASE_DIR / "data" / "sql"
 STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
 
@@ -29,41 +29,35 @@ FLOAT_COLUMNS = [
 ]
 
 
-def extract_dataset(sql_string: str) -> pl.DataFrame:
+def run_query(sql_string: str) -> pl.DataFrame:
     started_time = time.time()
 
     # Create SSH KEY:
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as fp:
-        fp.write(settings.DWH_SSH_KEY)
-        fp.close()
+    with ssh_tunnel(settings) as tunnel:
+        local_port = tunnel.local_bind_port
+        local_host = tunnel.local_bind_host
 
-        os.chmod(fp.name, 0o600)
+        SQLALCHEMY_DATABASE_URL = (
+            f"clickhouse+native://{settings.DWH_USERNAME}:{settings.DWH_PASSWORD}@{local_host}:{local_port}"
+        )
 
-        with sshtunnel.open_tunnel(
-            (settings.DWH_SSH_HOST, int(settings.DWH_SSH_PORT)),
-            ssh_username=settings.DWH_SSH_USERNAME,
-            ssh_pkey=fp.name,
-            remote_bind_address=("localhost", int(settings.DWH_PORT)),
-        ) as tunnel:
-            local_port = tunnel.local_bind_port
-            local_host = tunnel.local_bind_host
-
-            SQLALCHEMY_DATABASE_URL = (
-                f"clickhouse+native://{settings.DWH_USERNAME}:{settings.DWH_PASSWORD}@{local_host}:{local_port}"
-            )
-
-            engine = create_engine(SQLALCHEMY_DATABASE_URL)
-            data_df = pl.read_database(sql_string, connection=engine)
-
-    for colname, data_type in data_df.schema.items():
-        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
-            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+        engine = create_engine(SQLALCHEMY_DATABASE_URL)
+        data_df = pl.read_database(sql_string, connection=engine)
 
     logger.info(
         "Loading stats duration: %s (query : %s)",
         time.time() - started_time,
         sql_string,
     )
+
+    return data_df
+
+
+def extract_dataset(sql_string: str) -> pl.DataFrame:
+    data_df = run_query(sql_string)
+    for colname, data_type in data_df.schema.items():
+        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
+            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
 
     return data_df
 
@@ -77,10 +71,7 @@ def get_processing_operation_codes_data() -> pl.DataFrame:
     DataFrame
         DataFrame with processing operations codes and description.
     """
-    data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone.codes_operations_traitements", uri=settings.WAREHOUSE_URL, engine="adbc"
-    )
-
+    data = run_query("SELECT * FROM trusted_zone_referentials.codes_operations_traitements")
     return data
 
 
@@ -93,9 +84,7 @@ def get_departement_geographical_data() -> pl.DataFrame:
     DataFrame
         DataFrame with INSEE department geographical data.
     """
-    data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone_insee.code_geo_departements", uri=settings.WAREHOUSE_URL, engine="adbc"
-    )
+    data = run_query("SELECT * FROM trusted_zone_insee.code_geo_departements")
 
     return data
 
@@ -109,7 +98,7 @@ def get_waste_nomenclature_data() -> pl.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL, engine="adbc")
+    data = run_query("SELECT * FROM trusted_zone_referentials.codes_dechets")
     return data
 
 
