@@ -29,7 +29,28 @@ FLOAT_COLUMNS = [
 ]
 
 
-def run_query(sql_string: str) -> pl.DataFrame:
+def run_query(sql_string: str, schema_overrides: dict = None) -> pl.DataFrame:
+    """
+    Executes a SQL query to fetch data from the database and returns it as a Polars DataFrame.
+
+    Parameters
+    ----------
+    sql_string : str
+        The SQL query string used to fetch data from the database.
+    schema_overrides : dict, optional
+        A dictionary specifying any schema overrides (polars types) for the query result. Defaults to None.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing the data fetched from the database.
+
+    Notes
+    -----
+    This function uses SSH tunneling to securely connect to the ClickHouse database.
+    It relies on the `ssh_tunnel` context manager to establish and close the SSH connection.
+    The function also logs the duration of the query execution using the `logger`.
+    """
     started_time = time.time()
 
     # Create SSH KEY:
@@ -42,7 +63,7 @@ def run_query(sql_string: str) -> pl.DataFrame:
         )
 
         engine = create_engine(SQLALCHEMY_DATABASE_URL)
-        data_df = pl.read_database(sql_string, connection=engine)
+        data_df = pl.read_database(sql_string, connection=engine, schema_overrides=schema_overrides)
 
     logger.info(
         "Loading stats duration: %s (query : %s)",
@@ -53,8 +74,29 @@ def run_query(sql_string: str) -> pl.DataFrame:
     return data_df
 
 
-def extract_dataset(sql_string: str) -> pl.DataFrame:
-    data_df = run_query(sql_string)
+def extract_dataset(sql_string: str, schema_overrides: dict = None) -> pl.DataFrame:
+    """
+    Extracts a dataset from the database using an SQL query and performs type casting on specified columns.
+
+    Parameters
+    ----------
+    sql_string : str
+        The SQL query string used to fetch data from the database.
+    schema_overrides : dict, optional
+        A dictionary specifying any schema overrides (polars types) for the query result. Defaults to None.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing the extracted data with specified columns cast to Float64 if they are originally of type String and listed in FLOAT_COLUMNS.
+
+    Notes
+    -----
+    This function assumes that `FLOAT_COLUMNS` is a predefined list of column names that need to be cast to Float64.
+    It also relies on the `run_query` function to execute the SQL query and fetch the data.
+    """
+
+    data_df = run_query(sql_string, schema_overrides)
     for colname, data_type in data_df.schema.items():
         if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
             data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
