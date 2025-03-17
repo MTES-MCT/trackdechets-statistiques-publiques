@@ -13,7 +13,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: admin
           POSTGRES_DB: td_stats_test
-        ports: [ '5432:5432' ]
+        ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
@@ -35,7 +35,7 @@ jobs:
           python -m pip install --upgrade pipenv wheel
 
       - id: cache-pipenv
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.local/share/virtualenvs
           key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
@@ -58,6 +58,12 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: core.settings.test
           DATABASE_URL: postgresql://admin:postgres@localhost/inspection_test
-          WAREHOUSE_URL: postgresql://admin:postgres@localhost/tdwarehouse_test
+          DWH_USERNAME: clickhouse_user
+          DWH_PASSWORD: clickhouse_password
+          DWH_PORT: 8123
+          DWH_SSH_HOST: clickhouse_ssh_host
+          DWH_SSH_PORT: 22
+          DWH_SSH_USERNAME: clickhouse_ssh_user
+          DWH_SSH_KEY: MY_PRIVATE_SSH_KEY
           ADMIN_SLUG: admin
           MESSAGE_RECIPIENTS: lorem@ipsum.lol

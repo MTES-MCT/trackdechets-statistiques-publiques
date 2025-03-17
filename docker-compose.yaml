@@ -1,28 +1,34 @@
-version: '3.8'
+version: "3.8"
 
 services:
   td-postgres:
     image: postgres:15
     container_name: db
     environment:
-     - POSTGRES_DB=tdstats
-     - POSTGRES_USER=td
-     - POSTGRES_PASSWORD=td
+      - POSTGRES_DB=tdstats
+      - POSTGRES_USER=td
+      - POSTGRES_PASSWORD=td
     ports:
-    - '5432:5432'
+      - "5432:5432"
     volumes:
-    - pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
 
   web:
     build: .
     container_name: django
     ports:
-      - '8000:8000'
+      - "8000:8000"
     volumes:
       - .:/app
     environment:
       - DATABASE_URL=postgresql://td:td@td-postgres/tdstats?conn_max_age=600
-      - WAREHOUSE_URL=${WAREHOUSE_URL}
+      - DWH_USERNAME=${DWH_USERNAME}
+      - DWH_PASSWORD=${DWH_PASSWORD}
+      - DWH_PORT=${DWH_PORT}
+      - DWH_SSH_HOST=${DWH_SSH_HOST}
+      - DWH_SSH_PORT=${DWH_SSH_PORT}
+      - DWH_SSH_USERNAME=${DWH_SSH_USERNAME}
+      - DWH_SSH_KEY=${DWH_SSH_KEY}
       - ALLOWED_HOST=*
       - ADMIN_SLUG=plop
       - DEBUG=True
@@ -30,7 +36,5 @@ services:
     depends_on:
       - td-postgres
 
-
 volumes:
   pg_data:
-

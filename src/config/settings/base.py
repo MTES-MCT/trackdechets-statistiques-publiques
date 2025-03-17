@@ -72,7 +72,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {"default": env.db()}
-WAREHOUSE_URL = env("WAREHOUSE_URL")
 
 
 # Password validation
@@ -129,3 +128,11 @@ BASE_URL = env.str("BASE_URL", "http://127.0.0.1:8000")
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "sender@test.fr"
 MESSAGE_RECIPIENTS = env.list("MESSAGE_RECIPIENTS", [])
+
+DWH_USERNAME = env.str("DWH_USERNAME")
+DWH_PASSWORD = env.str("DWH_PASSWORD")
+DWH_PORT = env.str("DWH_PORT")
+DWH_SSH_HOST = env.str("DWH_SSH_HOST")
+DWH_SSH_PORT = env.str("DWH_SSH_PORT")
+DWH_SSH_USERNAME = env.str("DWH_SSH_USERNAME")
+DWH_SSH_KEY = env.str("DWH_SSH_KEY", multiline=True)

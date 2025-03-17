@@ -42,7 +42,18 @@ from
 
 icpe_installations_sql = """
 select 
-    * 
+    code_aiot,
+    raison_sociale,
+    siret,
+    rubrique,
+    quantite_autorisee,
+    unite,
+    latitude,
+    longitude,
+    adresse1,
+    adresse2,
+    code_postal,
+    commune
 from 
     refined_zone_stats_publiques.installations_icpe_2024
 """

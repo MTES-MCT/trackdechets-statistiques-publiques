@@ -6,9 +6,9 @@ import polars as pl
 from django.conf import settings
 from sqlalchemy import create_engine
 
+from data.ssh_utils import ssh_tunnel
 from data.utils import format_waste_codes
 
-DB_ENGINE = create_engine(settings.WAREHOUSE_URL)
 SQL_PATH = settings.BASE_DIR / "data" / "sql"
 STATIC_DATA_PATH = settings.BASE_DIR / "data" / "static"
 
@@ -26,19 +26,77 @@ FLOAT_COLUMNS = [
 ]
 
 
-def extract_dataset(sql_string: str) -> pl.DataFrame:
+def run_query(sql_string: str, schema_overrides: dict = None) -> pl.DataFrame:
+    """
+    Executes a SQL query to fetch data from the database and returns it as a Polars DataFrame.
+
+    Parameters
+    ----------
+    sql_string : str
+        The SQL query string used to fetch data from the database.
+    schema_overrides : dict, optional
+        A dictionary specifying any schema overrides (polars types) for the query result. Defaults to None.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing the data fetched from the database.
+
+    Notes
+    -----
+    This function uses SSH tunneling to securely connect to the ClickHouse database.
+    It relies on the `ssh_tunnel` context manager to establish and close the SSH connection.
+    The function also logs the duration of the query execution using the `logger`.
+    """
     started_time = time.time()
 
-    data_df = pl.read_database_uri(sql_string, uri=settings.WAREHOUSE_URL, engine="adbc")
-    for colname, data_type in data_df.schema.items():
-        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
-            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
+    # Create SSH KEY:
+    with ssh_tunnel(settings) as tunnel:
+        local_port = tunnel.local_bind_port
+        local_host = tunnel.local_bind_host
+
+        SQLALCHEMY_DATABASE_URL = (
+            f"clickhouse+native://{settings.DWH_USERNAME}:{settings.DWH_PASSWORD}@{local_host}:{local_port}"
+        )
+
+        engine = create_engine(SQLALCHEMY_DATABASE_URL)
+        data_df = pl.read_database(sql_string, connection=engine, schema_overrides=schema_overrides)
 
     logger.info(
         "Loading stats duration: %s (query : %s)",
         time.time() - started_time,
         sql_string,
     )
+
+    return data_df
+
+
+def extract_dataset(sql_string: str, schema_overrides: dict = None) -> pl.DataFrame:
+    """
+    Extracts a dataset from the database using an SQL query and performs type casting on specified columns.
+
+    Parameters
+    ----------
+    sql_string : str
+        The SQL query string used to fetch data from the database.
+    schema_overrides : dict, optional
+        A dictionary specifying any schema overrides (polars types) for the query result. Defaults to None.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing the extracted data with specified columns cast to Float64 if they are originally of type String and listed in FLOAT_COLUMNS.
+
+    Notes
+    -----
+    This function assumes that `FLOAT_COLUMNS` is a predefined list of column names that need to be cast to Float64.
+    It also relies on the `run_query` function to execute the SQL query and fetch the data.
+    """
+
+    data_df = run_query(sql_string, schema_overrides)
+    for colname, data_type in data_df.schema.items():
+        if (data_type == pl.String) and (colname in FLOAT_COLUMNS):
+            data_df = data_df.with_columns(pl.col(colname).cast(pl.Float64))
 
     return data_df
 
@@ -52,10 +110,7 @@ def get_processing_operation_codes_data() -> pl.DataFrame:
     DataFrame
         DataFrame with processing operations codes and description.
     """
-    data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone.codes_operations_traitements", uri=settings.WAREHOUSE_URL, engine="adbc"
-    )
-
+    data = run_query("SELECT * FROM trusted_zone_referentials.codes_operations_traitements")
     return data
 
 
@@ -68,9 +123,7 @@ def get_departement_geographical_data() -> pl.DataFrame:
     DataFrame
         DataFrame with INSEE department geographical data.
     """
-    data = pl.read_database_uri(
-        "SELECT * FROM trusted_zone_insee.code_geo_departements", uri=settings.WAREHOUSE_URL, engine="adbc"
-    )
+    data = run_query("SELECT * FROM trusted_zone_insee.code_geo_departements")
 
     return data
 
@@ -84,7 +137,7 @@ def get_waste_nomenclature_data() -> pl.DataFrame:
     DataFrame
         DataFrame with waste nomenclature data.
     """
-    data = pl.read_database_uri("SELECT * FROM trusted_zone.code_dechets", uri=settings.WAREHOUSE_URL, engine="adbc")
+    data = run_query("SELECT * FROM trusted_zone_referentials.codes_dechets")
     return data
 
 

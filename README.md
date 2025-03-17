@@ -10,7 +10,6 @@ Transition Écologique.
 - Une instance de prosgresql récente
 - Python >= 3.10 avec pipenv
 
-
 ## Installation
 
 Initialisation et activation d'un environnement
@@ -30,7 +29,7 @@ $ pipenv install -d
 2 db sont nécessaires:
 
 - DATABASE_URL, managée par django, pour les comptes, les données calculées etc.
-- WAREHOUSE_URL, en lecture seule, contenant un dump des données du data warehouse Trackdéchets
+- Une connection au DataWarehouse Clickhouse via un tunnel SSH, se référer au variables d'evironnment commençant par `DWH_`
 
 Se référer au fichier src/env.dist
 
@@ -72,24 +71,25 @@ Utiliser :
 
 ### Docker
 
-Créer un .env à la racine contenant la viable WAREHOUSE_URL
+Créer un .env à la racine contenant les variables permettant de se connecter au DataWarehouse (voir le env.dist)
 
 ```
     docker compose build
-    docker compose run web python manage.py migrate 
+    docker compose run web python manage.py migrate
 ```
 
 Pour la comamnde build stats vous aurez besoin d'un tunnel ssh écountant sur 0.0.0.0:10001 (demander à un dev)
 
 Créer les stats
-```
-   docker compose run web python manage.py build_stats 
-```
 
+```
+   docker compose run web python manage.py build_stats
+```
 
 ```
     docker compose up
 ```
+
 Le serveur est accessible sur localhost:8000
 
 ## Licence
