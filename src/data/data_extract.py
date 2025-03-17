@@ -1,11 +1,8 @@
 import json
 import logging
-import os
-import tempfile
 import time
 
 import polars as pl
-import sshtunnel
 from django.conf import settings
 from sqlalchemy import create_engine
 
