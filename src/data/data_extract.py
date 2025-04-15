@@ -5,6 +5,7 @@ import time
 import polars as pl
 from django.conf import settings
 from sqlalchemy import create_engine
+import polars.selectors as cs
 
 from data.ssh_utils import ssh_tunnel
 from data.utils import format_waste_codes
@@ -61,6 +62,9 @@ def run_query(sql_string: str, schema_overrides: dict = None) -> pl.DataFrame:
 
         engine = create_engine(SQLALCHEMY_DATABASE_URL)
         data_df = pl.read_database(sql_string, connection=engine, schema_overrides=schema_overrides)
+
+    # Convert Decimal to Float64 to avoid compatibility issues
+    data_df = data_df.cast({cs.decimal(): pl.Float64})
 
     logger.info(
         "Loading stats duration: %s (query : %s)",

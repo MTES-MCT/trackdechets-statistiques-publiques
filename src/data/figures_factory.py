@@ -397,10 +397,10 @@ def create_quantity_processed_sunburst_figure(
         weekly_waste_processed_data_df.filter(
             pl.col("semaine").is_between(*date_interval, closed="left") & (pl.col("code_operation") != "")
         )
-        .groupby(["code_operation"])
+        .group_by(["code_operation"])
         .agg(pl.col("type_operation").max(), pl.col("quantite_traitee").sum())
     )
-    total_data = agg_data.groupby("type_operation").agg(pl.col("quantite_traitee").sum()).sort("type_operation")
+    total_data = agg_data.group_by("type_operation").agg(pl.col("quantite_traitee").sum()).sort("type_operation")
 
     agg_data_recycled = agg_data.filter(pl.col("type_operation") == "Déchet valorisé").sort("quantite_traitee")
     agg_data_eliminated = agg_data.filter(pl.col("type_operation") == "Déchet éliminé").sort("quantite_traitee")
@@ -426,12 +426,12 @@ def create_quantity_processed_sunburst_figure(
         .to_series()
     )
     agg_data_without_other = agg_data.filter(
-        pl.col("code_operation").is_in(other_processing_operations_codes).is_not()
+        pl.col("code_operation").is_in(other_processing_operations_codes).not_()
     ).sort("quantite_traitee", descending=True)
 
     agg_data_without_other = agg_data_without_other.with_columns(
         pl.col("type_operation")
-        .apply(lambda x: "rgb(102, 103, 61, 0.7)" if x == "Déchet valorisé" else "rgb(94, 42, 43, 0.7)")
+        .map_elements(lambda x: "rgb(102, 103, 61, 0.7)" if x == "Déchet valorisé" else "rgb(94, 42, 43, 0.7)")
         .alias("colors")
     )
 
@@ -676,7 +676,7 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
                 col_names_to_agg.append(tmp_col_name)
         col_names_to_agg.append(f"libelle_{cat}")
 
-        temp_df = temp_df.groupby(f"code_{cat}", maintain_order=True).agg(agg_exprs)
+        temp_df = temp_df.group_by(f"code_{cat}", maintain_order=True).agg(agg_exprs)
 
         id_expr = pl.concat_str(
             [pl.lit("Tous les établissements")] + [pl.col(e) for e in col_names_to_agg], separator=id_sep
@@ -698,9 +698,9 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
 
         labels_expr = pl.concat_str(
             [
-                pl.col(f"libelle_{cat}").apply(lambda x: break_long_line(x, 14)),
+                pl.col(f"libelle_{cat}").map_elements(lambda x: break_long_line(x, 14)),
                 pl.lit(" - <b>"),
-                pl.col("value").apply(lambda x: f"{x / 1000:.0f}k" if x > 1000 else format_number(x, 1)),
+                pl.col("value").map_elements(lambda x: f"{x / 1000:.0f}k" if x > 1000 else format_number(x, 1)),
                 value_suffix,
             ]
         ).alias("labels")
@@ -717,7 +717,7 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
         hover_expr = pl.concat_str(
             [
                 pl.lit("<b>"),
-                pl.col("value").apply(format_number),
+                pl.col("value").map_elements(format_number),
                 hover_expr_prefix,
                 hover_expr_code,
                 hover_expr_label,

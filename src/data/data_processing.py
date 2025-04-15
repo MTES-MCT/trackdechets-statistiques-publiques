@@ -54,7 +54,7 @@ def get_recovered_and_eliminated_quantity_processed_by_week_series(
         and the second one the weekly quantity of eliminated waste.
     """
 
-    series = weekly_waste_processed_data_df.groupby(["semaine", "type_operation"], maintain_order=True).agg(
+    series = weekly_waste_processed_data_df.group_by(["semaine", "type_operation"], maintain_order=True).agg(
         pl.col("quantite_traitee").sum()
     )
 
@@ -304,7 +304,7 @@ def create_icpe_regional_df(
         agg_exprs = [agg_expr, pl.col("quantite_autorisee").max(), pl.col("nombre_installations").max()]
 
         if regional_key_column is None:
-            annual_stats = df_waste_processed_filtered.groupby("rubrique").agg(*agg_exprs)
+            annual_stats = df_waste_processed_filtered.group_by("rubrique").agg(*agg_exprs)
             annual_stats = annual_stats.with_columns(metric_expr)
             df = annual_stats
             df = df.with_columns(
