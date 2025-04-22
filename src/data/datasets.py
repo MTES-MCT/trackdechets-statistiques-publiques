@@ -89,7 +89,23 @@ def get_data_df():
             "commune": pl.String,
         },
     )
-    icpe_installations_waste_processed_data = extract_dataset(icpe_installations_waste_processed_sql)
+    icpe_installations_waste_processed_data = extract_dataset(
+        icpe_installations_waste_processed_sql,
+        {
+            "code_aiot": pl.String,
+            "siret": pl.String,
+            "raison_sociale": pl.String,
+            "rubrique": pl.String,
+            "quantite_autorisee": pl.Float64,
+            "unite": pl.String,
+            "latitude": pl.Float64,
+            "longitude": pl.Float64,
+            "adresse1": pl.String,
+            "adresse2": pl.String,
+            "code_postal": pl.String,
+            "commune": pl.String,
+        },
+    )
     icpe_departements_waste_processed_data = extract_dataset(icpe_departements_waste_processed_sql)
     icpe_regions_waste_processed_data = extract_dataset(icpe_regions_waste_processed_sql)
     icpe_france_waste_processed_data = extract_dataset(icpe_france_waste_processed_sql)
