@@ -97,6 +97,7 @@ def get_data_df():
             "raison_sociale": pl.String,
             "rubrique": pl.String,
             "quantite_autorisee": pl.Float64,
+            "quantite_objectif": pl.Float64,
             "unite": pl.String,
             "latitude": pl.Float64,
             "longitude": pl.Float64,
