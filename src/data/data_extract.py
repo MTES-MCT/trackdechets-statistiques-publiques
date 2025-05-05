@@ -3,9 +3,9 @@ import logging
 import time
 
 import polars as pl
+import polars.selectors as cs
 from django.conf import settings
 from sqlalchemy import create_engine
-import polars.selectors as cs
 
 from data.ssh_utils import ssh_tunnel
 from data.utils import format_waste_codes

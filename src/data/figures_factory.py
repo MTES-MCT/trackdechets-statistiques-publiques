@@ -790,6 +790,10 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
 def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -> str:
     authorized_quantity = df.select(pl.col("quantite_autorisee").max()).item()
 
+    target_quantity = None
+    if "quantite_objectif" in df.columns:
+        target_quantity = df.select(pl.col("quantite_objectif").max()).item()
+
     df_waste = df.filter(pl.col("day_of_processing").is_not_null())
     if len(df_waste) == 0:
         return None
@@ -884,6 +888,27 @@ def create_icpe_graph(df: pl.DataFrame, key_column: str | None, rubrique: str) -
             font_size=13,
         )
         max_y = max(max_y, authorized_quantity)
+
+        if target_quantity is not None:
+            fig.add_hline(
+                y=target_quantity,
+                line_dash="dot",
+                line_color="black",
+                line_width=2,
+            )
+            fig.add_annotation(
+                xref="x domain",
+                yref="y",
+                x=0,
+                y=target_quantity,
+                text=f"Objectif 2025 :{target_quantity:.0f} {authorized_quantity_unit}",
+                font_color="black",
+                xanchor="left",
+                yanchor="bottom",
+                showarrow=False,
+                font_size=13,
+            )
+            max_y = max(max_y, target_quantity)
 
     fig.update_yaxes(gridcolor="#ccc", title="tonnes", tick0=0, range=[0, max_y * 1.3])
 
