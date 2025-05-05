@@ -147,6 +147,9 @@ def create_weekly_scatter_figure(
         # Filter out data from previous year:
         current_year = data.select("semaine").max().item().year
         data = data.filter(pl.col("semaine").dt.year() == current_year)
+        data_without_nulls = data.drop_nulls(column_to_use)
+
+        data = data.to_dict(as_series=False)
 
         min_at = data["semaine"][0]
         if min_x is None or min_at < min_x:
@@ -162,7 +165,7 @@ def create_weekly_scatter_figure(
         # Creates a list of text to only show value on last point of the line
         texts = []
         last_value = None
-        data_without_nulls = data.drop_nulls(column_to_use)
+
         if len(data_without_nulls) > 0:
             last_value = data_without_nulls[-1, column_to_use]
         texts = [""] * (len(data_without_nulls) - 1) if len(data_without_nulls) > 1 else []
@@ -177,8 +180,8 @@ def create_weekly_scatter_figure(
             suffix = f"{to_add_str} {suffix}"
 
         hover_texts = [
-            f"Semaine du {e['semaine']:%d/%m} au {e['semaine'] + timedelta(days=6):%d/%m}<br><b>{format_number(e[column_to_use], 2)}</b> {suffix}"
-            for e in data.iter_rows(named=True)
+            f"Semaine du {semaine:%d/%m} au {semaine + timedelta(days=6):%d/%m}<br><b>{format_number(value, 2)}</b> {suffix}"
+            for semaine, value in zip(data["semaine"], data[column_to_use])
         ]
 
         scatter_list.append(
