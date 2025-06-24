@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.generic import TemplateView
 
 from .views import (
     BaseRender,
@@ -12,9 +11,6 @@ from .views import (
     CompanyView,
     UserView,
     digest_view,
-    icpe_get_graph,
-    icpe_view_france,
-    icpe_view_many,
 )
 
 urlpatterns = [
@@ -29,8 +25,4 @@ urlpatterns = [
     path("companies/<int:year>", CompanyView.as_view(), name="companies"),
     path("users/<int:year>", UserView.as_view(), name="users"),
     path("digest/", digest_view, name="stats_digest"),
-    path("map/", TemplateView.as_view(template_name="map.html"), name="map"),
-    path("icpe/france/<int:year>/<str:rubrique>", icpe_view_france, name="icpe_france"),
-    path("icpe/<str:layer>/<int:year>/<str:rubrique>", icpe_view_many, name="icpe_many"),
-    path("icpe/<str:layer>/<int:year>/<str:rubrique>/<str:code>", icpe_get_graph, name="icpe_get_graph"),
 ]
