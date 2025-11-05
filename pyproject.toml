@@ -1,3 +1,44 @@
+[project]
+name = "trackdechets-statistiques-publiques"
+version = "0.1.0"
+description = "Trackdechets statistiques publiques"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "adbc-driver-manager>=1.8.0",
+    "adbc-driver-postgresql>=1.8.0",
+    "clickhouse-sqlalchemy>=0.2.3",
+    "django>=5.2.7",
+    "django-environ>=0.12.0",
+    "gunicorn>=23.0.0",
+    "paramiko<4",
+    "plotly>=6.4.0",
+    "polars==1.27.0",
+    "psycopg2-binary>=2.9.11",
+    "pyarrow>=22.0.0",
+    "sentry-sdk[django]>=2.43.0",
+    "sqlalchemy==1.4",
+    "sshtunnel>=0.4.0",
+    "whitenoise>=6.11.0",
+]
+[dependency-groups]
+dev = [
+    "bandit>=1.8.6",
+    "djade>=1.6.0",
+    "django-debug-toolbar<6",
+    "django-extensions>=4.1",
+    "isort>=7.0.0",
+    "mypy>=1.18.2",
+    "pywatchman",
+    "ruff>=0.14.3",
+]
+test = [
+    "pytest",
+    "pytest-django",
+    "pytest-cov",
+    "factory-boy",
+]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 119
