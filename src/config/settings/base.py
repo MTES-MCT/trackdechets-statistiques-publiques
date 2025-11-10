@@ -15,8 +15,8 @@ from pathlib import Path
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parents[2]
-
+BASE_DIR = Path(__file__).resolve().parents[3]
+SRC_DIR = BASE_DIR / "src"
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(BASE_DIR / ".env")
 
@@ -53,7 +53,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [SRC_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -72,7 +72,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {"default": env.db()}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -107,16 +106,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = SRC_DIR / "staticfiles"
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
-STATICFILES_DIR = BASE_DIR / "static"
+STATICFILES_DIR = SRC_DIR / "static"
 STATICFILES_DIRS = [
     STATICFILES_DIR,
 ]
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -136,3 +134,9 @@ DWH_SSH_HOST = env.str("DWH_SSH_HOST")
 DWH_SSH_PORT = env.str("DWH_SSH_PORT")
 DWH_SSH_USERNAME = env.str("DWH_SSH_USERNAME")
 DWH_SSH_KEY = env.str("DWH_SSH_KEY", multiline=True)
+
+
+if gdal_path := env.str("GDAL_LIBRARY_PATH", ""):
+    GDAL_LIBRARY_PATH = gdal_path
+if geos_path := env.str("GEOS_LIBRARY_PATH", ""):
+    GEOS_LIBRARY_PATH = env.str("GEOS_LIBRARY_PATH")

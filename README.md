@@ -8,7 +8,7 @@ Transition Écologique.
 ## Prérequis:
 
 - Une instance de prosgresql récente
-- Python >= 3.10 avec pipenv
+- Python >= 3.11 avec UV
 
 ## Installation
 
