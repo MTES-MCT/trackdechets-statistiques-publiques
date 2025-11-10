@@ -1,4 +1,4 @@
-name: TD Inspection CI
+name: TD Stats publiques CI
 
 on: pull_request
 
@@ -28,7 +28,7 @@ jobs:
       - name: Install python dependencies
         run: |
           uv sync --group test
-          
+
       - name: Ruff lint
         run: uv run ruff check .
 
