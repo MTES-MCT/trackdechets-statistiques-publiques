@@ -8,7 +8,7 @@ dependencies = [
     "adbc-driver-manager>=1.8.0",
     "adbc-driver-postgresql>=1.8.0",
     "clickhouse-sqlalchemy>=0.2.3",
-    "django>=5.2.7",
+    "django>=5.2.8",
     "django-environ>=0.12.0",
     "gunicorn>=23.0.0",
     "paramiko<4",
