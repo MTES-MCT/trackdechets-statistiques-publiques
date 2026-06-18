@@ -1,9 +1,6 @@
 name: Push to the BRGM GitLab repository
 
-on:
-  schedule:
-    - cron: '0 2 * * *'  # Run every day at 2 AM
-  workflow_dispatch:  # Allow manual trigger
+on: push
 
 jobs:
   push-to-gitlab:
