@@ -7,7 +7,7 @@ services:
       - POSTGRES_USER=td
       - POSTGRES_PASSWORD=td
     ports:
-      - "15432:5432"
+      - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -15,7 +15,7 @@ services:
     build: .
     container_name: django
     ports:
-      - "18000:8000"
+      - "8000:8000"
     volumes:
       - .:/app
     environment:
