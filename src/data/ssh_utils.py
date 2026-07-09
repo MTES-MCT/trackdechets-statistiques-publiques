@@ -5,6 +5,19 @@ from contextlib import contextmanager
 import sshtunnel
 
 
+def _normalize_ssh_key(key_content: str) -> str:
+    normalized = key_content.replace("\\n", "\n").strip()
+
+    if "\n" not in normalized and "-----BEGIN" in normalized and "-----END" in normalized:
+        normalized = normalized.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "-----BEGIN OPENSSH PRIVATE KEY-----\n")
+        normalized = normalized.replace("-----END OPENSSH PRIVATE KEY-----", "\n-----END OPENSSH PRIVATE KEY-----")
+
+    if not normalized.endswith("\n"):
+        normalized += "\n"
+
+    return normalized
+
+
 @contextmanager
 def ssh_tunnel(settings):
     """
@@ -32,8 +45,10 @@ def ssh_tunnel(settings):
     The tunnel is stopped and the key file is deleted when the context manager exits, ensuring cleanup.
     """
     temp_key_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    tunnel = None
     try:
-        temp_key_file.write(settings.DWH_SSH_KEY)
+        key_content = _normalize_ssh_key(settings.DWH_SSH_KEY)
+        temp_key_file.write(key_content)
         temp_key_file.close()
         os.chmod(temp_key_file.name, 0o600)
 
@@ -41,11 +56,13 @@ def ssh_tunnel(settings):
             (settings.DWH_SSH_HOST, int(settings.DWH_SSH_PORT)),
             ssh_username=settings.DWH_SSH_USERNAME,
             ssh_pkey=temp_key_file.name,
+            ssh_private_key_password=settings.DWH_SSH_KEY_PASSPHRASE,
             remote_bind_address=("localhost", int(settings.DWH_PORT)),
         )
 
         tunnel.start()
         yield tunnel
     finally:
-        tunnel.stop()
+        if tunnel is not None:
+            tunnel.stop()
         os.unlink(temp_key_file.name)
