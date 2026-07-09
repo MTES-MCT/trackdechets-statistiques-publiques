@@ -134,6 +134,7 @@ DWH_SSH_HOST = env.str("DWH_SSH_HOST")
 DWH_SSH_PORT = env.str("DWH_SSH_PORT")
 DWH_SSH_USERNAME = env.str("DWH_SSH_USERNAME")
 DWH_SSH_KEY = env.str("DWH_SSH_KEY", multiline=True)
+DWH_SSH_KEY_PASSPHRASE = env.str("DWH_SSH_KEY_PASSPHRASE", default=None)
 
 
 if gdal_path := env.str("GDAL_LIBRARY_PATH", ""):

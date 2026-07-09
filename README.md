@@ -31,7 +31,7 @@ $ pipenv install -d
 - DATABASE_URL, managée par django, pour les comptes, les données calculées etc.
 - Une connection au DataWarehouse Clickhouse via un tunnel SSH, se référer au variables d'evironnment commençant par `DWH_`
 
-Se référer au fichier src/env.dist
+Se référer au fichier `.env.dist`
 
 ### Setup de la db
 
@@ -78,7 +78,8 @@ Créer un .env à la racine contenant les variables permettant de se connecter a
     docker compose run web python manage.py migrate
 ```
 
-Pour la comamnde build stats vous aurez besoin d'un tunnel ssh écountant sur 0.0.0.0:10001 (demander à un dev)
+Le tunnel SSH vers le DWH est géré automatiquement par l'application à partir des variables `DWH_*`.
+Si votre clé SSH est chiffrée, renseigner aussi `DWH_SSH_KEY_PASSPHRASE`.
 
 Créer les stats
 
