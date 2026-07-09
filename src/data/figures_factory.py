@@ -433,7 +433,10 @@ def create_quantity_processed_sunburst_figure(
 
     agg_data_without_other = agg_data_without_other.with_columns(
         pl.col("type_operation")
-        .map_elements(lambda x: "rgb(102, 103, 61, 0.7)" if x == "Déchet valorisé" else "rgb(94, 42, 43, 0.7)", return_dtype=pl.Utf8)
+        .map_elements(
+            lambda x: "rgb(102, 103, 61, 0.7)" if x == "Déchet valorisé" else "rgb(94, 42, 43, 0.7)",
+            return_dtype=pl.Utf8,
+        )
         .alias("colors")
     )
 
@@ -703,7 +706,9 @@ def create_treemap_companies_figure(data_with_naf: pl.DataFrame, year: int, use_
             [
                 pl.col(f"libelle_{cat}").map_elements(lambda x: break_long_line(x, 14), return_dtype=pl.Utf8),
                 pl.lit(" - <b>"),
-                pl.col("value").map_elements(lambda x: f"{x / 1000:.0f}k" if x > 1000 else format_number(x, 1), return_dtype=pl.Utf8),
+                pl.col("value").map_elements(
+                    lambda x: f"{x / 1000:.0f}k" if x > 1000 else format_number(x, 1), return_dtype=pl.Utf8
+                ),
                 value_suffix,
             ]
         ).alias("labels")
