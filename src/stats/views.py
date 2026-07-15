@@ -56,8 +56,9 @@ class Main(BaseRender):
 class BaseBsdView(BaseRender):
     def get_year(self):
         year = self.kwargs.get("year")
-        allowed = [2022, 2023, 2024, 2025]
-        if year not in allowed:
+        if year is None:
+            raise Http404
+        if not Computation.objects.filter(year=year).exists():
             raise Http404
         return year
 
